@@ -3,7 +3,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import csv
-import ckanapi
 import smtplib
 from email.message import EmailMessage
 import datetime
@@ -25,10 +24,6 @@ chefsUrl = 'https://chefs.nrs.gov.bc.ca/app/api/v1'
 soilsFormId = 'e6083928-4bff-45b5-a447-2b9b59d61757'
 hvsFormId = '83181b39-521b-4b9f-b089-f5c794bdcc80'
 subscriptionFormId = '75a33b78-f20a-4d05-8eb6-96986604760b'
-
-# to change host between prod and test, use the following: production = 'catalogue'; test = 'cat'
-# the ckanKey is the BC Data Catalogue API Key
-ckanUrl = 'https://catalogue.data.gov.bc.ca'
 
 authUrl = 'https://dev.oidc.gov.bc.ca' # dev
 # authUrl = 'https://test.oidc.gov.bc.ca' # test
@@ -1446,54 +1441,7 @@ fLyr.append(item_id=csv_item.id, upload_format='csv', source_info=param1['publis
 """
 
 
-# Create connection to catalog/ckan
-#ckan = ckanapi.RemoteCKAN(ckanUrl, apikey=ckanKey)
 
-# Update the soils resource
-#   All mandatory fields must be included to use this function.
-#   Recommend reviewing the json schema for a listing of all available fields and if mandatory or not.
-#   The following is an example of loading a resource to the catalogue itself and fields defined for the Dataset/Tabular (bcdc_type=”document”). 
-#   Geographic Datasets require more fields.
-
-"""
-# to get your organization name
-org = ckan.action.organization_show(id="information-management-cfd")
-print(org['name'], org['id'])
-
-# to get package names and package IDs within an organization
-pkgs = ckan.action.package_search(fq="owner_org:a1a9c5cc-b601-4190-b206-13ba08c54292",rows=1000)
-for pkg in pkgs['results']:
-    print(pkg['name'], pkg['id'])
-
-pkg_data = ckan.action.package_show(id="b67255a7-8040-43c0-935c-d74f168af215")
-for resource in pkg_data['resources']:
-    print(resource['name'], resource['id'])
-"""
-
-"""
-resp = ckan.action.resource_update(
-  id='SRIS-SOIL-SOURCE-SITES',
-  upload=open('soil_source_site.csv'),
-  name='SRIS Soil Source Sites',
-  bcdc_type='document',
-  resource_update_cycle='unknown',
-  format='csv',
-  resource_storage_location='catalogue data store',
-  resource_type='data',
-  resource_access_method='direct access')
-
-resp = ckan.action.resource_create(
-  package_id='SRIS-SOIL-SOURCE-SITES',
-  upload=open('soil_source_site.csv'),
-  name='SRIS Soil Source Sites',
-	bcdc_type='document',
-	resource_update_cycle='unknown',
-	format='csv',
-	resource_storage_location='catalogue data store',
-	resource_type='data',
-	resource_access_method='direct access')
-print(resp)
-"""
 
 
 # Find a location or feature to open the map
