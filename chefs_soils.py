@@ -18,6 +18,8 @@ from arcgis import geometry
 from copy import deepcopy
 import csv, os, time
 
+maphubUrl = r'https://governmentofbc.maps.arcgis.com'
+
 # Move these to a configuration file
 chefsUrl = 'https://chefs.nrs.gov.bc.ca/app/api/v1'
 
@@ -35,9 +37,6 @@ chesUrl = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # chesServiceClient = 'SRIS_SERVICE_CLIENT'
 
 csvLocation = 'C:\GITHUB_REPOS\nr-soils-relocation'
-
-arcgisUrl = 'https://governmentofbc.maps.arcgis.com'
-arcgisUsername = 'PX.SRIS.CHEFSTOAGOL'
 
 testSourceLats = ['53.89428','58.0151','57.07397','55.56444']
 testSourceLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
@@ -970,8 +969,10 @@ with open('soil_high_volume_site.csv', 'w', encoding='UTF8', newline='') as f:
 start_time = time.time()
 
 # Connect to GIS
-gis = GIS(arcgisUrl, arcgisUsername, arcgisPwd)
+gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
 
+# About your account
+user = gis.users.me 
 
 # read the second csv set
 csv2 = 'soil_source_site_test.csv'
@@ -1185,7 +1186,7 @@ soil_source_site_csv_data = shutil.copyfile(os.path.abspath(soil_source_site_csv
 # add the initial csv file and publish that as a web layer
 item_prop = {'title':'Contaminated Soils Sites ' + now_ts,'tags':'Contaminated Soils, Contaminated Soils Sites, BC','description':'Contaminated Soils Sites',"commentsEnabled" : False}
 #item_prop = {'type':'Feature Collection','title':'Contaminated Soils Sites ' + now_ts,'tags':'Contaminated Soils, Contaminated Soils Sites, BC','description':'Contaminated Soils Sites',"commentsEnabled" : False}
-csv_item = gis.content.add(item_properties=item_prop, data=soil_source_site_csv_data, owner = arcgisUsername)
+csv_item = gis.content.add(item_properties=item_prop, data=soil_source_site_csv_data, owner = maphubUser)
 
 # publish the csv item into a feature layer
 #publishParameters = 
