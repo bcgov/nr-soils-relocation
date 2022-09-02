@@ -6,6 +6,7 @@ import csv
 import smtplib
 from email.message import EmailMessage
 import datetime
+import copy
 
 # arcgis libraries
 from arcgis.gis import GIS
@@ -90,7 +91,7 @@ def send_mail(to_email, subject, message):
   'Authorization': 'Bearer ' + accessToken
   }
   chesResponse = requests.request("POST", chesUrl + '/api/v1/email', headers=chesHeaders, data=chesPayload)
-  print(chesResponse.text)
+  # print(chesResponse.text)
   chesContent = json.loads(chesResponse.content)
   return chesContent
 
@@ -103,7 +104,7 @@ def is_json(string):
 
 def site_list(formId, formKey):
   request = requests.get(chefsUrl + '/forms/' + formId + '/export?format=json&type=submissions', auth=HTTPBasicAuth(formId, formKey), headers={'Content-type': 'application/json'})
-  print('Parsing JSON response')
+  # print('Parsing JSON response')
   content = json.loads(request.content)
   return content
 
@@ -242,7 +243,7 @@ hvsAttributes = fetch_columns(hvsFormId, hvsKey)
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
 submissionsJson = site_list(soilsFormId, soilsKey)
-print(submissionsJson)
+# print(submissionsJson)
 print('Loading Submission attributes and headers...')
 soilsAttributes = fetch_columns(soilsFormId, soilsKey)
 # print(soilsAttributes)
@@ -654,6 +655,7 @@ for submission in submissionsJson:
 
   # Map submission data to the receiving site
   receivingSiteData = [''] * 142
+  receivingSiteDataCopy = [''] * 142
   rcvIdx = 0
   if submission.get("C1-FirstNameReceivingSiteOwner") is not None : receivingSiteData[0] = submission["C1-FirstNameReceivingSiteOwner"]
   if submission.get("C1-LastNameReceivingSiteOwner") is not None : receivingSiteData[1] = submission["C1-LastNameReceivingSiteOwner"]
@@ -806,12 +808,13 @@ for submission in submissionsJson:
   receivingSites.append(receivingSiteData)
 
   # 'sitesDic' dictionary - key:regionalDistrict / value:receivingSiteData
+  receivingSiteDataCopy = copy.deepcopy(receivingSiteData)
   for rd in receivingSiteData[31]: # could be more than one
     if rd is not None: 
       if rd in sitesDic:
-        sitesDic[rd].append(receivingSiteData)
+        sitesDic[rd].append(receivingSiteDataCopy)
       else:
-        sitesDic[rd] = receivingSiteData
+        sitesDic[rd] = receivingSiteDataCopy
 
 
 
@@ -822,6 +825,7 @@ for hvs in hvsJson:
   # print(hvs)
   # Map hv data to the hv site
   hvSiteData = [''] * 72
+  hvSiteDataCopy = [''] * 72
   hvIdx = 0
   if hvs.get("Section1-FirstNameReceivingSiteOwner") is not None : hvSiteData[0] = hvs["Section1-FirstNameReceivingSiteOwner"]
   if hvs.get("Section1-LastNameReceivingSiteOwner") is not None : hvSiteData[1] = hvs["Section1-LastNameReceivingSiteOwner"]
@@ -904,12 +908,17 @@ for hvs in hvsJson:
   hvSites.append(hvSiteData)
 
   # 'hvSitesDic' dictionary - key:regionalDistrict / value:hvSiteData
+  hvSiteDataCopy = copy.deepcopy(hvSiteData)
   for rd in hvSiteData[40]: # could be more than one
     if rd is not None: 
       if rd in hvSitesDic:
-        hvSitesDic[rd].append(hvSiteData)
+        hvSitesDic[rd].append(hvSiteDataCopy)
       else:
-        hvSitesDic[rd] = hvSiteData
+        hvSitesDic[rd] = hvSiteDataCopy
+
+
+
+
 
   # Map hv data to the hv site
   # for col in hvsAttributes: 
