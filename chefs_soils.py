@@ -15,7 +15,7 @@ import pandas as pd
 import os
 import datetime as dt
 import shutil
-from arcgis import geometry
+from arcgis import geometry #use geometry module to project Long,Lat to X and Y
 from copy import deepcopy
 import csv, os, time
 
@@ -37,6 +37,10 @@ authUrl = 'https://dev.oidc.gov.bc.ca' # dev
 chesUrl = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # chesUrl = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
 # chesUrl = 'https://ches.nrs.gov.bc.ca' # prod
+
+source_sites_csv_file = 'Soil Relocation Source Sites.csv'
+receiving_sites_csv_file = 'Soil Relocation Receiving Sites.csv'
+high_volume_receiving_sites_csv_file = 'High Volumn Receiving Sites.csv'
 
 testSourceLats = ['53.89428','58.0151','57.07397','55.56444']
 testSourceLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
@@ -922,10 +926,8 @@ for hvs in hvsJson:
   # Map hv data to the hv site
   # for col in hvsAttributes: 
   #   if hvs.get(col) is not None : hvSiteData.append(hvs[col])
-
-
 print('Creating soil source site CSV...')
-with open('soil_source_site.csv', 'w', encoding='UTF8', newline='') as f:  
+with open(source_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(sourceSiteHeaders)
 
@@ -939,7 +941,7 @@ with open('soil_source_site.csv', 'w', encoding='UTF8', newline='') as f:
     writer.writerow(data)      
 
 print('Creating soil destination site CSV...')
-with open('soil_destination_site.csv', 'w', encoding='UTF8', newline='') as f:  
+with open(receiving_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(receivingSiteHeaders)
 
@@ -953,7 +955,7 @@ with open('soil_destination_site.csv', 'w', encoding='UTF8', newline='') as f:
     writer.writerow(data)          
 
 print('Creating soil high volume site CSV...')
-with open('soil_high_volume_site.csv', 'w', encoding='UTF8', newline='') as f:  
+with open(high_volume_receiving_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(hvSiteHeaders)
 
@@ -968,93 +970,82 @@ with open('soil_high_volume_site.csv', 'w', encoding='UTF8', newline='') as f:
 
 
 
-start_time = time.time()
 
-# Connect to GIS
+print('Apply updates from CSV to AGOL...')
+
+# connect to GIS
 gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
 
-# About your account
+# about your account
 user = gis.users.me 
 
-# read the second csv set
-csv2 = 'soil_source_site_test.csv'
-cities_df_2 = pd.read_csv(csv2)
-cities_df_2.head()
-#print(cities_df_2.head())
+# read the csv set
+df = pd.read_csv(source_sites_csv_file)
+df.head()
+print(df.head())
 
+# get the dimensions of this csv
+print(df.shape)
 
-
+# accessing feature layers using item id
 featureLayerCollectionItem = gis.content.get(sourceFLayerItemID)
 
-cities_flayer = featureLayerCollectionItem.layers[0]
-cities_fset = cities_flayer.query() #querying without any conditions returns all the features
-print(cities_fset.sdf.head())
 
-
-
-
-
-overlap_rows = pd.merge(left=cities_fset.sdf, right=cities_df_2, how='inner', on='confirmationId')
-
+# 1.Identifying existing features that need to be updated
+flayer = featureLayerCollectionItem.layers[0]
+fset = flayer.query() #querying without any conditions returns all the features
+print(fset.sdf.head())
+overlap_rows = pd.merge(left=fset.sdf, right=df, how='inner', on='confirmationId')
 print(overlap_rows)
 
+# 2.perform updates to the existing features
 features_for_update = [] #list containing corrected features
-all_features = cities_fset.features
-print(all_features[0])
-print(cities_fset.spatial_reference)
+all_features = fset.features
+
+# inspect one of the features
+all_features[0]
+
+# get the spatial reference of the features since we need to update the geometry
+print(fset.spatial_reference)
 
 for confirmationId in overlap_rows['confirmationId']:
     # get the feature to be updated
     original_feature = [f for f in all_features if f.attributes['confirmationId'] == confirmationId][0]
-
     feature_to_be_updated = deepcopy(original_feature)
     
     print(str(original_feature))
     
     # get the matching row from csv
-    matching_row = cities_df_2.where(cities_df_2["confirmationId"] == confirmationId).dropna()
-
-
-    #get geometries in the destination coordinate system
-    #input_geometry = {'y':float(matching_row['A3-SourceSiteLatitude']),
-    #                   'x':float(matching_row['A3-SourceSiteLongitude'])}
-    #output_geometry = geometry.project(geometries = [input_geometry],
-    #                                   in_sr = 4326, 
-    #                                   out_sr = cities_fset.spatial_reference['latestWkid'],
-    #                                  gis = gis)
+    matching_row = df.where(df["confirmationId"] == confirmationId).dropna()
+    #matching_row = df.where(df.confirmationId == confirmationId).dropna()
     
     # assign the updated values
-    #feature_to_be_updated.geometry = output_geometry[0]
-    print(matching_row['A1_FIRSTName'])
-
     feature_to_be_updated.attributes['A1_FIRSTName'] = str(matching_row['A1_FIRSTName'])
 
-    #feature_to_be_updated.attributes['confirmationId'] = (matching_row['confirmationId'])
-    
     #add this to the list of features to be updated
     features_for_update.append(feature_to_be_updated)
-    print(features_for_update)
     
-    #print(str(feature_to_be_updated))
-    #print("========================================================================")
+    print(str(feature_to_be_updated))
+    print("========================================================================")
 
-#cities_flayer.edit_features(updates=features_for_update)
-
-
-elapsed_time = time.time() - start_time
-totaltime = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
-print("Total processing time: "+ totaltime)
+print(features_for_update)
+# update the feature layer
+flayer.edit_features(updates= features_for_update)
 
 
 
-# add new feature
-#select those rows in the capitals_2.csv that do not overlap with those in capitals_1.csv
 
-new_rows = cities_df_2[~cities_df_2['confirmationId'].isin(overlap_rows['confirmationId'])]
+
+# 3.Identifying new features that need to be added
+
+# select those rows in the csv that do not overlap with those in csv
+new_rows = df[~df['confirmationId'].isin(overlap_rows['confirmationId'])]
 print(new_rows.shape)
+print(new_rows.head())
 
-
+# 4.Adding new features
 features_to_be_added = []
+
 # get a template feature object
 template_feature = deepcopy(features_for_update[0])
 print(template_feature)
@@ -1066,16 +1057,7 @@ for row in new_rows.iterrows():
   #print
   print("Creating " + row[1]['A1_FIRSTName'])
   
-  #get geometries in the destination coordinate system
-  #input_geometry = {'y':float(row[1]['latitude']),
-  #                    'x':float(row[1]['longitude'])}
-  #output_geometry = geometry.project(geometries = [input_geometry],
-  #                                    in_sr = 4326, 
-  #                                    out_sr = cities_fset.spatial_reference['latestWkid'],
-  #                                  gis = gis)
-  
   # assign the updated values
-  #new_feature.geometry = output_geometry[0]
   new_feature.attributes['A1_FIRSTName'] = row[1]['A1_FIRSTName']
   new_feature.attributes['A1_LASTName'] = row[1]['A1_LASTName']
   new_feature.attributes['A1_Company'] = row[1]['A1_Company']
@@ -1153,12 +1135,15 @@ for row in new_rows.iterrows():
   new_feature.attributes['A3_SourceSiteLatitude'] = row[1]['A3_SourceSiteLatitude']
   new_feature.attributes['A3_SourceSiteLongitude'] = row[1]['A3_SourceSiteLongitude']
 
-  #add this to the list of features to be updated
+  # add this to the list of features to be updated
   features_to_be_added.append(new_feature)
 
-# take a look at one of the features we created
-#print(features_to_be_added[0])
-cities_flayer.edit_features(adds = features_to_be_added)
+# take a look at one of the features created
+print(features_to_be_added[0])
+
+flayer.edit_features(adds = features_to_be_added)
+
+
 
 
 
