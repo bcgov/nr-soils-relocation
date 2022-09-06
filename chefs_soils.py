@@ -1,25 +1,14 @@
-from urllib.parse import urlencode
 import requests
 from requests.auth import HTTPBasicAuth
 import json
 import csv
-import smtplib
-from email.message import EmailMessage
 import datetime
 import copy
-
-# arcgis libraries
 from arcgis.gis import GIS
-from arcgis import features
-import pandas as pd
-import os
-import datetime as dt
-import shutil
-from arcgis import geometry #use geometry module to project Long,Lat to X and Y
-from copy import deepcopy
-import csv, os, time
+from arcgis.features import FeatureLayerCollection
 
-sourceFLayerItemID = 'ebd6b75fa5b44b62ab13014674250f3f' # Soil Relocation Source Site - feature layer Item Id
+
+sourceFLayerItemID = 'a08b3a5e0f564a75befdc8e6775d6e80' # Soil Relocation Source Site - feature layer Item Id
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
 
@@ -38,9 +27,9 @@ chesUrl = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # chesUrl = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
 # chesUrl = 'https://ches.nrs.gov.bc.ca' # prod
 
-source_sites_csv_file = 'Soil Relocation Source Sites.csv'
-receiving_sites_csv_file = 'Soil Relocation Receiving Sites.csv'
-high_volume_receiving_sites_csv_file = 'High Volumn Receiving Sites.csv'
+source_sites_csv_file = 'soil_relocation_source_sites.csv'
+receiving_sites_csv_file = 'soil_relocation_receiving_sites.csv'
+high_volume_receiving_sites_csv_file = 'high_volumn_receiving_sites.csv'
 
 testSourceLats = ['53.89428','58.0151','57.07397','55.56444']
 testSourceLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
@@ -927,6 +916,7 @@ for hvs in hvsJson:
   # for col in hvsAttributes: 
   #   if hvs.get(col) is not None : hvSiteData.append(hvs[col])
 print('Creating soil source site CSV...')
+"""
 with open(source_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(sourceSiteHeaders)
@@ -967,7 +957,7 @@ with open(high_volume_receiving_sites_csv_file, 'w', encoding='UTF8', newline=''
     for hvsData in hvs:
       data.append(hvsData)
     writer.writerow(data)
-
+"""
 
 
 
@@ -976,199 +966,14 @@ print('Apply updates from CSV to AGOL...')
 # connect to GIS
 gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
 
-# about your account
-user = gis.users.me 
+#for csv update
+csvItem = gis.content.get('c34c998c1feb4796a61d7e0aef256c12')
+csv_update_result = csvItem.update({}, source_sites_csv_file)
 
-# read the csv set
-df = pd.read_csv(source_sites_csv_file)
-df.head()
-print(df.head())
-
-# get the dimensions of this csv
-print(df.shape)
-
-# accessing feature layers using item id
-featureLayerCollectionItem = gis.content.get(sourceFLayerItemID)
-
-
-# 1.Identifying existing features that need to be updated
-flayer = featureLayerCollectionItem.layers[0]
-fset = flayer.query() #querying without any conditions returns all the features
-print(fset.sdf.head())
-overlap_rows = pd.merge(left=fset.sdf, right=df, how='inner', on='confirmationId')
-print(overlap_rows)
-
-# 2.perform updates to the existing features
-features_for_update = [] #list containing corrected features
-all_features = fset.features
-
-# inspect one of the features
-all_features[0]
-
-# get the spatial reference of the features since we need to update the geometry
-print(fset.spatial_reference)
-
-for confirmationId in overlap_rows['confirmationId']:
-    # get the feature to be updated
-    original_feature = [f for f in all_features if f.attributes['confirmationId'] == confirmationId][0]
-    feature_to_be_updated = deepcopy(original_feature)
-    
-    print(str(original_feature))
-    
-    # get the matching row from csv
-    matching_row = df.where(df["confirmationId"] == confirmationId).dropna()
-    #matching_row = df.where(df.confirmationId == confirmationId).dropna()
-    
-    # assign the updated values
-    feature_to_be_updated.attributes['A1_FIRSTName'] = str(matching_row['A1_FIRSTName'])
-
-    #add this to the list of features to be updated
-    features_for_update.append(feature_to_be_updated)
-    
-    print(str(feature_to_be_updated))
-    print("========================================================================")
-
-print(features_for_update)
-# update the feature layer
-flayer.edit_features(updates= features_for_update)
-
-
-
-
-
-# 3.Identifying new features that need to be added
-
-# select those rows in the csv that do not overlap with those in csv
-new_rows = df[~df['confirmationId'].isin(overlap_rows['confirmationId'])]
-print(new_rows.shape)
-print(new_rows.head())
-
-# 4.Adding new features
-features_to_be_added = []
-
-# get a template feature object
-template_feature = deepcopy(features_for_update[0])
-print(template_feature)
-
-# loop through each row and add to the list of features to be added
-for row in new_rows.iterrows():
-  new_feature = deepcopy(template_feature)
-    
-  #print
-  print("Creating " + row[1]['A1_FIRSTName'])
-  
-  # assign the updated values
-  new_feature.attributes['A1_FIRSTName'] = row[1]['A1_FIRSTName']
-  new_feature.attributes['A1_LASTName'] = row[1]['A1_LASTName']
-  new_feature.attributes['A1_Company'] = row[1]['A1_Company']
-  new_feature.attributes['A1_Address'] = row[1]['A1_Address']
-  new_feature.attributes['A1_City'] = row[1]['A1_City']
-  new_feature.attributes['A1_ProvinceState'] = row[1]['A1_ProvinceState']
-  new_feature.attributes['A1_Country'] = row[1]['A1_Country']
-  new_feature.attributes['A1_PostalZipCode'] = row[1]['A1_PostalZipCode']
-  new_feature.attributes['A1_Phone'] = row[1]['A1_Phone']
-  new_feature.attributes['A1_Email'] = row[1]['A1_Email']
-  new_feature.attributes['A1_checkbox_extraowners'] = row[1]['A1_checkbox_extraowners']
-  new_feature.attributes['A1_additionalownerFIRSTName'] = row[1]['A1_additionalownerFIRSTName']
-  new_feature.attributes['A1_additionalownerLASTName1'] = row[1]['A1_additionalownerLASTName1']
-  new_feature.attributes['A1_additionalownerCompany1'] = row[1]['A1_additionalownerCompany1']
-  new_feature.attributes['A1_additionalownerAddress1'] = row[1]['A1_additionalownerAddress1']
-  new_feature.attributes['A1_additionalownerCity1'] = row[1]['A1_additionalownerCity1']
-  new_feature.attributes['A1_additionalownerPhone1'] = row[1]['A1_additionalownerPhone1']
-  new_feature.attributes['A1_additionalownerEmail1'] = row[1]['A1_additionalownerEmail1']
-  new_feature.attributes['areThereMoreThanTwoOwnersIncludeTheirInformationBelow'] = row[1]['areThereMoreThanTwoOwnersIncludeTheirInformationBelow']
-  new_feature.attributes['A1_SourceSiteContact_sameAsAbove'] = row[1]['A1_SourceSiteContact_sameAsAbove']
-  new_feature.attributes['A2_SourceSiteContactFirstName'] = row[1]['A2_SourceSiteContactFirstName']
-  new_feature.attributes['A2_SourceSiteContactLastName'] = row[1]['A2_SourceSiteContactLastName']
-  new_feature.attributes['A2_SourceSiteContactCompany'] = row[1]['A2_SourceSiteContactCompany']
-  new_feature.attributes['A2_SourceSiteContactAddress'] = row[1]['A2_SourceSiteContactAddress']
-  new_feature.attributes['A2_SourceSiteContactCity'] = row[1]['A2_SourceSiteContactCity']
-  new_feature.attributes['SourceSiteContactphoneNumber'] = row[1]['SourceSiteContactphoneNumber']
-  new_feature.attributes['A2_SourceSiteContactEmail'] = row[1]['A2_SourceSiteContactEmail']
-  new_feature.attributes['A3_SourcesiteIdentificationNumberSiteIdIfAvailable'] = row[1]['A3_SourcesiteIdentificationNumberSiteIdIfAvailable']
-  new_feature.attributes['A3_SourceSiteLatitude_Degrees'] = row[1]['A3_SourceSiteLatitude_Degrees']
-  new_feature.attributes['A3_SourceSiteLatitude_Minutes'] = row[1]['A3_SourceSiteLatitude_Minutes']
-  new_feature.attributes['A3_SourceSiteLatitude_Seconds'] = row[1]['A3_SourceSiteLatitude_Seconds']
-  new_feature.attributes['A3_SourceSiteLongitude_Degrees'] = row[1]['A3_SourceSiteLongitude_Degrees']
-  new_feature.attributes['A3_SourceSiteLongitude_Minutes'] = row[1]['A3_SourceSiteLongitude_Minutes']
-  new_feature.attributes['A3_SourceSiteLongitude_Seconds'] = row[1]['A3_SourceSiteLongitude_Seconds']
-  new_feature.attributes['SourcelandOwnership_checkbox'] = row[1]['SourcelandOwnership_checkbox']
-  new_feature.attributes['A_LegallyTitled_AddressSource'] = row[1]['A_LegallyTitled_AddressSource']
-  new_feature.attributes['A_LegallyTitled_CitySource'] = row[1]['A_LegallyTitled_CitySource']
-  new_feature.attributes['A_LegallyTitled_PostalZipCodeSource'] = row[1]['A_LegallyTitled_PostalZipCodeSource']
-  new_feature.attributes['SourceSiteregionalDistrict'] = row[1]['SourceSiteregionalDistrict']
-  new_feature.attributes['dataGrid'] = row[1]['dataGrid']
-  new_feature.attributes['FirstAdditionalReceivingsiteuploadLandTitleRecord'] = row[1]['FirstAdditionalReceivingsiteuploadLandTitleRecord']
-  new_feature.attributes['dataGrid1'] = row[1]['dataGrid1']
-  new_feature.attributes['A_UntitledCrownLand_FileNumberColumnSource'] = row[1]['A_UntitledCrownLand_FileNumberColumnSource']
-  new_feature.attributes['A_UntitledMunicipalLand_PIDColumnSource'] = row[1]['A_UntitledMunicipalLand_PIDColumnSource']
-  new_feature.attributes['A4_schedule2ReferenceSourceSite'] = row[1]['A4_schedule2ReferenceSourceSite']
-  new_feature.attributes['isTheSourceSiteHighRisk'] = row[1]['isTheSourceSiteHighRisk']
-  new_feature.attributes['A5_PurposeOfSoilExcavationSource'] = row[1]['A5_PurposeOfSoilExcavationSource']
-  new_feature.attributes['B4_currentTypeOfSoilStorageEGStockpiledInSitu1Source'] = row[1]['B4_currentTypeOfSoilStorageEGStockpiledInSitu1Source']
-  new_feature.attributes['dataGrid9'] = row[1]['dataGrid9']
-  new_feature.attributes['B2_describeSoilCharacterizationMethod1'] = row[1]['B2_describeSoilCharacterizationMethod1']
-  new_feature.attributes['uploadSoilAnalyticalData'] = row[1]['uploadSoilAnalyticalData']
-  new_feature.attributes['B3_yesOrNoVapourexemptionsource'] = row[1]['B3_yesOrNoVapourexemptionsource']
-  new_feature.attributes['B3_ifExemptionsApplyPleaseDescribe'] = row[1]['B3_ifExemptionsApplyPleaseDescribe']
-  new_feature.attributes['B3_describeVapourCharacterizationMethod'] = row[1]['B3_describeVapourCharacterizationMethod']
-  new_feature.attributes['uploadVapourAnalyticalData1'] = row[1]['uploadVapourAnalyticalData1']
-  new_feature.attributes['B4_soilRelocationEstimatedStartDateMonthDayYear'] = row[1]['B4_soilRelocationEstimatedStartDateMonthDayYear']
-  new_feature.attributes['B4_soilRelocationEstimatedCompletionDateMonthDayYear'] = row[1]['B4_soilRelocationEstimatedCompletionDateMonthDayYear']
-  new_feature.attributes['B4_RelocationMethod'] = row[1]['B4_RelocationMethod']
-  new_feature.attributes['D1_FirstNameQualifiedProfessional'] = row[1]['D1_FirstNameQualifiedProfessional']
-  new_feature.attributes['LastNameQualifiedProfessional'] = row[1]['LastNameQualifiedProfessional']
-  new_feature.attributes['D1_TypeofQP1'] = row[1]['D1_TypeofQP1']
-  new_feature.attributes['D1_professionalLicenseRegistrationEGPEngRpBio'] = row[1]['D1_professionalLicenseRegistrationEGPEngRpBio']
-  new_feature.attributes['D1_organization1QualifiedProfessional'] = row[1]['D1_organization1QualifiedProfessional']
-  new_feature.attributes['D1_streetAddress1QualifiedProfessional'] = row[1]['D1_streetAddress1QualifiedProfessional']
-  new_feature.attributes['D1_city1QualifiedProfessional'] = row[1]['D1_city1QualifiedProfessional']
-  new_feature.attributes['D1_provinceState3QualifiedProfessional'] = row[1]['D1_provinceState3QualifiedProfessional']
-  new_feature.attributes['D1_canadaQualifiedProfessional'] = row[1]['D1_canadaQualifiedProfessional']
-  new_feature.attributes['D1_postalZipCode3QualifiedProfessional'] = row[1]['D1_postalZipCode3QualifiedProfessional']
-  new_feature.attributes['simplephonenumber1QualifiedProfessional'] = row[1]['simplephonenumber1QualifiedProfessional']
-  new_feature.attributes['EmailAddressQualifiedProfessional'] = row[1]['EmailAddressQualifiedProfessional']
-  new_feature.attributes['D2_soilDepositIsInTheAgriculturalLandReserveAlr'] = row[1]['D2_soilDepositIsInTheAgriculturalLandReserveAlr']
-  new_feature.attributes['D2_soilDepositIsInTheReserveLands'] = row[1]['D2_soilDepositIsInTheReserveLands']
-  new_feature.attributes['createAt'] = row[1]['createAt']
-  new_feature.attributes['confirmationId'] = row[1]['confirmationId']
-  new_feature.attributes['A3_SourceSiteLatitude'] = row[1]['A3_SourceSiteLatitude']
-  new_feature.attributes['A3_SourceSiteLongitude'] = row[1]['A3_SourceSiteLongitude']
-
-  # add this to the list of features to be updated
-  features_to_be_added.append(new_feature)
-
-# take a look at one of the features created
-print(features_to_be_added[0])
-
-flayer.edit_features(adds = features_to_be_added)
-
-
-
-
-
-"""
-# Remove if same csv is already added to AGOL
-tempCSV_to_delete = gis.content.search('title: update_features type: CSV')
-for item in tempCSV_to_delete:
-  if item:
-    item.delete()
-
-# Add the csv into a folder called Smartsheets in AGOL
-item_prop = {'title':'update_features', 'description':'This csv has been created from Smartsheets', 'tags':'Smartsheet, csv, Python API'}
-csv_item = gis.content.add(item_properties=item_prop, data=output_csv, folder='SmartSheets')
-
-# Get the hosted feature layer
-feature_layer_item = gis.content.get(hosted_feature.id)
-fLyr = feature_layer_item.layers[0]
-
-# Truncate the hosted feature layer
-fLyr.manager.truncate()
-
-# append the newly added csv to the hosted feature layer
-param1 = gis.content.analyze(item.csv_item.id)
-fLyr.append(item_id=csv_item.id, upload_format='csv', source_info=param1['publishParameters'])
-"""
+#for layer update
+item = gis.content.get('4a35bb807eec41af9000e9d12b45b06e')
+flc = FeatureLayerCollection.fromitem(item)
+layer_overwrite_result = flc.manager.overwrite(source_sites_csv_file)
 
 
 
