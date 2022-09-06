@@ -1,9 +1,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import json
-import csv
-import datetime
-import copy
+import json, csv, datetime, copy
+import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
 
@@ -30,7 +28,6 @@ webMapAppId = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
 
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
-
 
 
 
@@ -202,23 +199,26 @@ def create_popup_links(rcv_sites):
   links = ''  
   link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
   link_suf = '>Link to new submission</a><br/>'
+
   if rcv_sites is not None:
     for rcv_site in rcv_sites:
       links += link_prx
+
       if rcv_site[24] is not None and rcv_site[24].strip() != '':
-        links += rcv_site[24] #Site ID
+        links += urllib.parse.quote(rcv_site[24]) #Site ID
       elif rcv_site[3] is not None and rcv_site[3].strip() != '':
-        links += rcv_site[3] #Receiving Site Owner Address
+        links += urllib.parse.quote(rcv_site[3]) #Receiving Site Owner Address
       elif rcv_site[11] is not None and rcv_site[11].strip() != '':
-        links += rcv_site[11]  #Additional Owner Address
+        links += urllib.parse.quote(rcv_site[11])  #Additional Owner Address
       #elif rcv_site[7] is not None and rcv_site[7].strip() != '':
       #  links += rcv_site[7]  #Receiving Site Owner postal Code
       #elif rcv_site[18] is not None and rcv_site[18].strip() != '':
       #  links += rcv_site[18]  #Receiving Site Owner Address
       elif rcv_site[2] is not None and rcv_site[2].strip() != '':
-        links += rcv_site[2]  #Receiving Site Owner Company
+        links += urllib.parse.quote(rcv_site[2])  #Receiving Site Owner Company
       elif rcv_site[10] is not None and rcv_site[10].strip() != '':
-        links += rcv_site[10]  #Additional Owner Company
+        links += urllib.parse.quote(rcv_site[10])  #Additional Owner Company
+
       links += link_suf
   return links
 
@@ -233,19 +233,20 @@ def create_hv_popup_links(hv_sites):
     for hv_site in hv_sites:
       links += link_prx
       if hv_site[33] is not None and hv_site[33].strip() != '':
-        links += hv_site[33] #Site ID
+        links += urllib.parse.quote(hv_site[33]) #Site ID
       elif hv_site[3] is not None and hv_site[3].strip() != '':
-        links += hv_site[3] #Receiving Site Owner Address
+        links += urllib.parse.quote(hv_site[3]) #Receiving Site Owner Address
       elif hv_site[14] is not None and hv_site[14].strip() != '':
-        links += hv_site[14]  #Additional Owner Address
+        links += urllib.parse.quote(hv_site[14])  #Additional Owner Address
       elif hv_site[7] is not None and hv_site[7].strip() != '':
-        links += hv_site[7]  #Receiving Site Owner postal Code
+        links += urllib.parse.quote(hv_site[7])  #Receiving Site Owner postal Code
       elif hv_site[18] is not None and hv_site[18].strip() != '':
-        links += hv_site[18]  #Receiving Site Owner Address
+        links += urllib.parse.quote(hv_site[18])  #Receiving Site Owner Address
       elif hv_site[2] is not None and hv_site[2].strip() != '':
-        links += hv_site[2]  #Receiving Site Owner Company
+        links += urllib.parse.quote(hv_site[2])  #Receiving Site Owner Company
       elif hv_site[13] is not None and hv_site[13].strip() != '':
-        links += hv_site[13]  #Additional Owner Company
+        links += urllib.parse.quote(hv_site[13])  #Additional Owner Company
+
       links += link_suf
   return links
 
