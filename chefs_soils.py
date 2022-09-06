@@ -206,18 +206,12 @@ def create_popup_links(rcv_sites):
 
       if rcv_site[24] is not None and rcv_site[24].strip() != '':
         links += urllib.parse.quote(rcv_site[24]) #Site ID
+      elif rcv_site[142] is not None and rcv_site[142].strip() != '' and rcv_site[143] is not None and rcv_site[143].strip() != '':
+        links += urllib.parse.quote(rcv_site[142]+','+rcv_site[143]) #Receiving Site lat/lon
       elif rcv_site[3] is not None and rcv_site[3].strip() != '':
         links += urllib.parse.quote(rcv_site[3]) #Receiving Site Owner Address
-      elif rcv_site[11] is not None and rcv_site[11].strip() != '':
-        links += urllib.parse.quote(rcv_site[11])  #Additional Owner Address
-      #elif rcv_site[7] is not None and rcv_site[7].strip() != '':
-      #  links += rcv_site[7]  #Receiving Site Owner postal Code
-      #elif rcv_site[18] is not None and rcv_site[18].strip() != '':
-      #  links += rcv_site[18]  #Receiving Site Owner Address
       elif rcv_site[2] is not None and rcv_site[2].strip() != '':
         links += urllib.parse.quote(rcv_site[2])  #Receiving Site Owner Company
-      elif rcv_site[10] is not None and rcv_site[10].strip() != '':
-        links += urllib.parse.quote(rcv_site[10])  #Additional Owner Company
 
       links += link_suf
   return links
@@ -234,18 +228,12 @@ def create_hv_popup_links(hv_sites):
       links += link_prx
       if hv_site[33] is not None and hv_site[33].strip() != '':
         links += urllib.parse.quote(hv_site[33]) #Site ID
+      elif hv_site[72] is not None and hv_site[72].strip() != '' and hv_site[73] is not None and hv_site[73].strip() != '':
+        links += urllib.parse.quote(hv_site[72]+','+hv_site[73]) #Receiving Site lat/lon
       elif hv_site[3] is not None and hv_site[3].strip() != '':
         links += urllib.parse.quote(hv_site[3]) #Receiving Site Owner Address
-      elif hv_site[14] is not None and hv_site[14].strip() != '':
-        links += urllib.parse.quote(hv_site[14])  #Additional Owner Address
-      elif hv_site[7] is not None and hv_site[7].strip() != '':
-        links += urllib.parse.quote(hv_site[7])  #Receiving Site Owner postal Code
-      elif hv_site[18] is not None and hv_site[18].strip() != '':
-        links += urllib.parse.quote(hv_site[18])  #Receiving Site Owner Address
       elif hv_site[2] is not None and hv_site[2].strip() != '':
         links += urllib.parse.quote(hv_site[2])  #Receiving Site Owner Company
-      elif hv_site[13] is not None and hv_site[13].strip() != '':
-        links += urllib.parse.quote(hv_site[13])  #Additional Owner Company
 
       links += link_suf
   return links
@@ -853,6 +841,8 @@ for submission in submissionsJson:
   #receivingSiteData[143] = receivingSiteLatLon[1] # receiving site longitude
   receivingSiteData[142] = testRcvLats[testingCount2]
   receivingSiteData[143] = testRcvLons[testingCount2]
+  #receivingSiteData[142] = '58.51441'
+  #receivingSiteData[143] = '-122.14787'
   testingCount2 = testingCount2 +1
 
   receivingSites.append(receivingSiteData)
