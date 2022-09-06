@@ -8,9 +8,26 @@ from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
 
 
-sourceFLayerItemID = 'a08b3a5e0f564a75befdc8e6775d6e80' # Soil Relocation Source Site - feature layer Item Id
+# CSV file names
+srcCSV = 'soil_relocation_source_sites.csv'
+rcvCSV = 'soil_relocation_receiving_sites.csv'
+hvCSV = 'high_volumn_receiving_sites.csv'
+
+# Soil Relocation Source Sites
+srcCSVId = 'c34c998c1feb4796a61d7e0aef256c12'
+srcLayerId = '4a35bb807eec41af9000e9d12b45b06e'
+
+# Soil Relocation Receiving Sites
+rcvCSVId = ''
+rcvLayerId = ''
+
+# High Volume Receiving Sites
+hvCSVId = ''
+hvLayerId = ''
+
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
+
 
 # Move these to a configuration file
 chefsUrl = 'https://chefs.nrs.gov.bc.ca/app/api/v1'
@@ -27,9 +44,7 @@ chesUrl = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # chesUrl = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
 # chesUrl = 'https://ches.nrs.gov.bc.ca' # prod
 
-source_sites_csv_file = 'soil_relocation_source_sites.csv'
-receiving_sites_csv_file = 'soil_relocation_receiving_sites.csv'
-high_volume_receiving_sites_csv_file = 'high_volumn_receiving_sites.csv'
+
 
 testSourceLats = ['53.89428','58.0151','57.07397','55.56444']
 testSourceLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
@@ -966,14 +981,32 @@ print('Apply updates from CSV to AGOL...')
 # connect to GIS
 gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
 
-#for csv update
-csvItem = gis.content.get('c34c998c1feb4796a61d7e0aef256c12')
-csv_update_result = csvItem.update({}, source_sites_csv_file)
+# Soil Relocation Source Sites
+srcCsvItem = gis.content.get(srcCSVId)
+srcCsvUpdateResult = srcCsvItem.update({}, srcCSV) # csv update
 
-#for layer update
-item = gis.content.get('4a35bb807eec41af9000e9d12b45b06e')
-flc = FeatureLayerCollection.fromitem(item)
-layer_overwrite_result = flc.manager.overwrite(source_sites_csv_file)
+srcLyrItem = gis.content.get(srcLayerId)
+srcFlc = FeatureLayerCollection.fromitem(srcLyrItem)
+srcLyrOverwriteResult = srcFlc.manager.overwrite(srcCSV) # layer update
+
+# Soil Relocation Receiving Sites
+rcvCsvItem = gis.content.get(rcvCSVId)
+rcvCsvUpdateResult = rcvCsvItem.update({}, rcvCSV) # csv update
+
+rcvLyrItem = gis.content.get(rcvLayerId)
+rcvFlc = FeatureLayerCollection.fromitem(rcvLyrItem)
+rcvLyrOverwriteResult = rcvFlc.manager.overwrite(rcvCSV) # layer update
+
+# High Volume Receiving Sites
+hvCsvItem = gis.content.get(hvCSVId)
+hvCsvUpdateResult = hvCsvItem.update({}, hvCSV) # csv update
+
+hvLyrItem = gis.content.get(hvLayerId)
+hvFlc = FeatureLayerCollection.fromitem(hvLyrItem)
+hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV) # layer update
+
+
+
 
 
 
