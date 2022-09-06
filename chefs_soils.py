@@ -25,8 +25,14 @@ rcvLayerId = '7cf27ebd5078431394ad4aa7fe1d7f4f'
 hvCSVId = '90fea595e88549018e9ecd37ef90b9fc'
 hvLayerId = 'a5e6db91a855410f9dd5b6ccdb4a6857'
 
+# WEB Mapping Application Itme Id
+webMapAppId = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
+
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
+
+
+
 
 # Move these to a configuration file
 chefsUrl = 'https://chefs.nrs.gov.bc.ca/app/api/v1'
@@ -114,68 +120,68 @@ def is_json(string):
     return False
   return True
 
-def site_list(formId, formKey):
-  request = requests.get(chefsUrl + '/forms/' + formId + '/export?format=json&type=submissions', auth=HTTPBasicAuth(formId, formKey), headers={'Content-type': 'application/json'})
+def site_list(form_id, form_key):
+  request = requests.get(chefsUrl + '/forms/' + form_id + '/export?format=json&type=submissions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
   # print('Parsing JSON response')
   content = json.loads(request.content)
   return content
 
-def fetch_columns(formId, formKey):
-  request = requests.get(chefsUrl + '/forms/' + formId + '/versions', auth=HTTPBasicAuth(formId, formKey), headers={'Content-type': 'application/json'})
-  requestJson = json.loads(request.content)
-  version = requestJson[0]['id']
+def fetch_columns(form_id, form_key):
+  request = requests.get(chefsUrl + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
+  request_json = json.loads(request.content)
+  version = request_json[0]['id']
 
-  attributeRequest = requests.get(chefsUrl + '/forms/' + formId + '/versions/' + version + '/fields', auth=HTTPBasicAuth(formId, formKey), headers={'Content-type': 'application/json'})
-  attributes = json.loads(attributeRequest.content)
+  attribute_request = requests.get(chefsUrl + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
+  attributes = json.loads(attribute_request.content)
   return attributes
 
-def create_site_relocation_email_msg(regional_district):
-  #<p>----------------------------------------------------------------------------------------------------------------------------------------</p>\
-  msg = ''
-  msg = '<p>This email is to notify you that soil is being relocated in the following Regional District: <span style=font-weight:bold;color:red;>' 
-  msg += regional_district 
+def create_site_relocation_email_msg(regional_district, popup_links):
+  msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
+  msg += '<p>This email is to notify you that soil is being relocated in the Regional District: <span style=font-weight:bold;color:red;>' 
+  msg += regional_district
   msg += '</span></p>\
         <p>The following new submission(s) were received.<p/>\
-        <p><a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=8a6afeae8fdd4960a0ea0df1fa34aa74&find=382011>Link to new submission</a><br/>\
-        <a href=http://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=8a6afeae8fdd4960a0ea0df1fa34aa74&find=6810%20Random%20St.>Link to new submission</a></p><br/>\
-        <p><hr style=height:1px;border-top:dotted;color:#000000;background-color:#000000;/></p>\
+        <p font-style:italic>'
+  msg += popup_links
+  msg += '</p><br/>\
+        <p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
         <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
         <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-        Click &#8216;view&#8217; under the Soil Relocation Dashboard and follow the search instructions below:\
+        Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
         <ul>\
           <li>click on the small arrow on the left of the screen  to open search options</li>\
           <li>Filter by site address, regional district, high volume sites, and more.</li>\
           <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>\
           <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
         </ul>\
-        <p>You can also search for information on the Soil Relocation Site Map by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
-  msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
+        <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+
+  msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + subscriptionFormId + '>form</a></span>.<br/>'
+  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + subscriptionFormId + '>form</a></span>.<br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   return msg
 
-def create_hv_site_email_msg(regional_district, linksToPopup):
-  #<p>----------------------------------------------------------------------------------------------------------------------------------------</p>\
-  msg = ''
-  msg = '<p>This email is to notify you that a registration for a high volume soil receiving site has been received in the following Regional District: <span style=font-weight:bold;color:red;>'
+def create_hv_site_email_msg(regional_district, popup_links):
+  msg = '<p>High Volume Receiving Site Registrations are received by the ministry under section 55.1 of the <i>Environmental Management Act</i>.  For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
+  msg += '<p>This email is to notify you that a registration for a high volume site has been received in Regional District: <span style=font-weight:bold;color:red;>'
   msg += regional_district
   msg += '</span></p>\
         <p>The following new high volume receiving site registration(s) were received.<p/>\
-        <p>'
-  msg += linksToPopup
+        <p font-style:italic>'
+  msg += popup_links
   msg += '</p><br/>\
-        <p><hr style=height:1px;border-top:dotted;color:#000000;background-color:#000000;/></p>\
+        <p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
         <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
         <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-        Click &#8216;view&#8217; under the Soil Relocation Dashboard and follow the search instructions below:\
+        Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
         <ul>\
           <li>click on the small arrow on the left of the screen to open search options</li>\
           <li>Filter by site address, regional district, high volume sites, and more.</li>\
           <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement</li>\
           <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
         </ul>\
-        <p>You can also search for information on the Soil Relocation Site Map by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+        <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
   msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + subscriptionFormId + '>form</a></span>.<br/>'
@@ -189,41 +195,58 @@ def convert_regional_district_to_name(id):
   else:
     return id
 
-# high volumn soil receiving sites
-def createLinkToPopupOnMapForHV(hv_sites):
-  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=8a6afeae8fdd4960a0ea0df1fa34aa74&find='
-  link_suf = '>Link to new high volume receiving site registration</a>'
-  links = ''
-  for hv_site in hv_sites:
-    if hv_site[33] is not None : 
-      links = addBRToLinks(links) + hv_site[33]  #Site ID
+# create links to popup on Map using receiving sites searching keywords
+def create_popup_links(rcv_sites):
     #PID
-    #PIN  
-    #Receiver Address
-    #Receiver 2 Address    
-    #Receiver Zip/Postal Code
-    #Receiver 2 Postal Code/Zip
-    # Receiver Regional District
-    # Receiver Organization  
-    #Receiver 2 Organization    
-    #Receiver City
-    #Receiver 2 City    
-    #Receiver Province/State
-    #Receiver 2 Province/State    
-    #Receiver Country
-    #Receiver 2 Country
+    #PIN    
+  links = ''  
+  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
+  link_suf = '>Link to new submission</a><br/>'
+  if rcv_sites is not None:
+    for rcv_site in rcv_sites:
+      links += link_prx
+      if rcv_site[24] is not None and rcv_site[24].strip() != '':
+        links += rcv_site[24] #Site ID
+      elif rcv_site[3] is not None and rcv_site[3].strip() != '':
+        links += rcv_site[3] #Receiving Site Owner Address
+      elif rcv_site[11] is not None and rcv_site[11].strip() != '':
+        links += rcv_site[11]  #Additional Owner Address
+      #elif rcv_site[7] is not None and rcv_site[7].strip() != '':
+      #  links += rcv_site[7]  #Receiving Site Owner postal Code
+      #elif rcv_site[18] is not None and rcv_site[18].strip() != '':
+      #  links += rcv_site[18]  #Receiving Site Owner Address
+      elif rcv_site[2] is not None and rcv_site[2].strip() != '':
+        links += rcv_site[2]  #Receiving Site Owner Company
+      elif rcv_site[10] is not None and rcv_site[10].strip() != '':
+        links += rcv_site[10]  #Additional Owner Company
+      links += link_suf
+  return links
 
-
-
-    #elif 
-
-
-
-  return link
-
-def addBRToLinks(links):
-  if links is not None and (not links):
-    links += '<br/>'
+# high volumn soil receiving sites
+def create_hv_popup_links(hv_sites):
+    #PID
+    #PIN    
+  links = ''  
+  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
+  link_suf = '>Link to new high volume receiving site registration</a><br/>'
+  if hv_sites is not None:
+    for hv_site in hv_sites:
+      links += link_prx
+      if hv_site[33] is not None and hv_site[33].strip() != '':
+        links += hv_site[33] #Site ID
+      elif hv_site[3] is not None and hv_site[3].strip() != '':
+        links += hv_site[3] #Receiving Site Owner Address
+      elif hv_site[14] is not None and hv_site[14].strip() != '':
+        links += hv_site[14]  #Additional Owner Address
+      elif hv_site[7] is not None and hv_site[7].strip() != '':
+        links += hv_site[7]  #Receiving Site Owner postal Code
+      elif hv_site[18] is not None and hv_site[18].strip() != '':
+        links += hv_site[18]  #Receiving Site Owner Address
+      elif hv_site[2] is not None and hv_site[2].strip() != '':
+        links += hv_site[2]  #Receiving Site Owner Company
+      elif hv_site[13] is not None and hv_site[13].strip() != '':
+        links += hv_site[13]  #Additional Owner Company
+      links += link_suf
   return links
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
@@ -565,7 +588,7 @@ hvSiteHeaders = [
 
 sourceSites = [] # [''] * len(submissionsJson)
 receivingSites = [] # [''] * len(submissionsJson)
-sitesDic = {}
+rcvSitesDic = {}
 sourceSiteLatLon = []
 testingCount1 = 0
 testingCount2 = 0
@@ -837,10 +860,14 @@ for submission in submissionsJson:
   receivingSiteDataCopy = copy.deepcopy(receivingSiteData)
   for rd in receivingSiteData[31]: # could be more than one
     if rd is not None: 
-      if rd in sitesDic:
-        sitesDic[rd].append(receivingSiteDataCopy)
+
+      #for testing
+      rd = 'metroVancouverRegionalDistrict' 
+
+      if rd in rcvSitesDic:
+        rcvSitesDic[rd].append(receivingSiteDataCopy)
       else:
-        sitesDic[rd] = receivingSiteDataCopy
+        rcvSitesDic[rd] = [receivingSiteDataCopy]
 
 
 
@@ -948,16 +975,18 @@ for hvs in hvsJson:
   hvSiteDataCopy = copy.deepcopy(hvSiteData)
   for rd in hvSiteData[40]: # could be more than one
     if rd is not None: 
+
+      #for testing
+      rd = 'metroVancouverRegionalDistrict' 
+
       if rd in hvSitesDic:
         hvSitesDic[rd].append(hvSiteDataCopy)
       else:
-        hvSitesDic[rd] = hvSiteDataCopy
+        hvSitesDic[rd] = [hvSiteDataCopy]
 
 
 
-  # Map hv data to the hv site
-  # for col in hvsAttributes: 
-  #   if hvs.get(col) is not None : hvSiteData.append(hvs[col])
+
 print('Creating soil source site CSV...')
 with open(srcCSV, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
@@ -1002,7 +1031,7 @@ with open(hvCSV, 'w', encoding='UTF8', newline='') as f:
 
 
 
-
+"""
 print('Connecting to AGOL GIS...')
 # connect to GIS
 gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
@@ -1030,7 +1059,7 @@ print('Updating High Volume Receiving Site Feature Layer...')
 hvLyrItem = gis.content.get(hvLayerId)
 hvFlc = FeatureLayerCollection.fromitem(hvLyrItem)
 hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV)
-
+"""
 
 
 
@@ -1042,7 +1071,7 @@ hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV)
 
 
 print('Sending subscriber emails...')
-"""
+
 #Email sending testing
 #emailMsg = '<a href=&quot;http://www.google.com&quot;>asdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdsdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfasdfassssssssssssssssssssssssssssssssssssssssssssssasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasd-end</a>'
 #send_mail('rjeong@vividsolutions.com', '5153 char-Soil Relocations Notification', emailMsg)
@@ -1050,8 +1079,8 @@ print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
 
-emailSubjSR = 'Soil Relocations Notification'
-emailSubjHV = 'High Volume Site Registrations Notification'
+emailSubjectSR = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
+emailSubjectHV = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
 
 today = datetime.datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
 # print(today)
@@ -1090,7 +1119,8 @@ for subscriber in subscribersJson:
   # print(unsubscribe)
 
   if subscriberEmail is not None and regionalDistrict is not None and unsubscribe == False:
-    ""
+    
+
     # Notification of soil relocation in selected Regional District(s)
     if notifyOnSoilRelocationsInSelectedDistrict == True:
       for receivingSiteData in receivingSites:
@@ -1107,15 +1137,21 @@ for subscriber in subscribersJson:
         # print(createdAt)
         daysDiff = (today - createdAt).days
         # print(daysDiff)
+
         if (daysDiff >= 1):
-          
-          #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
-          #if receivingSiteData[31] == regionalDistrict: # ReceivingSiteregionalDistrict
-            regDis = convert_regional_district_to_name(regionalDistrict[0])
-            emailMsg = create_site_relocation_email_msg(regDis)
-            subscriberEmail = 'rjeong@vividsolutions.com'
-            send_mail(subscriberEmail, emailSubjSR, emailMsg)
-    ""
+          for rd in regionalDistrict:
+            # finding if subscriber's regional district in receiving site registration
+            sitesInRD = rcvSitesDic.get(rd)
+            popupLinks = create_popup_links(sitesInRD)
+
+            #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
+            #if receivingSiteData[31] == regionalDistrict: # ReceivingSiteregionalDistrict
+            if sitesInRD is not None:
+              regDis = convert_regional_district_to_name(rd)
+              emailMsg = create_site_relocation_email_msg(regDis, popupLinks)
+              send_mail('rjeong@vividsolutions.com', emailSubjectSR, emailMsg)
+    
+
     # Notification of high volume site registration in selected Regional District(s)        
     
     #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
@@ -1135,16 +1171,12 @@ for subscriber in subscribersJson:
         for rd in regionalDistrict:
           # finding if subscriber's regional district in high volumn receiving site registration
           hvSitesInRD = hvSitesDic.get(rd)
-          createLinkToPopupOnMap(hvSitesInRD)
-
+          hvPopupLinks = create_hv_popup_links(hvSitesInRD)
 
           if hvSitesInRD is not None:
             hvRegDis = convert_regional_district_to_name(rd)
-            hvSiteEmailMsg = create_hv_site_email_msg(hvRegDis)
-            subscriberEmail = 'rjeong@vividsolutions.com'
-            send_mail(subscriberEmail, emailSubjHV, hvSiteEmailMsg)
-    
-"""
+            hvEmailMsg = create_hv_site_email_msg(hvRegDis, hvPopupLinks)
+            send_mail('rjeong@vividsolutions.com', emailSubjectHV, hvEmailMsg)
 
 
 print('Completed Soils data publishing')
