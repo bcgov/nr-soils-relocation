@@ -13,21 +13,20 @@ srcCSV = 'soil_relocation_source_sites.csv'
 rcvCSV = 'soil_relocation_receiving_sites.csv'
 hvCSV = 'high_volumn_receiving_sites.csv'
 
-# Soil Relocation Source Sites
+# Soil Relocation Source Sites Item Id
 srcCSVId = 'c34c998c1feb4796a61d7e0aef256c12'
 srcLayerId = '4a35bb807eec41af9000e9d12b45b06e'
 
-# Soil Relocation Receiving Sites
-rcvCSVId = ''
-rcvLayerId = ''
+# Soil Relocation Receiving Sites Item Id
+rcvCSVId = '2dcbe99f7ea04da19319e0f398b74310'
+rcvLayerId = '7cf27ebd5078431394ad4aa7fe1d7f4f'
 
-# High Volume Receiving Sites
-hvCSVId = ''
-hvLayerId = ''
+# High Volume Receiving Sites Item Id
+hvCSVId = '90fea595e88549018e9ecd37ef90b9fc'
+hvLayerId = 'a5e6db91a855410f9dd5b6ccdb4a6857'
 
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
-
 
 # Move these to a configuration file
 chefsUrl = 'https://chefs.nrs.gov.bc.ca/app/api/v1'
@@ -46,8 +45,14 @@ chesUrl = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 
 
 
-testSourceLats = ['53.89428','58.0151','57.07397','55.56444']
-testSourceLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
+testSrcLats = ['53.89428','58.0151','57.07397','55.56444']
+testSrcLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
+
+testRcvLats = ['54.046489','53.317749','52.462704','51.788232']
+testRcvLons = ['-127.023798','-124.95887','-126.265493','-123.377022']
+
+testHVLats = ['51.590723','51.672555','52.153714','52.321911']
+testHVLons = ['-121.805686','-124.65016','-125.738196','-123.519695']
 
 
 regionalDistrictDict = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
@@ -334,7 +339,6 @@ sourceSiteHeaders = [
   "A3_SourceSiteLongitude"
 ]
 
-
 receivingSiteHeaders = [
   "C1-FirstNameReceivingSiteOwner",
   "C1-LastNameReceivingSiteOwner",
@@ -477,7 +481,9 @@ receivingSiteHeaders = [
   "C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite",
   "C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3",
   "createAt", # not in soilsAttributes, but in submissionsJson
-  "confirmationId" # not in soilsAttributes, but in submissionsJson
+  "confirmationId", # not in soilsAttributes, but in submissionsJson
+  "Latitude",
+  "Longitude"  
 ]
 
 hvSiteHeaders = [
@@ -552,14 +558,17 @@ hvSiteHeaders = [
   "simpleemail1QualifiedProfessional",
   "firstAndLastNameQualifiedProfessional",
   "createAt", # not in hvsAttributes, but in hvsJson
-  "confirmationId" # not in hvsAttributes, but in hvsJson
+  "confirmationId", # not in hvsAttributes, but in hvsJson
+  "Latitude",
+  "Longitude"
 ]
 
 sourceSites = [] # [''] * len(submissionsJson)
 receivingSites = [] # [''] * len(submissionsJson)
 sitesDic = {}
 sourceSiteLatLon = []
-testingCount = 0
+testingCount1 = 0
+testingCount2 = 0
 # create source site, destination site records
 for submission in submissionsJson:
   # print(submission)
@@ -652,17 +661,17 @@ for submission in submissionsJson:
   #for testing
   #sourceSiteData[74] = sourceSiteLatLon[0] # source site latitude
   #sourceSiteData[75] = sourceSiteLatLon[1] # source site longitude
-  sourceSiteData[74] = testSourceLats[testingCount]
-  sourceSiteData[75] = testSourceLons[testingCount]
-  testingCount = testingCount +1
+  sourceSiteData[74] = testSrcLats[testingCount1]
+  sourceSiteData[75] = testSrcLons[testingCount1]
+  testingCount1 = testingCount1 +1
 
   sourceSites.append(sourceSiteData)
 
 
 
   # Map submission data to the receiving site
-  receivingSiteData = [''] * 142
-  receivingSiteDataCopy = [''] * 142
+  receivingSiteData = [''] * 144
+  receivingSiteDataCopy = [''] * 144
   rcvIdx = 0
   if submission.get("C1-FirstNameReceivingSiteOwner") is not None : receivingSiteData[0] = submission["C1-FirstNameReceivingSiteOwner"]
   if submission.get("C1-LastNameReceivingSiteOwner") is not None : receivingSiteData[1] = submission["C1-LastNameReceivingSiteOwner"]
@@ -812,6 +821,16 @@ for submission in submissionsJson:
      # not in attributes, but in json
     if createdAt is not None : receivingSiteData[140] = createdAt
     if confirmationId is not None : receivingSiteData[141] = confirmationId
+
+  # convert lat/lon
+  receivingSiteLatLon = convert_deciaml_lat_long(receivingSiteData[25], receivingSiteData[26], receivingSiteData[27], receivingSiteData[28], receivingSiteData[29], receivingSiteData[30])
+  #for testing
+  #receivingSiteData[142] = receivingSiteLatLon[0] # receiving site latitude
+  #receivingSiteData[143] = receivingSiteLatLon[1] # receiving site longitude
+  receivingSiteData[142] = testRcvLats[testingCount2]
+  receivingSiteData[143] = testRcvLons[testingCount2]
+  testingCount2 = testingCount2 +1
+
   receivingSites.append(receivingSiteData)
 
   # 'sitesDic' dictionary - key:regionalDistrict / value:receivingSiteData
@@ -827,12 +846,13 @@ for submission in submissionsJson:
 
 hvSites = [] # [''] * len(hvsJson)
 hvSitesDic = {}
+testingCount3 = 0
 # create high volumn site records
 for hvs in hvsJson:
   # print(hvs)
   # Map hv data to the hv site
-  hvSiteData = [''] * 72
-  hvSiteDataCopy = [''] * 72
+  hvSiteData = [''] * 74
+  hvSiteDataCopy = [''] * 74
   hvIdx = 0
   if hvs.get("Section1-FirstNameReceivingSiteOwner") is not None : hvSiteData[0] = hvs["Section1-FirstNameReceivingSiteOwner"]
   if hvs.get("Section1-LastNameReceivingSiteOwner") is not None : hvSiteData[1] = hvs["Section1-LastNameReceivingSiteOwner"]
@@ -912,6 +932,16 @@ for hvs in hvsJson:
     # not in attributes, but in json
     if createdAt is not None : hvSiteData[70] = createdAt 
     if confirmationId is not None : hvSiteData[71] = confirmationId
+
+  # convert to lat/lon
+  hvSiteLatLon = convert_deciaml_lat_long(hvSiteData[34], hvSiteData[35], hvSiteData[36], hvSiteData[37], hvSiteData[38], hvSiteData[39])
+  #for testing
+  #hvSiteData[72] = hvSiteLatLon[0] # High Volume Site latitude
+  #hvSiteData[73] = hvSiteLatLon[1] # High Volume Site longitude
+  hvSiteData[72] = testHVLats[testingCount3]
+  hvSiteData[73] = testHVLons[testingCount3]
+  testingCount3 = testingCount3 +1
+
   hvSites.append(hvSiteData)
 
   # 'hvSitesDic' dictionary - key:regionalDistrict / value:hvSiteData
@@ -925,14 +955,11 @@ for hvs in hvsJson:
 
 
 
-
-
   # Map hv data to the hv site
   # for col in hvsAttributes: 
   #   if hvs.get(col) is not None : hvSiteData.append(hvs[col])
 print('Creating soil source site CSV...')
-"""
-with open(source_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
+with open(srcCSV, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(sourceSiteHeaders)
 
@@ -946,7 +973,7 @@ with open(source_sites_csv_file, 'w', encoding='UTF8', newline='') as f:
     writer.writerow(data)      
 
 print('Creating soil destination site CSV...')
-with open(receiving_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
+with open(rcvCSV, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(receivingSiteHeaders)
 
@@ -960,7 +987,7 @@ with open(receiving_sites_csv_file, 'w', encoding='UTF8', newline='') as f:
     writer.writerow(data)          
 
 print('Creating soil high volume site CSV...')
-with open(high_volume_receiving_sites_csv_file, 'w', encoding='UTF8', newline='') as f:  
+with open(hvCSV, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
   writer.writerow(hvSiteHeaders)
 
@@ -972,41 +999,37 @@ with open(high_volume_receiving_sites_csv_file, 'w', encoding='UTF8', newline=''
     for hvsData in hvs:
       data.append(hvsData)
     writer.writerow(data)
-"""
 
 
 
-print('Apply updates from CSV to AGOL...')
 
+print('Connecting to AGOL GIS...')
 # connect to GIS
 gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
 
-# Soil Relocation Source Sites
+print('Updating Soil Relocation Soruce Site CSV...')
 srcCsvItem = gis.content.get(srcCSVId)
-srcCsvUpdateResult = srcCsvItem.update({}, srcCSV) # csv update
-
+srcCsvUpdateResult = srcCsvItem.update({}, srcCSV)
+print('Updating Soil Relocation Soruce Site Feature Layer...')
 srcLyrItem = gis.content.get(srcLayerId)
 srcFlc = FeatureLayerCollection.fromitem(srcLyrItem)
-srcLyrOverwriteResult = srcFlc.manager.overwrite(srcCSV) # layer update
+srcLyrOverwriteResult = srcFlc.manager.overwrite(srcCSV)
 
-# Soil Relocation Receiving Sites
+print('Updating Soil Relocation Soruce Site CSV...')
 rcvCsvItem = gis.content.get(rcvCSVId)
-rcvCsvUpdateResult = rcvCsvItem.update({}, rcvCSV) # csv update
-
+rcvCsvUpdateResult = rcvCsvItem.update({}, rcvCSV)
+print('Updating Soil Relocation Receiving Site Feature Layer...')
 rcvLyrItem = gis.content.get(rcvLayerId)
 rcvFlc = FeatureLayerCollection.fromitem(rcvLyrItem)
-rcvLyrOverwriteResult = rcvFlc.manager.overwrite(rcvCSV) # layer update
+rcvLyrOverwriteResult = rcvFlc.manager.overwrite(rcvCSV)
 
-# High Volume Receiving Sites
+print('Updating High Volume Receiving Site CSV...')
 hvCsvItem = gis.content.get(hvCSVId)
-hvCsvUpdateResult = hvCsvItem.update({}, hvCSV) # csv update
-
+hvCsvUpdateResult = hvCsvItem.update({}, hvCSV)
+print('Updating High Volume Receiving Site Feature Layer...')
 hvLyrItem = gis.content.get(hvLayerId)
 hvFlc = FeatureLayerCollection.fromitem(hvLyrItem)
-hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV) # layer update
-
-
-
+hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV)
 
 
 
