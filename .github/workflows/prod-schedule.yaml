@@ -1,0 +1,40 @@
+name: Execute the SRIS CHEFS load script
+on:
+  workflow_dispatch:
+
+  schedule:
+    # * is a special character in YAML, so you have to quote this string
+    # Execute at 1:00am every day
+    - cron:  '0 0 1 * * ?'
+jobs:
+  SRIS_CHEFS_LOAD:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2 # checkout the repository content to GitHub runner.
+        with:
+          ref: deploy/prod # Specify the branch to checkout.
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9 #install the python version needed
+      - name: install pipenv
+        run: |
+          pip install --upgrade pip
+          pip install pipenv
+      - name: install python script dependencies
+        run: pipenv install --deploy
+      - name: execute the python script
+        env:
+          CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
+          CHEFS_SOILS_API_KEY: ${{ secrets.CHEFS_SOILS_API_KEY }}
+          CHEFS_HV_FORM_ID: ${{ secrets.CHEFS_HV_FORM_ID }}
+          CHEFS_HV_API_KEY: ${{ secrets.CHEFS_HV_API_KEY }}
+          CHEFS_MAIL_FORM_ID: ${{ secrets.CHEFS_MAIL_FORM_ID }}
+          CHEFS_MAIL_API_KEY: ${{ secrets.CHEFS_MAIL_API_KEY }}
+          CHES_API_KEY: ${{ secrets.CHES_API_KEY }}
+          MAPHUB_USER: ${{ secrets.MAPHUB_USER }}
+          MAPHUB_PASS: ${{ secrets.MAPHUB_PASS }}
+        run: |
+          pipenv run python chefs_soils.py
