@@ -194,8 +194,6 @@ def convert_regional_district_to_name(id):
 
 # create links to popup on Map using receiving sites searching keywords
 def create_popup_links(rcv_sites):
-    #PID
-    #PIN    
   links = ''  
   link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
   link_suf = '>Link to new submission</a><br/>'
@@ -206,6 +204,10 @@ def create_popup_links(rcv_sites):
 
       if rcv_site[24] is not None and rcv_site[24].strip() != '':
         links += urllib.parse.quote(rcv_site[24]) #Site ID
+      #elif rcv_site[24] is not None and rcv_site[24].strip() != '':
+      #  links += urllib.parse.quote(rcv_site[24]) #PID
+      #elif rcv_site[24] is not None and rcv_site[24].strip() != '':
+      #  links += urllib.parse.quote(rcv_site[24]) #PIN
       elif rcv_site[142] is not None and rcv_site[142].strip() != '' and rcv_site[143] is not None and rcv_site[143].strip() != '':
         links += urllib.parse.quote(rcv_site[142]+','+rcv_site[143]) #Receiving Site lat/lon
       elif rcv_site[3] is not None and rcv_site[3].strip() != '':
@@ -218,8 +220,6 @@ def create_popup_links(rcv_sites):
 
 # high volumn soil receiving sites
 def create_hv_popup_links(hv_sites):
-    #PID
-    #PIN    
   links = ''  
   link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
   link_suf = '>Link to new high volume receiving site registration</a><br/>'
@@ -228,6 +228,10 @@ def create_hv_popup_links(hv_sites):
       links += link_prx
       if hv_site[33] is not None and hv_site[33].strip() != '':
         links += urllib.parse.quote(hv_site[33]) #Site ID
+      elif hv_site[76] is not None and hv_site[76].strip() != '':
+        links += urllib.parse.quote(hv_site[76]) #PID
+      elif hv_site[77] is not None and hv_site[77].strip() != '':
+        links += urllib.parse.quote(hv_site[77]) #PIN
       elif hv_site[72] is not None and hv_site[72].strip() != '' and hv_site[73] is not None and hv_site[73].strip() != '':
         links += urllib.parse.quote(hv_site[72]+','+hv_site[73]) #Receiving Site lat/lon
       elif hv_site[3] is not None and hv_site[3].strip() != '':
@@ -267,10 +271,10 @@ hvsAttributes = fetch_columns(hvsFormId, hvsKey)
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
 submissionsJson = site_list(soilsFormId, soilsKey)
-# print(submissionsJson)
+#print(submissionsJson)
 print('Loading Submission attributes and headers...')
 soilsAttributes = fetch_columns(soilsFormId, soilsKey)
-# print(soilsAttributes)
+#print(soilsAttributes)
 
 sourceSiteHeaders = [
   "A1_FIRSTName",
@@ -348,7 +352,9 @@ sourceSiteHeaders = [
   "createAt", # not in soilsAttributes, but in submissionsJson
   "confirmationId", # not in soilsAttributes, but in submissionsJson
   "A3_SourceSiteLatitude",
-  "A3_SourceSiteLongitude"
+  "A3_SourceSiteLongitude",
+  "PID",
+  "PIN"
 ]
 
 receivingSiteHeaders = [
@@ -572,7 +578,9 @@ hvSiteHeaders = [
   "createAt", # not in hvsAttributes, but in hvsJson
   "confirmationId", # not in hvsAttributes, but in hvsJson
   "Latitude",
-  "Longitude"
+  "Longitude",
+  "PID",
+  "PIN"
 ]
 
 sourceSites = [] # [''] * len(submissionsJson)
@@ -586,7 +594,7 @@ for submission in submissionsJson:
   # print(submission)
 
   # Map submission data to the source site
-  sourceSiteData = [''] * 76
+  sourceSiteData = [''] * 78
   if submission.get("A1-FIRSTName") is not None : sourceSiteData[0] = submission["A1-FIRSTName"]
   if submission.get("A1-LASTName") is not None : sourceSiteData[1] = submission["A1-LASTName"]
   if submission.get("A1-Company") is not None : sourceSiteData[2] = submission["A1-Company"]
@@ -676,6 +684,19 @@ for submission in submissionsJson:
   sourceSiteData[74] = testSrcLats[testingCount1]
   sourceSiteData[75] = testSrcLons[testingCount1]
   testingCount1 = testingCount1 +1
+
+  #PID
+  if submission.get("dataGrid") is not None : 
+    for dg in submission.get("dataGrid"):
+      if dg["A-LegallyTitled-PID"] is not None and dg["A-LegallyTitled-PID"] != '':
+        sourceSiteData[76] = dg["A-LegallyTitled-PID"]
+        break
+  #PIN
+  if submission.get("dataGrid1") is not None : 
+    for dg1 in submission.get("dataGrid1"):
+      if dg1["A-UntitledPINSource"] is not None and dg1["A-UntitledPINSource"] != '':
+        sourceSiteData[77] = dg1["A-UntitledPINSource"]
+        break
 
   sourceSites.append(sourceSiteData)
 
@@ -960,6 +981,19 @@ for hvs in hvsJson:
   hvSiteData[73] = testHVLons[testingCount3]
   testingCount3 = testingCount3 +1
 
+  #PID
+  if submission.get("dataGrid") is not None : 
+    for dg in submission.get("dataGrid"):
+      if dg["A-LegallyTitled-PID"] is not None and dg["A-LegallyTitled-PID"] != '':
+        sourceSiteData[74] = dg["A-LegallyTitled-PID"]
+        break
+  #PIN
+  if submission.get("dataGrid1") is not None : 
+    for dg1 in submission.get("dataGrid1"):
+      if dg1["A-LegallyTitled-PID"] is not None and dg1["A-LegallyTitled-PID"] != '':
+        sourceSiteData[75] = dg1["A-LegallyTitled-PID"]
+        break
+
   hvSites.append(hvSiteData)
 
   # 'hvSitesDic' dictionary - key:regionalDistrict / value:hvSiteData
@@ -1054,19 +1088,8 @@ hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV)
 
 
 
-
-# Find a location or feature to open the map
-# https://doc.arcgis.com/en/web-appbuilder/latest/manage-apps/app-url-parameters.htm
-# example: (1) using site addrees: http://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=8a6afeae8fdd4960a0ea0df1fa34aa74&find=6810%20Random%20St.
-#          (2) using siteIdentificationNumber: https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=8a6afeae8fdd4960a0ea0df1fa34aa74&find=382011
-
-
+"""
 print('Sending subscriber emails...')
-
-#Email sending testing
-#emailMsg = '<a href=&quot;http://www.google.com&quot;>asdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdsdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasfasdfaasdfasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfasdfassssssssssssssssssssssssssssssssssssssssssssssasdfaasdfasdfasdfaasdfasdfasdfaasdfasdfasdfaasdfasd-end</a>'
-#send_mail('rjeong@vividsolutions.com', '5153 char-Soil Relocations Notification', emailMsg)
-
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
 
@@ -1168,6 +1191,6 @@ for subscriber in subscribersJson:
             hvRegDis = convert_regional_district_to_name(rd)
             hvEmailMsg = create_hv_site_email_msg(hvRegDis, hvPopupLinks)
             send_mail('rjeong@vividsolutions.com', emailSubjectHV, hvEmailMsg)
-
+"""
 
 print('Completed Soils data publishing')
