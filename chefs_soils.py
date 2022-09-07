@@ -31,6 +31,7 @@ maphubUrl = r'https://governmentofbc.maps.arcgis.com'
 
 
 
+
 # Move these to a configuration file
 chefsUrl = 'https://chefs.nrs.gov.bc.ca/app/api/v1'
 
@@ -245,11 +246,18 @@ def create_hv_popup_links(hv_sites):
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
   # Convert to DD in mapLatitude and mapLongitude
   data = []
-  lat_dd = (float(lat_deg) + float(lat_min)/60 + float(lat_sec)/(60*60))
-  lon_dd = - (float(lon_deg) + float(lon_min)/60 + float(lon_sec)/(60*60))
+  if (lat_deg is not None and lat_deg != '' and
+      lat_min is not None and lat_min != '' and
+      lat_sec is not None and lat_sec != '' and
+      lon_deg is not None and lon_deg != '' and
+      lon_min is not None and lon_min != '' and
+      lon_sec is not None and lon_sec != ''
+  ):
+    lat_dd = (float(lat_deg) + float(lat_min)/60 + float(lat_sec)/(60*60))
+    lon_dd = - (float(lon_deg) + float(lon_min)/60 + float(lon_sec)/(60*60))
 
-  data.append(lat_dd)
-  data.append(lon_dd)
+    data.append(lat_dd)
+    data.append(lon_dd)
 
   return data
 
@@ -275,6 +283,7 @@ submissionsJson = site_list(soilsFormId, soilsKey)
 print('Loading Submission attributes and headers...')
 soilsAttributes = fetch_columns(soilsFormId, soilsKey)
 #print(soilsAttributes)
+
 
 sourceSiteHeaders = [
   "A1_FIRSTName",
@@ -358,151 +367,46 @@ sourceSiteHeaders = [
 ]
 
 receivingSiteHeaders = [
-  "C1-FirstNameReceivingSiteOwner",
-  "C1-LastNameReceivingSiteOwner",
-  "C1-CompanyReceivingSiteOwner",
-  "C1-AddressReceivingSiteOwner",
-  "C1-CityReceivingSiteOwner",
-  "C1-PhoneRecevingSiteOwner",
-  "C1-EmailReceivingSiteOwner",
-  "C1-checkbox-extraownersReceivingSite",
-  "C1-FirstName1ReceivingSiteAdditionalOwners",
-  "C1-LastName1ReceivingSiteAdditionalOwners",
-  "C1-Company1ReceivingSiteAdditionalOwners",
-  "C1-Address1ReceivingSiteAdditionalOwners",
-  "C1-City1ReceivingSiteAdditionalOwners",
-  "C1-Phone1ReceivingSiteAdditionalOwners",
-  "C1-Email1ReceivingSiteAdditionalOwners",
-  "haveMoreThatTwoOwnersEnterTheirInformationBelow",
-  "receivingsitecontact-sameAsAbove",
-  "C2-RSC-FirstName",
-  "C2-RSC-LastName",
-  "C2-RSC-Company",
-  "C2-RSC-Address",
-  "C2-RSC-City",
-  "C2-RSCphoneNumber1",
-  "C2-RSC-Email",
-  "C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite",
-  "C2-Latitude-DegreesReceivingSite",
-  "C2-Latitude-MinutesReceivingSite",
-  "Section2-Latitude-Seconds1ReceivingSite",
-  "C2-Longitude-DegreesReceivingSite",
-  "C2-Longitude-MinutesReceivingSite",
-  "C2-Longitude-SecondsReceivingSite",
-  "ReceivingSiteregionalDistrict",
-  "ReceivingSiteLocationMap",
-  "C2-receivinglandOwnership-checkbox",
-  "C2-LegallyTitled-AddressReceivingSite",
-  "C2-LegallyTitled-CityReceivingSite",
-  "C2-LegallyTitled-PostalReceivingSite",
-  "dataGrid2",
-  "ReceivingSiteLandTitleRecord",
-  "dataGrid5",
-  "A-UntitledCrownLand-FileNumberColumn1",
-  "A-UntitledMunicipalLand-PIDColumn1",
-  "C3-soilClassification1ReceivingSite",
-  "C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite",
-  "C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite",
-  "C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime",
-  "additionalReceivingSites",
-  "C1-FirstName2FirstAdditionalReceivingSite",
-  "C1-LastName2FirstAdditionalReceivingSite",
-  "C1-Company2FirstAdditionalReceivingSite",
-  "C1-Address2FirstAdditionalReceivingSite",
-  "C1-City2FirstAdditionalReceivingSite",
-  "phoneNumber4FirstAdditionalReceivingSite",
-  "C1-Email2FirstAdditionalReceivingSite",
-  "Firstadditionalreceiving-checkbox-extraowners1",
-  "C1-FirstName3AdditionalReceivingSiteOwner",
-  "C1-LastName3AdditionalReceivingSiteOwner",
-  "C1-Company3AdditionalReceivingSiteOwner",
-  "C1-Address3AdditionalReceivingSiteOwner",
-  "C1-City3AdditionalReceivingSiteOwner",
-  "phoneNumber2AdditionalReceivingSiteOwner",
-  "C1-Email3AdditionalReceivingSiteOwner",
-  "C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow2ReceivingSite",
-  "Firstadditionalcontactperson-sameAsAbove1",
-  "C2-RSC-FirstName1AdditionalReceivingSite",
-  "C2-RSC-LastName1AdditionalReceivingSite",
-  "C2-RSC-Company1AdditionalReceivingSite",
-  "C2-RSC-Address1AdditionalReceivingSite",
-  "C2-RSC-City1AdditionalReceivingSite",
-  "phoneNumber3AdditionalReceivingSite",
-  "C2-RSC-Email1AdditionalReceivingSite",
-  "C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite",
-  "C2-Latitude-Degrees1FirstAdditionalReceivingSite",
-  "C2-Latitude-Minutes1FirstAdditionalReceivingSite",
-  "Section2-Latitude-Seconds2FirstAdditionalReceivingSite",
-  "C2-Longitude-Degrees1FirstAdditionalReceivingSite",
-  "C2-Longitude-Minutes1FirstAdditionalReceivingSite",
-  "C2-Longitude-Seconds1FirstAdditionalReceivingSite",
-  "FirstAdditionalReceivingSiteregionalDistrict1",
-  "FirstAdditionalReceivingSiteLocationMap",
-  "Firstadditionalreceiving-landOwnership-checkbox1",
-  "C2-LegallyTitled-Address1FirstAdditionalReceivingSite",
-  "C2-LegallyTitled-City1FirstAdditionalReceivingSite",
-  "C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite",
-  "dataGrid3",
-  "FirstAdditionalReceivingSiteLandTitle",
-  "dataGrid6",
-  "A-UntitledCrownLand-FileNumberColumn2",
-  "A-UntitledMunicipalLand-PIDColumn2",
-  "C3-soilClassification2FirstAdditionalReceivingSite",
-  "C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite",
-  "C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite",
-  "C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1",
-  "secondadditionalReceivingSites1",
-  "C1-FirstName6SecondAdditionalreceivingSite",
-  "C1-LastName6SecondAdditionalreceivingSite",
-  "C1-Company6SecondAdditionalreceivingSite",
-  "C1-Address6SecondAdditionalreceivingSite",
-  "C1-City6SecondAdditionalreceivingSite",
-  "phoneNumber7SecondAdditionalreceivingSite",
-  "C1-Email6SecondAdditionalreceivingSite",
-  "secondadditionalreceivingsiteC1-checkbox-extraowners3",
-  "C1-FirstName7SecondAdditionalreceivingSite",
-  "C1-LastName7SecondAdditionalreceivingSite",
-  "C1-Company7SecondAdditionalreceivingSite",
-  "C1-Address7SecondAdditionalreceivingSite",
-  "C1-City7SecondAdditionalreceivingSite",
-  "phoneNumber5SecondAdditionalreceivingSite",
-  "C1-Email7SecondAdditionalreceivingSite",
-  "C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow4SecondAdditionalreceivingSite",
-  "secondadditionalreceivingsiteContactperson-sameAsAbove3",
-  "C2-RSC-FirstName3SecondAdditionalreceivingSite",
-  "C2-RSC-LastName3SecondAdditionalreceivingSite",
-  "C2-RSC-Company3SecondAdditionalreceivingSite",
-  "C2-RSC-Address3SecondAdditionalreceivingSite",
-  "C2-RSC-City3SecondAdditionalreceivingSite",
-  "phoneNumber6SecondAdditionalreceivingSite",
-  "C2-RSC-Email3SecondAdditionalreceivingSite",
-  "C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite",
-  "C2-Latitude-Degrees3SecondAdditionalreceivingSite",
-  "C2-Latitude-Minutes3SecondAdditionalreceivingSite",
-  "Section2-Latitude-Seconds4SecondAdditionalreceivingSite",
-  "C2-Longitude-Degrees3SecondAdditionalreceivingSite",
-  "C2-Longitude-Minutes3SecondAdditionalreceivingSite",
-  "C2-Longitude-Seconds3SecondAdditionalreceivingSite",
-  "SecondAdditionalReceivingSiteregionalDistrict",
-  "SecondAdditionalReceivingSiteLocationMap",
-  "Secondadditionalreceiving-landOwnership-checkbox3",
-  "C2-LegallyTitled-Address3SecondAdditionalreceivingSite",
-  "C2-LegallyTitled-City3SecondAdditionalreceivingSite",
-  "C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite",
-  "dataGrid4",
-  "SecondAdditionalReceivingSiteLandTitle2",
-  "dataGrid7",
-  "A-UntitledCrownLand-FileNumberColumn3",
-  "A-UntitledMunicipalLand-PIDColumn3",
-  "C3-soilClassification4SecondAdditionalreceivingSite",
-  "C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite",
-  "C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite",
-  "C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3",
-  "createAt", # not in soilsAttributes, but in submissionsJson
-  "confirmationId", # not in soilsAttributes, but in submissionsJson
-  "Latitude",
-  "Longitude"  
-]
+  "ownerFirstName",
+  "ownerLastName",
+  "ownerCompany",
+  "ownerAddress",
+  "ownerCity",
+  "ownerPhoneNumber",
+  "ownerEmail",
+  "owner2FirstName",
+  "owner2LastName",
+  "owner2Company",
+  "owner2Address",
+  "owner2City",
+  "owner2PhoneNumber",
+  "owner2Email",
+  "additionalOwners",
+  "contactFirstName",
+  "contactLastName",
+  "contactCompany",
+  "contactAddress",
+  "contactCity",
+  "contactPhoneNumber",
+  "contactEmail",
+  "SID",
+  "latitude",
+  "longitude",
+  "regionalDistrict",
+  "landOwnership",
+  "legallyTitledSiteAddress",
+  "legallyTitledSiteCity",
+  "legallyTitledSitePostalCode",
+  "PID",
+  "legalLandDescription",
+  "PIN",
+  "receivingSiteLandUse",
+  "CSRFactors",
+  "relocatedSoilUse",
+  "highVolumneSite",
+  "createAt",
+  "confirmationId"
+]  
 
 hvSiteHeaders = [
   "Section1-FirstNameReceivingSiteOwner",
@@ -584,7 +488,7 @@ hvSiteHeaders = [
 ]
 
 sourceSites = [] # [''] * len(submissionsJson)
-receivingSites = [] # [''] * len(submissionsJson)
+receivingSites = []
 rcvSitesDic = {}
 sourceSiteLatLon = []
 testingCount1 = 0
@@ -692,194 +596,302 @@ for submission in submissionsJson:
         sourceSiteData[76] = dg["A-LegallyTitled-PID"]
         break
   #PIN
+  """
   if submission.get("dataGrid1") is not None : 
     for dg1 in submission.get("dataGrid1"):
       if dg1["A-UntitledPINSource"] is not None and dg1["A-UntitledPINSource"] != '':
         sourceSiteData[77] = dg1["A-UntitledPINSource"]
         break
-
+  """
   sourceSites.append(sourceSiteData)
 
 
-
   # Map submission data to the receiving site
-  receivingSiteData = [''] * 144
-  receivingSiteDataCopy = [''] * 144
-  rcvIdx = 0
-  if submission.get("C1-FirstNameReceivingSiteOwner") is not None : receivingSiteData[0] = submission["C1-FirstNameReceivingSiteOwner"]
-  if submission.get("C1-LastNameReceivingSiteOwner") is not None : receivingSiteData[1] = submission["C1-LastNameReceivingSiteOwner"]
-  if submission.get("C1-CompanyReceivingSiteOwner") is not None : receivingSiteData[2] = submission["C1-CompanyReceivingSiteOwner"]
-  if submission.get("C1-AddressReceivingSiteOwner") is not None : receivingSiteData[3] = submission["C1-AddressReceivingSiteOwner"]
-  if submission.get("C1-CityReceivingSiteOwner") is not None : receivingSiteData[4] = submission["C1-CityReceivingSiteOwner"]
-  if submission.get("C1-PhoneRecevingSiteOwner") is not None : receivingSiteData[5] = submission["C1-PhoneRecevingSiteOwner"]
-  if submission.get("C1-EmailReceivingSiteOwner") is not None : receivingSiteData[6] = submission["C1-EmailReceivingSiteOwner"]
-  if submission.get("C1-checkbox-extraownersReceivingSite") is not None : receivingSiteData[7] = submission["C1-checkbox-extraownersReceivingSite"]
-  if submission.get("C1-FirstName1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[8] = submission["C1-FirstName1ReceivingSiteAdditionalOwners"]
-  if submission.get("C1-LastName1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[9] = submission["C1-LastName1ReceivingSiteAdditionalOwners"]
-  if submission.get("C1-Company1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[10] = submission["C1-Company1ReceivingSiteAdditionalOwners"]
-  if submission.get("C1-Address1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[11] = submission["C1-Address1ReceivingSiteAdditionalOwners"]
-  if submission.get("C1-City1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[12] = submission["C1-City1ReceivingSiteAdditionalOwners"]
-  if submission.get("C1-Phone1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[13] = submission["C1-Phone1ReceivingSiteAdditionalOwners"]
-  if submission.get("C1-Email1ReceivingSiteAdditionalOwners") is not None : receivingSiteData[14] = submission["C1-Email1ReceivingSiteAdditionalOwners"]
-  if submission.get("haveMoreThatTwoOwnersEnterTheirInformationBelow") is not None : receivingSiteData[15] = submission["haveMoreThatTwoOwnersEnterTheirInformationBelow"]
-  if submission.get("receivingsitecontact-sameAsAbove") is not None : receivingSiteData[16] = submission["receivingsitecontact-sameAsAbove"]
-  if submission.get("C2-RSC-FirstName") is not None : receivingSiteData[17] = submission["C2-RSC-FirstName"]
-  if submission.get("C2-RSC-LastName") is not None : receivingSiteData[18] = submission["C2-RSC-LastName"]
-  if submission.get("C2-RSC-Company") is not None : receivingSiteData[19] = submission["C2-RSC-Company"]
-  if submission.get("C2-RSC-Address") is not None : receivingSiteData[20] = submission["C2-RSC-Address"]
-  if submission.get("C2-RSC-City") is not None : receivingSiteData[21] = submission["C2-RSC-City"]
-  if submission.get("C2-RSCphoneNumber1") is not None : receivingSiteData[22] = submission["C2-RSCphoneNumber1"]
-  if submission.get("C2-RSC-Email") is not None : receivingSiteData[23] = submission["C2-RSC-Email"]
-  if submission.get("C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite") is not None : receivingSiteData[24] = submission["C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite"]
-  if submission.get("C2-Latitude-DegreesReceivingSite") is not None : receivingSiteData[25] = submission["C2-Latitude-DegreesReceivingSite"]
-  if submission.get("C2-Latitude-MinutesReceivingSite") is not None : receivingSiteData[26] = submission["C2-Latitude-MinutesReceivingSite"]
-  if submission.get("Section2-Latitude-Seconds1ReceivingSite") is not None : receivingSiteData[27] = submission["Section2-Latitude-Seconds1ReceivingSite"]
-  if submission.get("C2-Longitude-DegreesReceivingSite") is not None : receivingSiteData[28] = submission["C2-Longitude-DegreesReceivingSite"]
-  if submission.get("C2-Longitude-MinutesReceivingSite") is not None : receivingSiteData[29] = submission["C2-Longitude-MinutesReceivingSite"]
-  if submission.get("C2-Longitude-SecondsReceivingSite") is not None : receivingSiteData[30] = submission["C2-Longitude-SecondsReceivingSite"]
-  if submission.get("ReceivingSiteregionalDistrict") is not None : receivingSiteData[31] = submission["ReceivingSiteregionalDistrict"]
-  #if submission.get("ReceivingSiteLocationMap") is not None : receivingSiteData[32] = submission["ReceivingSiteLocationMap"]
-  if submission.get("C2-receivinglandOwnership-checkbox") is not None : receivingSiteData[33] = submission["C2-receivinglandOwnership-checkbox"]
-  if submission.get("C2-LegallyTitled-AddressReceivingSite") is not None : receivingSiteData[34] = submission["C2-LegallyTitled-AddressReceivingSite"]
-  if submission.get("C2-LegallyTitled-CityReceivingSite") is not None : receivingSiteData[35] = submission["C2-LegallyTitled-CityReceivingSite"]
-  if submission.get("C2-LegallyTitled-PostalReceivingSite") is not None : receivingSiteData[36] = submission["C2-LegallyTitled-PostalReceivingSite"]
-  #if submission.get("dataGrid2") is not None : receivingSiteData[37] = submission["dataGrid2"]
-  #if submission.get("ReceivingSiteLandTitleRecord") is not None : receivingSiteData[38] = submission["ReceivingSiteLandTitleRecord"]
-  #if submission.get("dataGrid5") is not None : receivingSiteData[39] = submission["dataGrid5"]
-  #if submission.get("A-UntitledCrownLand-FileNumberColumn1") is not None : receivingSiteData[40] = submission["A-UntitledCrownLand-FileNumberColumn1"]
-  #if submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None : receivingSiteData[41] = submission["A-UntitledMunicipalLand-PIDColumn1"]
-  #if submission.get("C3-soilClassification1ReceivingSite") is not None : receivingSiteData[42] = submission["C3-soilClassification1ReceivingSite"]
-  if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite") is not None : receivingSiteData[43] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite"]
-  if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite") is not None : receivingSiteData[44] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite"]
-  if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : receivingSiteData[45] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
-  #if submission.get("additionalReceivingSites") is not None : receivingSiteData[46] = submission["additionalReceivingSites"]
-  if submission.get("C1-FirstName2FirstAdditionalReceivingSite") is not None : receivingSiteData[47] = submission["C1-FirstName2FirstAdditionalReceivingSite"]
-  if submission.get("C1-LastName2FirstAdditionalReceivingSite") is not None : receivingSiteData[48] = submission["C1-LastName2FirstAdditionalReceivingSite"]
-  if submission.get("C1-Company2FirstAdditionalReceivingSite") is not None : receivingSiteData[49] = submission["C1-Company2FirstAdditionalReceivingSite"]
-  if submission.get("C1-Address2FirstAdditionalReceivingSite") is not None : receivingSiteData[50] = submission["C1-Address2FirstAdditionalReceivingSite"]
-  if submission.get("C1-City2FirstAdditionalReceivingSite") is not None : receivingSiteData[51] = submission["C1-City2FirstAdditionalReceivingSite"]
-  if submission.get("phoneNumber4FirstAdditionalReceivingSite") is not None : receivingSiteData[52] = submission["phoneNumber4FirstAdditionalReceivingSite"]
-  if submission.get("C1-Email2FirstAdditionalReceivingSite") is not None : receivingSiteData[53] = submission["C1-Email2FirstAdditionalReceivingSite"]
-  if submission.get("Firstadditionalreceiving-checkbox-extraowners1") is not None : receivingSiteData[54] = submission["Firstadditionalreceiving-checkbox-extraowners1"]
-  if submission.get("C1-FirstName3AdditionalReceivingSiteOwner") is not None : receivingSiteData[55] = submission["C1-FirstName3AdditionalReceivingSiteOwner"]
-  if submission.get("C1-LastName3AdditionalReceivingSiteOwner") is not None : receivingSiteData[56] = submission["C1-LastName3AdditionalReceivingSiteOwner"]
-  if submission.get("C1-Company3AdditionalReceivingSiteOwner") is not None : receivingSiteData[57] = submission["C1-Company3AdditionalReceivingSiteOwner"]
-  if submission.get("C1-Address3AdditionalReceivingSiteOwner") is not None : receivingSiteData[58] = submission["C1-Address3AdditionalReceivingSiteOwner"]
-  if submission.get("C1-City3AdditionalReceivingSiteOwner") is not None : receivingSiteData[59] = submission["C1-City3AdditionalReceivingSiteOwner"]
-  if submission.get("phoneNumber2AdditionalReceivingSiteOwner") is not None : receivingSiteData[60] = submission["phoneNumber2AdditionalReceivingSiteOwner"]
-  if submission.get("C1-Email3AdditionalReceivingSiteOwner") is not None : receivingSiteData[61] = submission["C1-Email3AdditionalReceivingSiteOwner"]
-  if submission.get("C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow2ReceivingSite") is not None : receivingSiteData[62] = submission["C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow2ReceivingSite"]
-  if submission.get("Firstadditionalcontactperson-sameAsAbove1") is not None : receivingSiteData[63] = submission["Firstadditionalcontactperson-sameAsAbove1"]
-  if submission.get("C2-RSC-FirstName1AdditionalReceivingSite") is not None : receivingSiteData[64] = submission["C2-RSC-FirstName1AdditionalReceivingSite"]
-  if submission.get("C2-RSC-LastName1AdditionalReceivingSite") is not None : receivingSiteData[65] = submission["C2-RSC-LastName1AdditionalReceivingSite"]
-  if submission.get("C2-RSC-Company1AdditionalReceivingSite") is not None : receivingSiteData[66] = submission["C2-RSC-Company1AdditionalReceivingSite"]
-  if submission.get("C2-RSC-Address1AdditionalReceivingSite") is not None : receivingSiteData[67] = submission["C2-RSC-Address1AdditionalReceivingSite"]
-  if submission.get("C2-RSC-City1AdditionalReceivingSite") is not None : receivingSiteData[68] = submission["C2-RSC-City1AdditionalReceivingSite"]
-  if submission.get("phoneNumber3AdditionalReceivingSite") is not None : receivingSiteData[69] = submission["phoneNumber3AdditionalReceivingSite"]
-  if submission.get("C2-RSC-Email1AdditionalReceivingSite") is not None : receivingSiteData[70] = submission["C2-RSC-Email1AdditionalReceivingSite"]
-  if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite") is not None : receivingSiteData[71] = submission["C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite"]
-  if submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite") is not None : receivingSiteData[72] = submission["C2-Latitude-Degrees1FirstAdditionalReceivingSite"]
-  if submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite") is not None : receivingSiteData[73] = submission["C2-Latitude-Minutes1FirstAdditionalReceivingSite"]
-  if submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite") is not None : receivingSiteData[74] = submission["Section2-Latitude-Seconds2FirstAdditionalReceivingSite"]
-  if submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite") is not None : receivingSiteData[75] = submission["C2-Longitude-Degrees1FirstAdditionalReceivingSite"]
-  if submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite") is not None : receivingSiteData[76] = submission["C2-Longitude-Minutes1FirstAdditionalReceivingSite"]
-  if submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite") is not None : receivingSiteData[77] = submission["C2-Longitude-Seconds1FirstAdditionalReceivingSite"]
-  if submission.get("FirstAdditionalReceivingSiteregionalDistrict1") is not None : receivingSiteData[78] = submission["FirstAdditionalReceivingSiteregionalDistrict1"]
-  if submission.get("FirstAdditionalReceivingSiteLocationMap") is not None : receivingSiteData[79] = submission["FirstAdditionalReceivingSiteLocationMap"]
-  if submission.get("Firstadditionalreceiving-landOwnership-checkbox1") is not None : receivingSiteData[80] = submission["Firstadditionalreceiving-landOwnership-checkbox1"]
-  if submission.get("C2-LegallyTitled-Address1FirstAdditionalReceivingSite") is not None : receivingSiteData[81] = submission["C2-LegallyTitled-Address1FirstAdditionalReceivingSite"]
-  if submission.get("C2-LegallyTitled-City1FirstAdditionalReceivingSite") is not None : receivingSiteData[82] = submission["C2-LegallyTitled-City1FirstAdditionalReceivingSite"]
-  if submission.get("C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite") is not None : receivingSiteData[83] = submission["C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite"]
-  #if submission.get("dataGrid3") is not None : receivingSiteData[84] = submission["dataGrid3"]
-  if submission.get("FirstAdditionalReceivingSiteLandTitle") is not None : receivingSiteData[85] = submission["FirstAdditionalReceivingSiteLandTitle"]
-  #if submission.get("dataGrid6") is not None : receivingSiteData[86] = submission["dataGrid6"]
-  #if submission.get("A-UntitledCrownLand-FileNumberColumn2") is not None : receivingSiteData[87] = submission["A-UntitledCrownLand-FileNumberColumn2"]
-  #if submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None : receivingSiteData[88] = submission["A-UntitledMunicipalLand-PIDColumn2"]
-  if submission.get("C3-soilClassification2FirstAdditionalReceivingSite") is not None : receivingSiteData[89] = submission["C3-soilClassification2FirstAdditionalReceivingSite"]
-  if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite") is not None : receivingSiteData[90] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite"]
-  if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite") is not None : receivingSiteData[91] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite"]
-  if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : receivingSiteData[92] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
-  #if submission.get("secondadditionalReceivingSites1") is not None : receivingSiteData[93] = submission["secondadditionalReceivingSites1"]
-  if submission.get("C1-FirstName6SecondAdditionalreceivingSite") is not None : receivingSiteData[94] = submission["C1-FirstName6SecondAdditionalreceivingSite"]
-  if submission.get("C1-LastName6SecondAdditionalreceivingSite") is not None : receivingSiteData[95] = submission["C1-LastName6SecondAdditionalreceivingSite"]
-  if submission.get("C1-Company6SecondAdditionalreceivingSite") is not None : receivingSiteData[96] = submission["C1-Company6SecondAdditionalreceivingSite"]
-  if submission.get("C1-Address6SecondAdditionalreceivingSite") is not None : receivingSiteData[97] = submission["C1-Address6SecondAdditionalreceivingSite"]
-  if submission.get("C1-City6SecondAdditionalreceivingSite") is not None : receivingSiteData[98] = submission["C1-City6SecondAdditionalreceivingSite"]
-  if submission.get("phoneNumber7SecondAdditionalreceivingSite") is not None : receivingSiteData[99] = submission["phoneNumber7SecondAdditionalreceivingSite"]
-  if submission.get("C1-Email6SecondAdditionalreceivingSite") is not None : receivingSiteData[100] = submission["C1-Email6SecondAdditionalreceivingSite"]
-  if submission.get("secondadditionalreceivingsiteC1-checkbox-extraowners3") is not None : receivingSiteData[101] = submission["secondadditionalreceivingsiteC1-checkbox-extraowners3"]
-  if submission.get("C1-FirstName7SecondAdditionalreceivingSite") is not None : receivingSiteData[102] = submission["C1-FirstName7SecondAdditionalreceivingSite"]
-  if submission.get("C1-LastName7SecondAdditionalreceivingSite") is not None : receivingSiteData[103] = submission["C1-LastName7SecondAdditionalreceivingSite"]
-  if submission.get("C1-Company7SecondAdditionalreceivingSite") is not None : receivingSiteData[104] = submission["C1-Company7SecondAdditionalreceivingSite"]
-  if submission.get("C1-Address7SecondAdditionalreceivingSite") is not None : receivingSiteData[105] = submission["C1-Address7SecondAdditionalreceivingSite"]
-  if submission.get("C1-City7SecondAdditionalreceivingSite") is not None : receivingSiteData[106] = submission["C1-City7SecondAdditionalreceivingSite"]
-  if submission.get("phoneNumber5SecondAdditionalreceivingSite") is not None : receivingSiteData[107] = submission["phoneNumber5SecondAdditionalreceivingSite"]
-  if submission.get("C1-Email7SecondAdditionalreceivingSite") is not None : receivingSiteData[108] = submission["C1-Email7SecondAdditionalreceivingSite"]
-  if submission.get("C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow4SecondAdditionalreceivingSite") is not None : receivingSiteData[109] = submission["C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow4SecondAdditionalreceivingSite"]
-  if submission.get("secondadditionalreceivingsiteContactperson-sameAsAbove3") is not None : receivingSiteData[110] = submission["secondadditionalreceivingsiteContactperson-sameAsAbove3"]
-  if submission.get("C2-RSC-FirstName3SecondAdditionalreceivingSite") is not None : receivingSiteData[111] = submission["C2-RSC-FirstName3SecondAdditionalreceivingSite"]
-  if submission.get("C2-RSC-LastName3SecondAdditionalreceivingSite") is not None : receivingSiteData[112] = submission["C2-RSC-LastName3SecondAdditionalreceivingSite"]
-  if submission.get("C2-RSC-Company3SecondAdditionalreceivingSite") is not None : receivingSiteData[113] = submission["C2-RSC-Company3SecondAdditionalreceivingSite"]
-  if submission.get("C2-RSC-Address3SecondAdditionalreceivingSite") is not None : receivingSiteData[114] = submission["C2-RSC-Address3SecondAdditionalreceivingSite"]
-  if submission.get("C2-RSC-City3SecondAdditionalreceivingSite") is not None : receivingSiteData[115] = submission["C2-RSC-City3SecondAdditionalreceivingSite"]
-  if submission.get("phoneNumber6SecondAdditionalreceivingSite") is not None : receivingSiteData[116] = submission["phoneNumber6SecondAdditionalreceivingSite"]
-  if submission.get("C2-RSC-Email3SecondAdditionalreceivingSite") is not None : receivingSiteData[117] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
-  if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : receivingSiteData[118] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
-  if submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite") is not None : receivingSiteData[119] = submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"]
-  if submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite") is not None : receivingSiteData[120] = submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"]
-  if submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite") is not None : receivingSiteData[121] = submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"]
-  if submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite") is not None : receivingSiteData[122] = submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"]
-  if submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite") is not None : receivingSiteData[123] = submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"]
-  if submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite") is not None : receivingSiteData[124] = submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"]
-  if submission.get("SecondAdditionalReceivingSiteregionalDistrict") is not None : receivingSiteData[125] = submission["SecondAdditionalReceivingSiteregionalDistrict"]
-  if submission.get("SecondAdditionalReceivingSiteLocationMap") is not None : receivingSiteData[126] = submission["SecondAdditionalReceivingSiteLocationMap"]
-  if submission.get("Secondadditionalreceiving-landOwnership-checkbox3") is not None : receivingSiteData[127] = submission["Secondadditionalreceiving-landOwnership-checkbox3"]
-  if submission.get("C2-LegallyTitled-Address3SecondAdditionalreceivingSite") is not None : receivingSiteData[128] = submission["C2-LegallyTitled-Address3SecondAdditionalreceivingSite"]
-  if submission.get("C2-LegallyTitled-City3SecondAdditionalreceivingSite") is not None : receivingSiteData[129] = submission["C2-LegallyTitled-City3SecondAdditionalreceivingSite"]
-  if submission.get("C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite") is not None : receivingSiteData[130] = submission["C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite"]
-  #if submission.get("dataGrid4") is not None : receivingSiteData[131] = submission["dataGrid4"]
-  if submission.get("SecondAdditionalReceivingSiteLandTitle2") is not None : receivingSiteData[132] = submission["SecondAdditionalReceivingSiteLandTitle2"]
-  #if submission.get("dataGrid7") is not None : receivingSiteData[133] = submission["dataGrid7"]
-  #if submission.get("A-UntitledCrownLand-FileNumberColumn3") is not None : receivingSiteData[134] = submission["A-UntitledCrownLand-FileNumberColumn3"]
-  #if submission.get("A-UntitledMunicipalLand-PIDColumn3") is not None : receivingSiteData[135] = submission["A-UntitledMunicipalLand-PIDColumn3"]
-  if submission.get("C3-soilClassification4SecondAdditionalreceivingSite") is not None : receivingSiteData[136] = submission["C3-soilClassification4SecondAdditionalreceivingSite"]
-  if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : receivingSiteData[137] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
-  if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : receivingSiteData[138] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
-  if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : receivingSiteData[139] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
-  if submission.get("form") is not None : 
-    formStr = json.dumps(submission.get("form"))
-    formJson = json.loads(formStr)
-    createdAt = datetime.datetime.strptime(formJson['createdAt'], "%Y-%m-%dT%H:%M:%S.%f%z").replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-    confirmationId = formJson['confirmationId']
-     # not in attributes, but in json
-    if createdAt is not None : receivingSiteData[140] = createdAt
-    if confirmationId is not None : receivingSiteData[141] = confirmationId
+  if (
+    submission.get("C2-Latitude-DegreesReceivingSite") is not None and
+    submission.get("C2-Latitude-MinutesReceivingSite") is not None and
+    submission.get("Section2-Latitude-Seconds1ReceivingSite") is not None and
+    submission.get("C2-Longitude-DegreesReceivingSite") is not None and
+    submission.get("C2-Longitude-MinutesReceivingSite") is not None and
+    submission.get("C2-Longitude-SecondsReceivingSite") is not None
+  ):
+    print("Mapping 1st receiver ...")
 
-  # convert lat/lon
-  receivingSiteLatLon = convert_deciaml_lat_long(receivingSiteData[25], receivingSiteData[26], receivingSiteData[27], receivingSiteData[28], receivingSiteData[29], receivingSiteData[30])
-  #for testing
-  #receivingSiteData[142] = receivingSiteLatLon[0] # receiving site latitude
-  #receivingSiteData[143] = receivingSiteLatLon[1] # receiving site longitude
-  receivingSiteData[142] = testRcvLats[testingCount2]
-  receivingSiteData[143] = testRcvLons[testingCount2]
-  #receivingSiteData[142] = '58.51441'
-  #receivingSiteData[143] = '-122.14787'
-  testingCount2 = testingCount2 +1
+    _rcvDic = {}
+    for rcvHeader in receivingSiteHeaders:
+      _rcvDic[rcvHeader] = None
 
-  receivingSites.append(receivingSiteData)
+    if submission.get("C1-FirstNameReceivingSiteOwner") is not None : _rcvDic['ownerFirstName'] = submission["C1-FirstNameReceivingSiteOwner"]
+    if submission.get("C1-LastNameReceivingSiteOwner") is not None : _rcvDic['ownerLastName'] = submission["C1-LastNameReceivingSiteOwner"]
+    if submission.get("C1-CompanyReceivingSiteOwner") is not None : _rcvDic['ownerCompany'] = submission["C1-CompanyReceivingSiteOwner"]
+    if submission.get("C1-AddressReceivingSiteOwner") is not None : _rcvDic['ownerAddress'] = submission["C1-AddressReceivingSiteOwner"]
+    if submission.get("C1-CityReceivingSiteOwner") is not None : _rcvDic['ownerCity'] = submission["C1-CityReceivingSiteOwner"]
+    if submission.get("C1-PhoneRecevingSiteOwner") is not None : _rcvDic['ownerPhoneNumber'] = submission["C1-PhoneRecevingSiteOwner"]
+    if submission.get("C1-EmailReceivingSiteOwner") is not None : _rcvDic['ownerEmail'] = submission["C1-EmailReceivingSiteOwner"]
 
-  # 'sitesDic' dictionary - key:regionalDistrict / value:receivingSiteData
-  receivingSiteDataCopy = copy.deepcopy(receivingSiteData)
-  for rd in receivingSiteData[31]: # could be more than one
-    if rd is not None: 
+    if submission.get("C1-FirstName1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2FirstName'] = submission["C1-FirstName1ReceivingSiteAdditionalOwners"]
+    if submission.get("C1-LastName1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2LastName'] = submission["C1-LastName1ReceivingSiteAdditionalOwners"]
+    if submission.get("C1-Company1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2Company'] = submission["C1-Company1ReceivingSiteAdditionalOwners"]
+    if submission.get("C1-Address1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2Address'] = submission["C1-Address1ReceivingSiteAdditionalOwners"]
+    if submission.get("C1-City1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2City'] = submission["C1-City1ReceivingSiteAdditionalOwners"]
+    if submission.get("C1-Phone1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2PhoneNumber'] = submission["C1-Phone1ReceivingSiteAdditionalOwners"]
+    if submission.get("C1-Email1ReceivingSiteAdditionalOwners") is not None : _rcvDic['owner2Email'] = submission["C1-Email1ReceivingSiteAdditionalOwners"]
 
-      #for testing
-      rd = 'metroVancouverRegionalDistrict' 
+    if submission.get("haveMoreThatTwoOwnersEnterTheirInformationBelow") is not None : _rcvDic['additionalOwners'] = submission["haveMoreThatTwoOwnersEnterTheirInformationBelow"]
+    if submission.get("C2-RSC-FirstName") is not None : _rcvDic['contactFirstName'] = submission["C2-RSC-FirstName"]
+    if submission.get("C2-RSC-LastName") is not None : _rcvDic['contactLastName'] = submission["C2-RSC-LastName"]
+    if submission.get("C2-RSC-Company") is not None : _rcvDic['contactCompany'] = submission["C2-RSC-Company"]
+    if submission.get("C2-RSC-Address") is not None : _rcvDic['contactAddress'] = submission["C2-RSC-Address"]
+    if submission.get("C2-RSC-City") is not None : _rcvDic['contactCity'] = submission["C2-RSC-City"]
+    if submission.get("C2-RSCphoneNumber1") is not None : _rcvDic['contactPhoneNumber'] = submission["C2-RSCphoneNumber1"]
+    if submission.get("C2-RSC-Email") is not None : _rcvDic['contactEmail'] = submission["C2-RSC-Email"]
+    if submission.get("C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite") is not None : _rcvDic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite"]
 
-      if rd in rcvSitesDic:
-        rcvSitesDic[rd].append(receivingSiteDataCopy)
-      else:
-        rcvSitesDic[rd] = [receivingSiteDataCopy]
+    # convert lat/lon
+    _rcvLatLon = convert_deciaml_lat_long(
+      submission["C2-Latitude-DegreesReceivingSite"], submission["C2-Latitude-MinutesReceivingSite"], submission["Section2-Latitude-Seconds1ReceivingSite"], 
+      submission["C2-Longitude-DegreesReceivingSite"], submission["C2-Longitude-MinutesReceivingSite"], submission["C2-Longitude-SecondsReceivingSite"])
+    #for testing
+    #rcvDic['latitude'] = _rcvLatLon[0]
+    #rcvDic['longitude'] = _rcvLatLon[0]
+    _rcvDic['latitude'] = testRcvLats[testingCount2]
+    _rcvDic['longitude'] = testRcvLons[testingCount2]
+    testingCount2 = testingCount2 + 1
+
+    if submission.get("ReceivingSiteregionalDistrict") is not None and submission['ReceivingSiteregionalDistrict'].len() > 0 : _rcvDic['regionalDistrict'] = submission["ReceivingSiteregionalDistrict"][0] # could be more than one, but take only one
+    if submission.get("C2-receivinglandOwnership-checkbox") is not None : _rcvDic['landOwnership'] = submission["C2-receivinglandOwnership-checkbox"]
+    if submission.get("C2-LegallyTitled-AddressReceivingSite") is not None : _rcvDic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-AddressReceivingSite"]
+    if submission.get("C2-LegallyTitled-CityReceivingSite") is not None : _rcvDic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-CityReceivingSite"]
+    if submission.get("C2-LegallyTitled-PostalReceivingSite") is not None : _rcvDic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalReceivingSite"]
+
+    if submission.get("dataGrid2") is not None and submission["dataGrid2"].len() > 0: 
+      _dg2 = submission["dataGrid2"][0] # could be more than one, but take only one
+      if _dg2.get("A-LegallyTitled-PIDReceivingSite") is not None: _rcvDic['PID'] = _dg2["A-LegallyTitled-PIDReceivingSite"]
+      if _dg2.get("legalLandDescriptionReceivingSite") is not None: _rcvDic['legalLandDescription'] = _dg2["legalLandDescriptionReceivingSite"]
+    elif submission.get("dataGrid5") is not None and submission["dataGrid5"].len() > 0: 
+      _dg5 = submission["dataGrid5"][0] # could be more than one, but take only one
+      if _dg5.get("A-LegallyTitled-PID") is not None: _rcvDic['PIN'] = _dg5["A-LegallyTitled-PID"]
+      if _dg5.get("legalLandDescriptionUntitledCrownLandReceivingSite") is not None: _rcvDic['legalLandDescription'] = _dg5["legalLandDescriptionUntitledCrownLandReceivingSite"]
+    elif submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None : _rcvDic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumn1"]
+
+    if submission.get("C3-soilClassification1ReceivingSite") is not None : _rcvDic['receivingSiteLandUse'] = submission["C3-soilClassification1ReceivingSite"]
+    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite") is not None : _rcvDic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcvDic['highVolumneSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
+    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite") is not None : _rcvDic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite"]
+
+    if submission.get("form") is not None : 
+      formStr = json.dumps(submission.get("form"))
+      formJson = json.loads(formStr)
+      createdAt = datetime.datetime.strptime(formJson['createdAt'], "%Y-%m-%dT%H:%M:%S.%f%z").replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+      confirmationId = formJson['confirmationId']
+      # not in attributes, but in json
+      if createdAt is not None : _rcvDic['createAt'] = createdAt
+      if confirmationId is not None : _rcvDic['confirmationId'] = confirmationId
+
+    receivingSites.append(_rcvDic)
+
+    # 'sitesDic' dictionary - key:regionalDistrict / value:receivingSiteData
+    _rcvDicCopy = {}
+    _rcvDicCopy = copy.deepcopy(_rcvDic)
+    for rd in _rcvDic['regionalDistrict']: # could be more than one
+      if rd is not None:
+        #for testing
+        rd = 'metroVancouverRegionalDistrict' 
+        if rd in rcvSitesDic:
+          rcvSitesDic[rd].append(_rcvDicCopy)
+        else:
+          rcvSitesDic[rd] = [_rcvDicCopy]
+
+
+  if (
+    submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite") is not None and
+    submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite") is not None and
+    submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite") is not None and
+    submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite") is not None and
+    submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite") is not None and
+    submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite") is not None
+  ):
+    print("Mapping 2nd receiver ...")
+
+    _rcvDic = {}
+    for rcvHeader in receivingSiteHeaders:
+      _rcvDic[rcvHeader] = None
+
+    if submission.get("C1-FirstName2FirstAdditionalReceivingSite") is not None : _rcvDic['ownerFirstName'] = submission["C1-FirstName2FirstAdditionalReceivingSite"]
+    if submission.get("C1-LastName2FirstAdditionalReceivingSite") is not None : _rcvDic['ownerLastName'] = submission["C1-LastName2FirstAdditionalReceivingSite"]
+    if submission.get("C1-Company2FirstAdditionalReceivingSite") is not None : _rcvDic['ownerCompany'] = submission["C1-Company2FirstAdditionalReceivingSite"]
+    if submission.get("C1-Address2FirstAdditionalReceivingSite") is not None : _rcvDic['ownerAddress'] = submission["C1-Address2FirstAdditionalReceivingSite"]
+    if submission.get("C1-City2FirstAdditionalReceivingSite") is not None : _rcvDic['ownerCity'] = submission["C1-City2FirstAdditionalReceivingSite"]
+    if submission.get("phoneNumber4FirstAdditionalReceivingSite") is not None : _rcvDic['ownerPhoneNumber'] = submission["phoneNumber4FirstAdditionalReceivingSite"]
+    if submission.get("C1-Email2FirstAdditionalReceivingSite") is not None : _rcvDic['ownerEmail'] = submission["C1-Email2FirstAdditionalReceivingSite"]
+
+    if submission.get("C1-FirstName3AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2FirstName'] = submission["C1-FirstName3AdditionalReceivingSiteOwner"]
+    if submission.get("C1-LastName3AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2LastName'] = submission["C1-LastName3AdditionalReceivingSiteOwner"]
+    if submission.get("C1-Company3AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2Company'] = submission["C1-Company3AdditionalReceivingSiteOwner"]
+    if submission.get("C1-Address3AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2Address'] = submission["C1-Address3AdditionalReceivingSiteOwner"]
+    if submission.get("C1-City3AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2City'] = submission["C1-City3AdditionalReceivingSiteOwner"]
+    if submission.get("phoneNumber2AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2PhoneNumber'] = submission["phoneNumber2AdditionalReceivingSiteOwner"]
+    if submission.get("C1-Email3AdditionalReceivingSiteOwner") is not None : _rcvDic['owner2Email'] = submission["C1-Email3AdditionalReceivingSiteOwner"]
+
+    if submission.get("C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow2ReceivingSite") is not None : _rcvDic['additionalOwners'] = submission["C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow2ReceivingSite"]
+    if submission.get("C2-RSC-FirstName1AdditionalReceivingSite") is not None : _rcvDic['contactFirstName'] = submission["C2-RSC-FirstName1AdditionalReceivingSite"]
+    if submission.get("C2-RSC-LastName1AdditionalReceivingSite") is not None : _rcvDic['contactLastName'] = submission["C2-RSC-LastName1AdditionalReceivingSite"]
+    if submission.get("C2-RSC-Company1AdditionalReceivingSite") is not None : _rcvDic['contactCompany'] = submission["C2-RSC-Company1AdditionalReceivingSite"]
+    if submission.get("C2-RSC-Address1AdditionalReceivingSite") is not None : _rcvDic['contactAddress'] = submission["C2-RSC-Address1AdditionalReceivingSite"]
+    if submission.get("C2-RSC-City1AdditionalReceivingSite") is not None : _rcvDic['contactCity'] = submission["C2-RSC-City1AdditionalReceivingSite"]
+    if submission.get("phoneNumber3AdditionalReceivingSite") is not None : _rcvDic['contactPhoneNumber'] = submission["phoneNumber3AdditionalReceivingSite"]
+    if submission.get("C2-RSC-Email1AdditionalReceivingSite") is not None : _rcvDic['contactEmail'] = submission["C2-RSC-Email1AdditionalReceivingSite"]
+    if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite") is not None : _rcvDic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite"]
+
+    # convert lat/lon
+    _rcvLatLon = convert_deciaml_lat_long(
+      submission["C2-Latitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Latitude-Minutes1FirstAdditionalReceivingSite"], submission["Section2-Latitude-Seconds2FirstAdditionalReceivingSite"], 
+      submission["C2-Longitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Longitude-Minutes1FirstAdditionalReceivingSite"], submission["C2-Longitude-Seconds1FirstAdditionalReceivingSite"])
+    #for testing
+    #rcvDic['latitude'] = _rcvLatLon[0]
+    #rcvDic['longitude'] = _rcvLatLon[0]
+    _rcvDic['latitude'] = testRcvLats[testingCount2]
+    _rcvDic['longitude'] = testRcvLons[testingCount2]
+    testingCount2 = testingCount2 + 1
+
+    if submission.get("FirstAdditionalReceivingSiteregionalDistrict1") is not None and submission['FirstAdditionalReceivingSiteregionalDistrict1'].len() > 0 : _rcvDic['regionalDistrict'] = submission["FirstAdditionalReceivingSiteregionalDistrict1"][0] # could be more than one, but take only one
+    if submission.get("Firstadditionalreceiving-landOwnership-checkbox1") is not None : _rcvDic['landOwnership'] = submission["Firstadditionalreceiving-landOwnership-checkbox1"]
+    if submission.get("C2-LegallyTitled-Address1FirstAdditionalReceivingSite") is not None : _rcvDic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address1FirstAdditionalReceivingSite"]
+    if submission.get("C2-LegallyTitled-City1FirstAdditionalReceivingSite") is not None : _rcvDic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City1FirstAdditionalReceivingSite"]
+    if submission.get("C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite") is not None : _rcvDic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite"]
+
+    if submission.get("dataGrid3") is not None and submission["dataGrid3"].len() > 0: 
+      _dg3 = submission["dataGrid3"][0] # could be more than one, but take only one
+      if _dg3.get("A-LegallyTitled-PIDFirstAdditionalReceivingSite") is not None: _rcvDic['PID'] = _dg3["A-LegallyTitled-PIDFirstAdditionalReceivingSite"]
+      if _dg3.get("legalLandDescriptionFirstAdditionalReceivingSite") is not None: _rcvDic['legalLandDescription'] = _dg3["legalLandDescriptionFirstAdditionalReceivingSite"]
+    elif submission.get("dataGrid6") is not None and submission["dataGrid6"].len() > 0: 
+      _dg6 = submission["dataGrid6"][0] # could be more than one, but take only one
+      if _dg6.get("A-UntitledCrown-PINFirstAdditionalReceivingSite") is not None: _rcvDic['PIN'] = _dg6["A-UntitledCrown-PINFirstAdditionalReceivingSite"]
+      if _dg6.get("legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite") is not None: _rcvDic['legalLandDescription'] = _dg6["legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite"]
+    elif submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None : _rcvDic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumn2"]
+
+    if submission.get("C3-soilClassification2FirstAdditionalReceivingSite") is not None : _rcvDic['receivingSiteLandUse'] = submission["C3-soilClassification2FirstAdditionalReceivingSite"]
+    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite") is not None : _rcvDic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcvDic['highVolumneSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
+    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite") is not None : _rcvDic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite"]
+
+    if submission.get("form") is not None : 
+      formStr = json.dumps(submission.get("form"))
+      formJson = json.loads(formStr)
+      createdAt = datetime.datetime.strptime(formJson['createdAt'], "%Y-%m-%dT%H:%M:%S.%f%z").replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+      confirmationId = formJson['confirmationId']
+      # not in attributes, but in json
+      if createdAt is not None : _rcvDic['createAt'] = createdAt
+      if confirmationId is not None : _rcvDic['confirmationId'] = confirmationId
+
+    receivingSites.append(_rcvDic)
+
+    # 'sitesDic' dictionary - key:regionalDistrict / value:receivingSiteData
+    _rcvDicCopy = {}
+    _rcvDicCopy = copy.deepcopy(_rcvDic)
+    for rd in _rcvDic['regionalDistrict']: # could be more than one
+      if rd is not None:
+        #for testing
+        rd = 'metroVancouverRegionalDistrict' 
+        if rd in rcvSitesDic:
+          rcvSitesDic[rd].append(_rcvDicCopy)
+        else:
+          rcvSitesDic[rd] = [_rcvDicCopy]
+
+  if (
+    submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite") is not None and
+    submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite") is not None and
+    submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite") is not None and
+    submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite") is not None and
+    submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite") is not None and
+    submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite") is not None
+  ):
+    print("Mapping 3rd receiver ...")
+
+    _rcvDic = {}
+    for rcvHeader in receivingSiteHeaders:
+      _rcvDic[rcvHeader] = None
+
+    if submission.get("C1-FirstName6SecondAdditionalreceivingSite") is not None : _rcvDic['ownerFirstName'] = submission["C1-FirstName6SecondAdditionalreceivingSite"]
+    if submission.get("C1-LastName6SecondAdditionalreceivingSite") is not None : _rcvDic['ownerLastName'] = submission["C1-LastName6SecondAdditionalreceivingSite"]
+    if submission.get("C1-Company6SecondAdditionalreceivingSite") is not None : _rcvDic['ownerCompany'] = submission["C1-Company6SecondAdditionalreceivingSite"]
+    if submission.get("C1-Address6SecondAdditionalreceivingSite") is not None : _rcvDic['ownerAddress'] = submission["C1-Address6SecondAdditionalreceivingSite"]
+    if submission.get("C1-City6SecondAdditionalreceivingSite") is not None : _rcvDic['ownerCity'] = submission["C1-City6SecondAdditionalreceivingSite"]
+    if submission.get("phoneNumber7SecondAdditionalreceivingSite") is not None : _rcvDic['ownerPhoneNumber'] = submission["phoneNumber7SecondAdditionalreceivingSite"]
+    if submission.get("C1-Email6SecondAdditionalreceivingSite") is not None : _rcvDic['ownerEmail'] = submission["C1-Email6SecondAdditionalreceivingSite"]
+
+    if submission.get("C1-FirstName7SecondAdditionalreceivingSite") is not None : _rcvDic['owner2FirstName'] = submission["C1-FirstName7SecondAdditionalreceivingSite"]
+    if submission.get("C1-LastName7SecondAdditionalreceivingSite") is not None : _rcvDic['owner2LastName'] = submission["C1-LastName7SecondAdditionalreceivingSite"]
+    if submission.get("C1-Company7SecondAdditionalreceivingSite") is not None : _rcvDic['owner2Company'] = submission["C1-Company7SecondAdditionalreceivingSite"]
+    if submission.get("C1-Address7SecondAdditionalreceivingSite") is not None : _rcvDic['owner2Address'] = submission["C1-Address7SecondAdditionalreceivingSite"]
+    if submission.get("C1-City7SecondAdditionalreceivingSite") is not None : _rcvDic['owner2City'] = submission["C1-City7SecondAdditionalreceivingSite"]
+    if submission.get("phoneNumber5SecondAdditionalreceivingSite") is not None : _rcvDic['owner2PhoneNumber'] = submission["phoneNumber5SecondAdditionalreceivingSite"]
+    if submission.get("C1-Email7SecondAdditionalreceivingSite") is not None : _rcvDic['owner2Email'] = submission["C1-Email7SecondAdditionalreceivingSite"]
+
+    if submission.get("C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow4SecondAdditionalreceivingSite") is not None : _rcvDic['additionalOwners'] = submission["C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow4SecondAdditionalreceivingSite"]
+    if submission.get("C2-RSC-FirstName3SecondAdditionalreceivingSite") is not None : _rcvDic['contactFirstName'] = submission["C2-RSC-FirstName3SecondAdditionalreceivingSite"]
+    if submission.get("C2-RSC-LastName3SecondAdditionalreceivingSite") is not None : _rcvDic['contactLastName'] = submission["C2-RSC-LastName3SecondAdditionalreceivingSite"]
+    if submission.get("C2-RSC-Company3SecondAdditionalreceivingSite") is not None : _rcvDic['contactCompany'] = submission["C2-RSC-Company3SecondAdditionalreceivingSite"]
+    if submission.get("C2-RSC-Address3SecondAdditionalreceivingSite") is not None : _rcvDic['contactAddress'] = submission["C2-RSC-Address3SecondAdditionalreceivingSite"]
+    if submission.get("C2-RSC-City3SecondAdditionalreceivingSite") is not None : _rcvDic['contactCity'] = submission["C2-RSC-City3SecondAdditionalreceivingSite"]
+    if submission.get("phoneNumber6SecondAdditionalreceivingSite") is not None : _rcvDic['contactPhoneNumber'] = submission["phoneNumber6SecondAdditionalreceivingSite"]
+    if submission.get("C2-RSC-Email3SecondAdditionalreceivingSite") is not None : _rcvDic['contactEmail'] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
+    if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : _rcvDic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
+
+    # convert lat/lon
+    _rcvLatLon = convert_deciaml_lat_long(
+      submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"], submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"], 
+      submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"], submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"])
+    #for testing
+    #rcvDic['latitude'] = _rcvLatLon[0]
+    #rcvDic['longitude'] = _rcvLatLon[0]
+    _rcvDic['latitude'] = testRcvLats[testingCount2]
+    _rcvDic['longitude'] = testRcvLons[testingCount2]
+    testingCount2 = testingCount2 + 1
+
+    if submission.get("SecondAdditionalReceivingSiteregionalDistrict") is not None and submission['SecondAdditionalReceivingSiteregionalDistrict'].len() > 0 : _rcvDic['regionalDistrict'] = submission["SecondAdditionalReceivingSiteregionalDistrict"]
+    if submission.get("Secondadditionalreceiving-landOwnership-checkbox3") is not None : _rcvDic['landOwnership'] = submission["Secondadditionalreceiving-landOwnership-checkbox3"]
+    if submission.get("C2-LegallyTitled-Address3SecondAdditionalreceivingSite") is not None : _rcvDic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address3SecondAdditionalreceivingSite"]
+    if submission.get("C2-LegallyTitled-City3SecondAdditionalreceivingSite") is not None : _rcvDic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City3SecondAdditionalreceivingSite"]
+    if submission.get("C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite") is not None : _rcvDic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite"]
+
+    if submission.get("dataGrid4") is not None and submission["dataGrid4"].len() > 0: 
+      _dg4 = submission["dataGrid4"][0] # could be more than one, but take only one
+      if _dg4.get("A-LegallyTitled-PIDSecondAdditionalreceivingSite") is not None: _rcvDic['PID'] = _dg4["A-LegallyTitled-PIDSecondAdditionalreceivingSite"]
+      if _dg4.get("legalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcvDic['legalLandDescription'] = _dg4["legalLandDescriptionSecondAdditionalreceivingSite"]
+    elif submission.get("dataGrid7") is not None and submission["dataGrid7"].len() > 0: 
+      _dg7 = submission["dataGrid7"][0] # could be more than one, but take only one
+      if _dg7.get("A-UntitledCrownLand-PINSecondAdditionalreceivingSite") is not None: _rcvDic['PIN'] = _dg7["A-UntitledCrownLand-PINSecondAdditionalreceivingSite"]
+      if _dg7.get("UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcvDic['legalLandDescription'] = _dg7["UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite"]
+    elif submission.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None : _rcvDic['legalLandDescription'] = submission["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
+
+    if submission.get("C3-soilClassification4SecondAdditionalreceivingSite") is not None : _rcvDic['receivingSiteLandUse'] = submission["C3-soilClassification4SecondAdditionalreceivingSite"]
+    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : _rcvDic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcvDic['highVolumneSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
+    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : _rcvDic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
+
+    if submission.get("form") is not None : 
+      formStr = json.dumps(submission.get("form"))
+      formJson = json.loads(formStr)
+      createdAt = datetime.datetime.strptime(formJson['createdAt'], "%Y-%m-%dT%H:%M:%S.%f%z").replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+      confirmationId = formJson['confirmationId']
+      # not in attributes, but in json
+      if createdAt is not None : _rcvDic['createAt'] = createdAt
+      if confirmationId is not None : _rcvDic['confirmationId'] = confirmationId
+
+    receivingSites.append(_rcvDic)
+
+    # 'sitesDic' dictionary - key:regionalDistrict / value:receivingSiteData
+    _rcvDicCopy = {}
+    _rcvDicCopy = copy.deepcopy(_rcvDic)
+    for rd in _rcvDic['regionalDistrict']: # could be more than one
+      if rd is not None:
+        #for testing
+        rd = 'metroVancouverRegionalDistrict' 
+        if rd in rcvSitesDic:
+          rcvSitesDic[rd].append(_rcvDicCopy)
+        else:
+          rcvSitesDic[rd] = [_rcvDicCopy]
 
 
 
@@ -1011,7 +1023,7 @@ for hvs in hvsJson:
 
 
 
-
+"""
 print('Creating soil source site CSV...')
 with open(srcCSV, 'w', encoding='UTF8', newline='') as f:  
   writer = csv.writer(f)
@@ -1053,7 +1065,7 @@ with open(hvCSV, 'w', encoding='UTF8', newline='') as f:
     for hvsData in hvs:
       data.append(hvsData)
     writer.writerow(data)
-
+"""
 
 
 """
