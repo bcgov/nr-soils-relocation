@@ -1,10 +1,9 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import json, csv, datetime, copy
+import json, csv, datetime, copy, os
 import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
-
 
 # CSV file names
 SOURCE_CSV_FILE = 'soil_relocation_source_sites.csv'
@@ -30,10 +29,6 @@ MAPHUB_URL = r'https://governmentofbc.maps.arcgis.com'
 
 # Move these to a configuration file
 CHEFS_API_URL = 'https://submit.digital.gov.bc.ca/app/api/v1'
-
-CHEFS_SOILS_FORM_ID = 'e6083928-4bff-45b5-a447-2b9b59d61757'
-CHEFS_HV_FORM_ID = '83181b39-521b-4b9f-b089-f5c794bdcc80'
-CHEFS_MAIL_FORM_ID = '75a33b78-f20a-4d05-8eb6-96986604760b' #subscription
 
 AUTH_URL = 'https://dev.oidc.gov.bc.ca' # dev
 # AUTH_URL = 'https://test.oidc.gov.bc.ca' # test
@@ -830,6 +825,28 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
         else:
           reg_dist_dic[_rd] = [_dic_copy]
 
+
+
+CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
+CHEFS_SOILS_API_KEY = os.getenv('CHEFS_SOILS_API_KEY')
+CHEFS_HV_FORM_ID = os.getenv('CHEFS_HV_FORM_ID')
+CHEFS_HV_API_KEY = os.getenv('CHEFS_HV_API_KEY')
+CHEFS_MAIL_FORM_ID = os.getenv('CHEFS_MAIL_FORM_ID')
+CHEFS_MAIL_API_KEY = os.getenv('CHEFS_MAIL_API_KEY')
+CHES_API_KEY = os.getenv('CHES_API_KEY')
+MAPHUB_USER = os.getenv('MAPHUB_USER')
+MAPHUB_PASS = os.getenv('MAPHUB_PASS')
+
+#print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
+#print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
+#print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
+#print(f"Value of env variable key='CHEFS_HV_API_KEY': {CHEFS_HV_API_KEY}")
+#print(f"Value of env variable key='CHEFS_MAIL_FORM_ID': {CHEFS_MAIL_FORM_ID}")
+#print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
+#print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
+#print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
+#print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
+
 # Fetch subscribers list
 print('Loading submission subscribers list...')
 subscribersJson = site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
@@ -1226,7 +1243,7 @@ for subscriber in subscribersJson:
               _regDis = convert_regional_district_to_name(_srd)
               _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
               send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
-              
+
 
     # Notification of high volume site registration in selected Regional District(s) =========================================================        
     if notifyOnHighVolumeSiteRegistrations == True:
