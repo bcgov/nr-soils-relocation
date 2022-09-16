@@ -28,7 +28,6 @@ WEB_MAP_APP_ID = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
 
 MAPHUB_URL = r'https://governmentofbc.maps.arcgis.com'
 
-
 # Move these to a configuration file
 CHEFS_API_URL = 'https://submit.digital.gov.bc.ca/app/api/v1'
 
@@ -198,53 +197,55 @@ def convert_regional_district_to_name(id):
 
 # create links to popup on Map using receiving sites searching keywords
 def create_rcv_popup_links(rcv_sites):
-  links = ''  
+  _links = ''  
   link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + WEB_MAP_APP_ID + '&find='
   link_suf = '>Link to new submission</a><br/>'
 
   if rcv_sites is not None:
     for _rcv_site_dic in rcv_sites:
-      links += link_prx
+      _links += link_prx
 
       if _rcv_site_dic['SID'] is not None and _rcv_site_dic['SID'].strip() != '':
-        links += urllib.parse.quote(_rcv_site_dic['SID']) #Site ID
+        _links += urllib.parse.quote(_rcv_site_dic['SID']) #Site ID
       elif _rcv_site_dic['PID'] is not None and _rcv_site_dic['PID'].strip() != '':
-        links += urllib.parse.quote(_rcv_site_dic['PID']) #PID
+        _links += urllib.parse.quote(_rcv_site_dic['PID']) #PID
       elif _rcv_site_dic['PIN'] is not None and _rcv_site_dic['PIN'].strip() != '':
-        links += urllib.parse.quote(_rcv_site_dic['PIN']) #PIN
+        _links += urllib.parse.quote(_rcv_site_dic['PIN']) #PIN
       elif _rcv_site_dic['latitude'] is not None and _rcv_site_dic['latitude'].strip() != '' and _rcv_site_dic['longitude'] is not None and _rcv_site_dic['longitude'].strip() != '':
-        links += urllib.parse.quote(_rcv_site_dic['latitude']+','+_rcv_site_dic['latitude']) #Receiving Site lat/lon
+        _links += urllib.parse.quote(_rcv_site_dic['latitude']+','+_rcv_site_dic['latitude']) #Receiving Site lat/lon
       elif _rcv_site_dic['ownerAddress'] is not None and _rcv_site_dic['ownerAddress'].strip() != '':
-        links += urllib.parse.quote(_rcv_site_dic['ownerAddress']) #Receiving Site Owner Address
+        _links += urllib.parse.quote(_rcv_site_dic['ownerAddress']) #Receiving Site Owner Address
       elif _rcv_site_dic['ownerCompany'] is not None and _rcv_site_dic['ownerCompany'].strip() != '':
-        links += urllib.parse.quote(_rcv_site_dic['ownerCompany'])  #Receiving Site Owner Company
+        _links += urllib.parse.quote(_rcv_site_dic['ownerCompany'])  #Receiving Site Owner Company
 
-      links += link_suf
-  return links
+      _links += link_suf
+  return _links
 
 # high volume soil receiving sites
 def create_hv_popup_links(hv_sites):
-  links = ''  
+  _links = ''  
   link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + WEB_MAP_APP_ID + '&find='
   link_suf = '>Link to new high volume receiving site registration</a><br/>'
-  if hv_sites is not None:
-    for hv_site in hv_sites:
-      links += link_prx
-      if hv_site[33] is not None and hv_site[33].strip() != '':
-        links += urllib.parse.quote(hv_site[33]) #Site ID
-      elif hv_site[76] is not None and hv_site[76].strip() != '':
-        links += urllib.parse.quote(hv_site[76]) #PID
-      elif hv_site[77] is not None and hv_site[77].strip() != '':
-        links += urllib.parse.quote(hv_site[77]) #PIN
-      elif hv_site[72] is not None and hv_site[72].strip() != '' and hv_site[73] is not None and hv_site[73].strip() != '':
-        links += urllib.parse.quote(hv_site[72]+','+hv_site[73]) #Receiving Site lat/lon
-      elif hv_site[3] is not None and hv_site[3].strip() != '':
-        links += urllib.parse.quote(hv_site[3]) #Receiving Site Owner Address
-      elif hv_site[2] is not None and hv_site[2].strip() != '':
-        links += urllib.parse.quote(hv_site[2])  #Receiving Site Owner Company
 
-      links += link_suf
-  return links
+  if hv_sites is not None:
+    for _hv_site_dic in hv_sites:
+      _links += link_prx
+
+      if _hv_site_dic['SID'] is not None and _hv_site_dic['SID'].strip() != '':
+        _links += urllib.parse.quote(_hv_site_dic['SID']) #Site ID
+      elif _hv_site_dic['PID'] is not None and _hv_site_dic['PID'].strip() != '':
+        _links += urllib.parse.quote(_hv_site_dic['PID']) #PID
+      elif _hv_site_dic['PIN'] is not None and _hv_site_dic['PIN'].strip() != '':
+        _links += urllib.parse.quote(_hv_site_dic['PIN']) #PIN
+      elif _hv_site_dic['latitude'] is not None and _hv_site_dic['latitude'].strip() != '' and _hv_site_dic['longitude'] is not None and _hv_site_dic['longitude'].strip() != '':
+        _links += urllib.parse.quote(_hv_site_dic['latitude']+','+_hv_site_dic['longitude']) #Receiving Site lat/lon
+      elif _hv_site_dic['ownerAddress'] is not None and _hv_site_dic['ownerAddress'].strip() != '':
+        _links += urllib.parse.quote(_hv_site_dic['ownerAddress']) #Receiving Site Owner Address
+      elif _hv_site_dic['ownerCompany'] is not None and _hv_site_dic['ownerCompany'].strip() != '':
+        _links += urllib.parse.quote(_hv_site_dic['ownerCompany'])  #Receiving Site Owner Company
+
+      _links += link_suf
+  return _links
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
   # Convert to DD in mapLatitude and mapLongitude
@@ -1225,11 +1226,9 @@ for subscriber in subscribersJson:
               _regDis = convert_regional_district_to_name(_srd)
               _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
               send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
-    
+              
 
     # Notification of high volume site registration in selected Regional District(s) =========================================================        
-    
-    #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
     if notifyOnHighVolumeSiteRegistrations == True:
       for _hvSiteDic in hvSites:
 
@@ -1249,7 +1248,7 @@ for subscriber in subscribersJson:
             _hvPopupLinks = create_hv_popup_links(_hvSitesInRD)
 
             if _hvSitesInRD is not None:
-              _hvRegDis = convert_regional_district_to_name(rd)
+              _hvRegDis = convert_regional_district_to_name(_srd)
               _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
               send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
     
