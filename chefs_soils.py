@@ -9,42 +9,40 @@ from arcgis.features import FeatureLayerCollection
 # CSV file names
 SOURCE_CSV_FILE = 'soil_relocation_source_sites.csv'
 RECEIVE_CSV_FILE = 'soil_relocation_receiving_sites.csv'
-HIGH_VOLUME_CSV_FILE = 'high_volumn_receiving_sites.csv'
+HIGH_VOLUME_CSV_FILE = 'high_volume_receiving_sites.csv'
 
 # Soil Relocation Source Sites Item Id
-srcCSVId = '4bfbda4fd22f4ab68fc548b3cfdf41cf'
-srcLayerId = 'f99012760e9e4f4394e54abdbfd1f1f8'
+SRC_CSV_ID = '4bfbda4fd22f4ab68fc548b3cfdf41cf'
+SRC_CSV_ID = 'f99012760e9e4f4394e54abdbfd1f1f8'
 
 # Soil Relocation Receiving Sites Item Id
-rcvCSVId = '426e40d6525747bb801c698357dea3b5'
-rcvLayerId = 'af9724382684495cbbc8aeeb6e20ea26'
+RCV_CSV_ID = '426e40d6525747bb801c698357dea3b5'
+RCV_CSV_ID = 'af9724382684495cbbc8aeeb6e20ea26'
 
 # High Volume Receiving Sites Item Id
-hvCSVId = '90fea595e88549018e9ecd37ef90b9fc'
-hvLayerId = 'a5e6db91a855410f9dd5b6ccdb4a6857'
+HV_CSV_ID = '7718b38fac0643a8b73de8cf556c5d14'
+HV_LAYER_ID = 'c1e349295bf14ee9bd8df89439b2cb80'
 
 # WEB Mapping Application Itme Id
-webMapAppId = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
+WEB_MAP_APP_ID = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
 
-
-maphubUrl = r'https://governmentofbc.maps.arcgis.com'
+MAPHUB_URL = r'https://governmentofbc.maps.arcgis.com'
 
 
 # Move these to a configuration file
-chefsUrl = 'https://submit.digital.gov.bc.ca/app/api/v1'
+CHEFS_API_URL = 'https://submit.digital.gov.bc.ca/app/api/v1'
 
-soilsFormId = 'e6083928-4bff-45b5-a447-2b9b59d61757'
-hvsFormId = '83181b39-521b-4b9f-b089-f5c794bdcc80'
-subscriptionFormId = '75a33b78-f20a-4d05-8eb6-96986604760b'
+CHEFS_SOILS_FORM_ID = 'e6083928-4bff-45b5-a447-2b9b59d61757'
+CHEFS_HV_FORM_ID = '83181b39-521b-4b9f-b089-f5c794bdcc80'
+CHEFS_MAIL_FORM_ID = '75a33b78-f20a-4d05-8eb6-96986604760b' #subscription
 
+AUTH_URL = 'https://dev.oidc.gov.bc.ca' # dev
+# AUTH_URL = 'https://test.oidc.gov.bc.ca' # test
+# AUTH_URL	= 'https://oidc.gov.bc.ca' # prod
 
-authUrl = 'https://dev.oidc.gov.bc.ca' # dev
-# authUrl = 'https://test.oidc.gov.bc.ca' # test
-# authUrl	= 'https://oidc.gov.bc.ca' # prod
-
-chesUrl = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
-# chesUrl = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
-# chesUrl = 'https://ches.nrs.gov.bc.ca' # prod
+CHEFS_URL = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
+# CHEFS_URL = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
+# CHEFS_URL = 'https://ches.nrs.gov.bc.ca' # prod
 
 
 
@@ -92,9 +90,9 @@ def send_mail(to_email, subject, message):
   auth_pay_load = 'grant_type=client_credentials'
   auth_haders = {
     'Content-Type': 'application/x-www-form-urlencoded',
-    'Authorization': 'Basic ' + chesEncodedServiceClientKey
+    'Authorization': 'Basic ' + CHES_API_KEY
   }
-  auth_response = requests.request("POST", authUrl + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
+  auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
   # print(authResponse.text)
   auth_response_json = json.loads(auth_response.content)
   access_token = auth_response_json['access_token']
@@ -105,7 +103,7 @@ def send_mail(to_email, subject, message):
   'Content-Type': 'application/json',
   'Authorization': 'Bearer ' + access_token
   }
-  ches_response = requests.request("POST", chesUrl + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
+  ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
   # print(chesResponse.text)
   ches_content = json.loads(ches_response.content)
   return ches_content
@@ -118,17 +116,17 @@ def is_json(string):
   return True
 
 def site_list(form_id, form_key):
-  request = requests.get(chefsUrl + '/forms/' + form_id + '/export?format=json&type=submissions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
+  request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
   # print('Parsing JSON response')
   content = json.loads(request.content)
   return content
 
 def fetch_columns(form_id, form_key):
-  request = requests.get(chefsUrl + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
+  request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
   request_json = json.loads(request.content)
   version = request_json[0]['id']
 
-  attribute_request = requests.get(chefsUrl + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
+  attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
   attributes = json.loads(attribute_request.content)
   return attributes
 
@@ -158,7 +156,7 @@ def create_site_relocation_email_msg(regional_district, popup_links):
 
   msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + subscriptionFormId + '>form</a></span>.<br/>'
+  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   return msg
 
@@ -187,7 +185,7 @@ def create_hv_site_email_msg(regional_district, popup_links):
           <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
   msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + subscriptionFormId + '>form</a></span>.<br/>'
+  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   return msg
 
@@ -201,7 +199,7 @@ def convert_regional_district_to_name(id):
 # create links to popup on Map using receiving sites searching keywords
 def create_rcv_popup_links(rcv_sites):
   links = ''  
-  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
+  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + WEB_MAP_APP_ID + '&find='
   link_suf = '>Link to new submission</a><br/>'
 
   if rcv_sites is not None:
@@ -224,10 +222,10 @@ def create_rcv_popup_links(rcv_sites):
       links += link_suf
   return links
 
-# high volumn soil receiving sites
+# high volume soil receiving sites
 def create_hv_popup_links(hv_sites):
   links = ''  
-  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
+  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + WEB_MAP_APP_ID + '&find='
   link_suf = '>Link to new high volume receiving site registration</a><br/>'
   if hv_sites is not None:
     for hv_site in hv_sites:
@@ -354,7 +352,7 @@ def map_source_site(submission):
     if submission.get("A4-schedule2ReferenceSourceSite") is not None and len(submission.get("A4-schedule2ReferenceSourceSite")) > 0 : 
         _src_dic['sourceSiteLandUse'] = "\"" + ",".join(submission.get("A4-schedule2ReferenceSourceSite")) + "\""
 
-    if submission.get("isTheSourceSiteHighRisk") is not None : _src_dic['highVolumneSite'] = submission["isTheSourceSiteHighRisk"]
+    if submission.get("isTheSourceSiteHighRisk") is not None : _src_dic['highVolumeSite'] = submission["isTheSourceSiteHighRisk"]
     if submission.get("A5-PurposeOfSoilExcavationSource") is not None : _src_dic['soilRelocationPurpose'] = submission["A5-PurposeOfSoilExcavationSource"]
     if submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source") is not None : _src_dic['soilStorageType'] = submission["B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source"]
 
@@ -484,7 +482,7 @@ def map_rcv_1st_rcver(submission):
         _rcv_dic['receivingSiteLandUse'] = "\"" + ",".join(_land_uses) + "\""
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcv_dic['highVolumneSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite"]
 
     if submission.get("form") is not None : 
@@ -578,7 +576,7 @@ def map_rcv_2nd_rcver(submission):
         _rcv_dic['receivingSiteLandUse'] = "\"" + ",".join(_land_uses) + "\""
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumneSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite"]
 
     if submission.get("form") is not None : 
@@ -673,7 +671,7 @@ def map_rcv_3rd_rcver(submission):
 
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumneSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
 
     if submission.get("form") is not None : 
@@ -687,13 +685,137 @@ def map_rcv_3rd_rcver(submission):
 
   return _rcv_dic
 
-# Receiving Sites Regional District dictionary - key:regional district string / value:receiving site data dictionary
-def add_regional_district_dic(rcv_dic, rcv_reg_dist_dic):
+def map_hv_site(hvs):
+  _hv_dic = {}
+  testingCount3 = 0
 
-  if 'regionalDistrict' in rcv_dic and rcv_dic['regionalDistrict'] is not None: # could be none regional district key
-    _rcv_dic_copy = {}
-    _rcv_dic_copy = copy.deepcopy(rcv_dic)
-    _rd_str = rcv_dic['regionalDistrict'] # could be more than one
+  if (
+    hvs.get("Section3-Latitude-Degrees") is not None and
+    hvs.get("Section3-Latitude-Minutes") is not None and
+    hvs.get("Section3-Latitude-Seconds") is not None and
+    hvs.get("Section3-Longitude-Degrees") is not None and
+    hvs.get("Section3-Longitude-Minutes") is not None and
+    hvs.get("Section3-Longitude-Seconds") is not None
+  ):
+    print("Mapping sourece site ...")
+
+    for hv_header in hvSiteHeaders:
+      _hv_dic[hv_header] = None
+
+    if hvs.get("Section1-FirstNameReceivingSiteOwner") is not None : _hv_dic['ownerFirstName'] = hvs["Section1-FirstNameReceivingSiteOwner"]
+    if hvs.get("Section1-LastNameReceivingSiteOwner") is not None : _hv_dic['ownerLastName'] = hvs["Section1-LastNameReceivingSiteOwner"]
+    if hvs.get("Section1-CompanyReceivingSiteOwner") is not None : _hv_dic['ownerCompany'] = hvs["Section1-CompanyReceivingSiteOwner"]
+    if hvs.get("Section1-AddressReceivingSiteOwner") is not None : _hv_dic['ownerAddress'] = hvs["Section1-AddressReceivingSiteOwner"]
+    if hvs.get("Section1-CityReceivingSiteOwner") is not None : _hv_dic['ownerCity'] = hvs["Section1-CityReceivingSiteOwner"]
+    if hvs.get("Section1-provinceStateReceivingSiteOwner") is not None : _hv_dic['ownerProvince'] = hvs["Section1-provinceStateReceivingSiteOwner"]
+    if hvs.get("Section1-countryReceivingSiteOwner") is not None : _hv_dic['ownerCountry'] = hvs["Section1-countryReceivingSiteOwner"]
+    if hvs.get("Section1-postalZipCodeReceivingSiteOwner") is not None : _hv_dic['ownerPostalCode'] = hvs["Section1-postalZipCodeReceivingSiteOwner"]
+    if hvs.get("ASection1-PhoneReceivingSiteOwner") is not None : _hv_dic['ownerPhoneNumber'] = hvs["Section1-PhoneReceivingSiteOwner"]
+    if hvs.get("Section1-EmailReceivingSiteOwner") is not None : _hv_dic['ownerEmail'] = hvs["Section1-EmailReceivingSiteOwner"]
+
+    if hvs.get("Section1a-FirstNameAdditionalOwner") is not None : _hv_dic['owner2FirstName'] = hvs["Section1a-FirstNameAdditionalOwner"]
+    if hvs.get("Section1A-LastNameAdditionalOwner") is not None : _hv_dic['owner2LastName'] = hvs["Section1A-LastNameAdditionalOwner"]
+    if hvs.get("Section1A-CompanyAdditionalOwner") is not None : _hv_dic['owner2Company'] = hvs["Section1A-CompanyAdditionalOwner"]
+    if hvs.get("Section1A-AddressAdditionalOwner") is not None : _hv_dic['owner2Address'] = hvs["Section1A-AddressAdditionalOwner"]
+    if hvs.get("Section1A-CityAdditionalOwner") is not None : _hv_dic['owner2City'] = hvs["Section1A-CityAdditionalOwner"]
+    if hvs.get("Section1A-ProvinceStateAdditionalOwner") is not None : _hv_dic['owner2Province'] = hvs["Section1A-ProvinceStateAdditionalOwner"]
+    if hvs.get("Section1A-CountryAdditionalOwner") is not None : _hv_dic['owner2Country'] = hvs["Section1A-CountryAdditionalOwner"]
+    if hvs.get("Section1A-PostalZipCodeAdditionalOwner") is not None : _hv_dic['owner2PostalCode'] = hvs["Section1A-PostalZipCodeAdditionalOwner"]
+    if hvs.get("Section1A-PhoneAdditionalOwner") is not None : _hv_dic['owner2PhoneNumber'] = hvs["Section1A-PhoneAdditionalOwner"]
+    if hvs.get("Section1A-EmailAdditionalOwner") is not None : _hv_dic['owner2Email'] = hvs["Section1A-EmailAdditionalOwner"]
+
+    if hvs.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : _hv_dic['additionalOwners'] = hvs["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
+    if hvs.get("Section2-firstNameRSC") is not None : _hv_dic['contactFirstName'] = hvs["Section2-firstNameRSC"]
+    if hvs.get("Section2-lastNameRSC") is not None : _hv_dic['contactLastName'] = hvs["Section2-lastNameRSC"]
+    if hvs.get("Section2-organizationRSC") is not None : _hv_dic['contactCompany'] = hvs["Section2-organizationRSC"]
+    if hvs.get("Section2-streetAddressRSC") is not None : _hv_dic['contactAddress'] = hvs["Section2-streetAddressRSC"]
+    if hvs.get("Section2-cityRSC") is not None : _hv_dic['contactCity'] = hvs["Section2-cityRSC"]
+    if hvs.get("Section2-provinceStateRSC") is not None : _hv_dic['contactProvince'] = hvs["Section2-provinceStateRSC"]
+    if hvs.get("Section2-countryRSC") is not None : _hv_dic['contactCountry'] = hvs["Section2-countryRSC"]
+    if hvs.get("Section2-postalZipCodeRSC") is not None : _hv_dic['contactPostalCode'] = hvs["Section2-postalZipCodeRSC"]
+    if hvs.get("section2phoneNumberRSC") is not None : _hv_dic['contactPhoneNumber'] = hvs["section2phoneNumberRSC"]
+    if hvs.get("Section2-simpleemailRSC") is not None : _hv_dic['contactEmail'] = hvs["Section2-simpleemailRSC"]
+
+    if hvs.get("Section3-siteIdIncludeAllRelatedNumbers") is not None : _hv_dic['SID'] = hvs["Section3-siteIdIncludeAllRelatedNumbers"]
+
+    # convert lat/lon
+    _hv_lat_lon = convert_deciaml_lat_long(
+      hvs["Section3-Latitude-Degrees"], hvs["Section3-Latitude-Minutes"], hvs["Section3-Latitude-Seconds"], 
+      hvs["Section3-Longitude-Degrees"], hvs["Section3-Longitude-Minutes"], hvs["Section3-Longitude-Seconds"])
+    #_hv_dic['latitude'] = _hv_lat_lon[0]
+    #_hv_dic['longitude'] = _hv_lat_lon[0]
+    _hv_dic['latitude'] = testHVLats[testingCount3] #for testing
+    _hv_dic['longitude'] = testHVLons[testingCount3] #for testing
+    testingCount3 = testingCount3 + 1
+
+    if hvs.get("ReceivingSiteregionalDistrict") is not None and len(hvs['ReceivingSiteregionalDistrict']) > 0 : 
+      _hv_dic['regionalDistrict'] = "\"" + ",".join(hvs["ReceivingSiteregionalDistrict"]) + "\""   # could be more than one
+
+    if hvs.get("landOwnership-checkbox") is not None : _hv_dic['landOwnership'] = hvs["landOwnership-checkbox"]
+    if hvs.get("Section3-LegallyTitled-Address") is not None : _hv_dic['legallyTitledSiteAddress'] = hvs["Section3-LegallyTitled-Address"]
+    if hvs.get("Section3-LegallyTitled-City") is not None : _hv_dic['legallyTitledSiteCity'] = hvs["Section3-LegallyTitled-City"]
+    if hvs.get("Section3-LegallyTitled-PostalZipCode") is not None : _hv_dic['legallyTitledSitePostalCode'] = hvs["Section3-LegallyTitled-PostalZipCode"]
+
+    if hvs.get("dataGrid") is not None and len(hvs["dataGrid"]) > 0: 
+      _dg = hvs["dataGrid"][0] # could be more than one, but take only one
+      if _dg.get("A-LegallyTitled-PID") is not None: _hv_dic['PID'] = _dg["A-LegallyTitled-PID"]
+      if _dg.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg["legalLandDescription"]
+    elif hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0: 
+      _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
+      if _dg1.get("A-LegallyTitled-PID") is not None: _hv_dic['PIN'] = _dg1["A-LegallyTitled-PID"]
+      if _dg1.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg1["legalLandDescription"]
+    elif hvs.get("legalLandDescription") is not None : _hv_dic['legalLandDescription'] = hvs["legalLandDescription"]
+
+    if hvs.get("A-UntitledCrownLand-FileNumberColumn") is not None : 
+      for _item in hvs["A-UntitledCrownLand-FileNumberColumn"]:
+        for _v in _item.values():
+          if _v != '':
+            _hv_dic['crownLandFileNumbers'] = _v
+            break    #could be more than one, but take only one
+        if 'crownLandFileNumbers' in _hv_dic:
+          break
+
+    if hvs.get("primarylanduse") is not None and len(hvs.get("primarylanduse")) > 0 : 
+      _hv_dic['receivingSiteLandUse'] = "\"" + ",".join(hvs.get("primarylanduse")) + "\""
+
+    if hvs.get("highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _hv_dic['hvsConfirmation'] = hvs["highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
+    if hvs.get("dateSiteBecameHighVolume") is not None : _hv_dic['dateSiteBecameHighVolume'] = hvs["dateSiteBecameHighVolume"]
+    if hvs.get("howrelocatedsoilwillbeused") is not None : _hv_dic['howRelocatedSoilWillBeUsed'] = hvs["howrelocatedsoilwillbeused"]
+    if hvs.get("soilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _hv_dic['soilDepositIsALR'] = hvs["soilDepositIsInTheAgriculturalLandReserveAlr1"]
+    if hvs.get("receivingSiteIsOnReserveLands1") is not None : _hv_dic['soilDepositIsReserveLands'] = hvs["receivingSiteIsOnReserveLands1"]
+    if hvs.get("Section5-FirstNameQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalFirstName'] = hvs["Section5-FirstNameQualifiedProfessional"]
+    if hvs.get("Section5-LastName1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalLastName'] = hvs["Section5-LastName1QualifiedProfessional"]
+    if hvs.get("Section5-TypeofQP") is not None : _hv_dic['qualifiedProfessionalType'] = hvs["Section5-TypeofQP"]
+    if hvs.get("Section5-organizationQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalOrganization'] = hvs["Section5-organizationQualifiedProfessional"]
+    if hvs.get("Section5-professionalLicenseRegistrationEGPEngRpBio") is not None : _hv_dic['professionalLicenceRegistration'] = hvs["Section5-professionalLicenseRegistrationEGPEngRpBio"]
+    if hvs.get("Section5-streetAddressQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalAddress'] = hvs["Section5-streetAddressQualifiedProfessional"]
+    if hvs.get("Section5-cityQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalCity'] = hvs["Section5-cityQualifiedProfessional"]
+    if hvs.get("Section5-provinceStateQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalProvince'] = hvs["Section5-provinceStateQualifiedProfessional"]
+    if hvs.get("Section5-countryQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalCountry'] = hvs["Section5-countryQualifiedProfessional"]
+    if hvs.get("Section5-postalZipCodeQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalPostalCode'] = hvs["Section5-postalZipCodeQualifiedProfessional"]
+    if hvs.get("simplephonenumber1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalPhoneNumber'] = hvs["simplephonenumber1QualifiedProfessional"]
+    if hvs.get("simpleemail1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalEmail'] = hvs["simpleemail1QualifiedProfessional"]
+    if hvs.get("firstAndLastNameQualifiedProfessional") is not None : _hv_dic['signaturerFirstAndLastName'] = hvs["firstAndLastNameQualifiedProfessional"]
+    if hvs.get("simpledatetime") is not None : _hv_dic['dateSigned'] = hvs["simpledatetime"]
+
+    if hvs.get("form") is not None : 
+      _form_str = json.dumps(submission.get("form"))
+      _form_json = json.loads(_form_str)
+      _created_at = datetime.datetime.strptime(_form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+      _confirmation_id = _form_json['confirmationId']
+      # not in attributes, but in json
+      _hv_dic['createAt'] = _created_at
+      if _confirmation_id is not None : _hv_dic['confirmationId'] = _confirmation_id
+
+  return _hv_dic
+
+# add Regional Districts in site forms to dictionary - key:regional district string / value:site data dictionary
+def add_regional_district_dic(site_dic, reg_dist_dic):
+
+  if 'regionalDistrict' in site_dic and site_dic['regionalDistrict'] is not None: # could be none regional district key
+    _dic_copy = {}
+    _dic_copy = copy.deepcopy(site_dic)
+    _rd_str = site_dic['regionalDistrict'] # could be more than one
     if _rd_str is not None:
       _rd_str = _rd_str.strip('\"')
       _rds = []
@@ -702,32 +824,32 @@ def add_regional_district_dic(rcv_dic, rcv_reg_dist_dic):
 
         _rd = 'metroVancouverRegionalDistrict' #for testing SHOULD BE REMOVED
 
-        if _rd in rcv_reg_dist_dic:
-          rcv_reg_dist_dic[_rd].append(_rcv_dic_copy)
+        if _rd in reg_dist_dic:
+          reg_dist_dic[_rd].append(_dic_copy)
         else:
-          rcv_reg_dist_dic[_rd] = [_rcv_dic_copy]
+          reg_dist_dic[_rd] = [_dic_copy]
 
 # Fetch subscribers list
 print('Loading submission subscribers list...')
-subscribersJson = site_list(subscriptionFormId, subscriptionKey)
+subscribersJson = site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribersJson)
 print('Loading submission subscribers attributes and headers...')
-subscribeAttributes = fetch_columns(subscriptionFormId, subscriptionKey)
+subscribeAttributes = fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribeAttributes)
 
 print('Loading High Volume Sites list...')
-hvsJson = site_list(hvsFormId, hvsKey)
+hvsJson = site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 # print(hvsJson)
 print('Loading High Volume Sites attributes and headers...')
-hvsAttributes = fetch_columns(hvsFormId, hvsKey)
+hvsAttributes = fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 # print(hvsAttributes)
 
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
-submissionsJson = site_list(soilsFormId, soilsKey)
-print(submissionsJson)
+submissionsJson = site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
+#print(submissionsJson)
 print('Loading Submission attributes and headers...')
-soilsAttributes = fetch_columns(soilsFormId, soilsKey)
+soilsAttributes = fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 #print(soilsAttributes)
 
 
@@ -771,7 +893,7 @@ sourceSiteHeaders = [
   "PIN",
   "crownLandFileNumbers",
   "sourceSiteLandUse",
-  "highVolumneSite",
+  "highVolumeSite",
   "soilRelocationPurpose",
   "soilStorageType",
   "soilVolume",
@@ -797,8 +919,8 @@ sourceSiteHeaders = [
 	"qualifiedProfessionalEmail",
   "signaturerFirstAndLastName",
   "dateSigned",
-  "createAt", # not in soilsAttributes, but in submissionsJson
-  "confirmationId" # not in soilsAttributes, but in submissionsJson
+  "createAt",
+  "confirmationId"
 ]
 
 receivingSiteHeaders = [
@@ -838,103 +960,91 @@ receivingSiteHeaders = [
   "receivingSiteLandUse",
   "CSRFactors",
   "relocatedSoilUse",
-  "highVolumneSite",
+  "highVolumeSite",
   "createAt",
   "confirmationId"
 ]  
 
 hvSiteHeaders = [
-  "Section1-FirstNameReceivingSiteOwner",
-  "Section1-LastNameReceivingSiteOwner",
-  "Section1-CompanyReceivingSiteOwner",
-  "Section1-AddressReceivingSiteOwner",
-  "Section1-CityReceivingSiteOwner",
-  "Section1-provinceStateReceivingSiteOwner",
-  "Section1-countryReceivingSiteOwner",
-  "Section1-postalZipCodeReceivingSiteOwner",
-  "Section1-PhoneReceivingSiteOwner",
-  "Section1-EmailReceivingSiteOwner",
-  "Section1-checkbox-extraowners",
-  "Section1a-FirstNameAdditionalOwner",
-  "Section1A-LastNameAdditionalOwner",
-  "Section1A-CompanyAdditionalOwner",
-  "Section1A-AddressAdditionalOwner",
-  "Section1A-CityAdditionalOwner",
-  "Section1A-ProvinceStateAdditionalOwner",
-  "Section1A-CountryAdditionalOwner",
-  "Section1A-PostalZipCodeAdditionalOwner",
-  "Section1A-PhoneAdditionalOwner",
-  "Section1A-EmailAdditionalOwner",
-  "areThereMoreThanTwoOwnersIncludeTheirInformationBelow",
-  "receivingsitecontact",
-  "Section2-firstNameRSC",
-  "Section2-lastNameRSC",
-  "Section2-organizationRSC",
-  "Section2-streetAddressRSC",
-  "Section2-cityRSC",
-  "Section2-provinceStateRSC",
-  "Section2-countryRSC",
-  "Section2-postalZipCodeRSC",
-  "section2phoneNumberRSC",
-  "Section2-simpleemailRSC",
-  "Section3-siteIdIncludeAllRelatedNumbers",
-  "Section3-Latitude-Degrees",
-  "Section3-Latitude-Minutes",
-  "Section3-Latitude-Seconds",
-  "Section3-Longitude-Degrees",
-  "Section3-Longitude-Minutes",
-  "Section3-Longitude-Seconds",
-  "ReceivingSiteregionalDistrict",
-  "uploadMapOfHighVolumeSiteLocation",
-  "landOwnership-checkbox",
-  "Section3-LegallyTitled-Address",
-  "Section3-LegallyTitled-City",
-  "Section3-LegallyTitled-PostalZipCode",
-  "dataGrid",
-  "uploadMapOfHighVolumeSiteLocation1",
-  "dataGrid1",
-  "A-UntitledCrownLand-FileNumberColumn",
-  "A-UntitledMunicipalLand-PIDColumn",
-  "primarylanduse",
-  "highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime",
-  "dateSiteBecameHighVolume",
-  "howrelocatedsoilwillbeused",
-  "soilDepositIsInTheAgriculturalLandReserveAlr1",
-  "receivingSiteIsOnReserveLands1",
-  "Section5-FirstNameQualifiedProfessional",
-  "Section5-LastName1QualifiedProfessional",
-  "Section5-TypeofQP",
-  "Section5-organizationQualifiedProfessional",
-  "Section5-professionalLicenseRegistrationEGPEngRpBio",
-  "Section5-streetAddressQualifiedProfessional",
-  "Section5-cityQualifiedProfessional",
-  "Section5-provinceStateQualifiedProfessional",
-  "Section5-countryQualifiedProfessional",
-  "Section5-postalZipCodeQualifiedProfessional",
-  "simplephonenumber1QualifiedProfessional",
-  "simpleemail1QualifiedProfessional",
-  "firstAndLastNameQualifiedProfessional",
-  "createAt", # not in hvsAttributes, but in hvsJson
-  "confirmationId", # not in hvsAttributes, but in hvsJson
-  "Latitude",
-  "Longitude",
+  "ownerFirstName",
+  "ownerLastName",
+  "ownerCompany",
+  "ownerAddress",
+  "ownerCity",
+  "ownerProvince",
+  "ownerCountry",
+  "ownerPostalCode",
+  "ownerPhoneNumber",
+  "ownerEmail",
+  "owner2FirstName",
+  "owner2LastName",
+  "owner2Company",
+  "owner2Address",
+  "owner2City",
+  "owner2Province",
+  "owner2Country",
+  "owner2PostalCode",
+  "owner2PhoneNumber",
+  "owner2Email",
+  "additionalOwners",
+  "contactFirstName",
+  "contactLastName",
+  "contactCompany",
+  "contactAddress",
+  "contactCity",
+  "contactProvince",
+  "contactCountry",
+  "contactPostalCode",
+  "contactPhoneNumber",
+  "contactEmail",
+  "SID",
+  "latitude",
+  "longitude",
+  "regionalDistrict",  
+  "landOwnership",
+  "legallyTitledSiteAddress",
+  "legallyTitledSiteCity",
+  "legallyTitledSitePostalCode",
   "PID",
-  "PIN"
+  "legalLandDescription",
+  "PIN",
+  "crownLandFileNumbers",
+  "receivingSiteLandUse",
+  "hvsConfirmation",
+  "dateSiteBecameHighVolume",
+  "howRelocatedSoilWillBeUsed",
+  "soilDepositIsALR",
+  "soilDepositIsReserveLands",
+  "qualifiedProfessionalFirstName",
+	"qualifiedProfessionalLastName",
+	"qualifiedProfessionalType",
+	"professionalLicenceRegistration",
+	"qualifiedProfessionalOrganization",
+	"qualifiedProfessionalAddress",
+	"qualifiedProfessionalCity",
+	"qualifiedProfessionalProvince",
+	"qualifiedProfessionalCountry",
+	"qualifiedProfessionalPostalCode",
+	"qualifiedProfessionalPhoneNumber",
+	"qualifiedProfessionalEmail",
+  "signaturerFirstAndLastName",
+  "dateSigned",
+  "createAt",
+  "confirmationId"
 ]
 
+
+print('Creating source site, receiving site records...')
 sourceSites = []
 receivingSites = []
 rcvRegDistDic = {}
-testingCount2 = 0
-
-# create source site, receiving site records
 for submission in submissionsJson:
-  # Mapping submission data to the source site =====================================================================
+  print('Mapping submission data to the source site...')
   _srcDic = map_source_site(submission)
   if _srcDic:
     sourceSites.append(_srcDic)
 
-  # Mapping submission data to the receiving site =================================================================
+  print('Mapping submission data to the receiving site...')  
   _1rcvDic = map_rcv_1st_rcver(submission)
   if _1rcvDic:
     receivingSites.append(_1rcvDic)
@@ -949,137 +1059,18 @@ for submission in submissionsJson:
   if _3rcvDic:
     receivingSites.append(_3rcvDic)
     add_regional_district_dic(_3rcvDic, rcvRegDistDic)  
-  
 
 
+print('Creating high volume site records records...')
 hvSites = []
-hvSitesDic = {}
-testingCount3 = 0
-
-# create high volumn site records
+hvRegDistDic = {}
 for hvs in hvsJson:
-  # print(hvs)
-  # Map hv data to the hv site
-  hvSiteData = [''] * 74
-  hvSiteDataCopy = [''] * 74
-  hvIdx = 0
-  if hvs.get("Section1-FirstNameReceivingSiteOwner") is not None : hvSiteData[0] = hvs["Section1-FirstNameReceivingSiteOwner"]
-  if hvs.get("Section1-LastNameReceivingSiteOwner") is not None : hvSiteData[1] = hvs["Section1-LastNameReceivingSiteOwner"]
-  if hvs.get("Section1-CompanyReceivingSiteOwner") is not None : hvSiteData[2] = hvs["Section1-CompanyReceivingSiteOwner"]
-  if hvs.get("Section1-AddressReceivingSiteOwner") is not None : hvSiteData[3] = hvs["Section1-AddressReceivingSiteOwner"]
-  if hvs.get("Section1-CityReceivingSiteOwner") is not None : hvSiteData[4] = hvs["Section1-CityReceivingSiteOwner"]
-  if hvs.get("Section1-provinceStateReceivingSiteOwner") is not None : hvSiteData[5] = hvs["Section1-provinceStateReceivingSiteOwner"]
-  if hvs.get("Section1-countryReceivingSiteOwner") is not None : hvSiteData[6] = hvs["Section1-countryReceivingSiteOwner"]
-  if hvs.get("Section1-postalZipCodeReceivingSiteOwner") is not None : hvSiteData[7] = hvs["Section1-postalZipCodeReceivingSiteOwner"]
-  if hvs.get("Section1-PhoneReceivingSiteOwner") is not None : hvSiteData[8] = hvs["Section1-PhoneReceivingSiteOwner"]
-  if hvs.get("Section1-EmailReceivingSiteOwner") is not None : hvSiteData[9] = hvs["Section1-EmailReceivingSiteOwner"]
-  if hvs.get("Section1-checkbox-extraowners") is not None : hvSiteData[10] = hvs["Section1-checkbox-extraowners"]
-  if hvs.get("Section1a-FirstNameAdditionalOwner") is not None : hvSiteData[11] = hvs["Section1a-FirstNameAdditionalOwner"]
-  if hvs.get("Section1A-LastNameAdditionalOwner") is not None : hvSiteData[12] = hvs["Section1A-LastNameAdditionalOwner"]
-  if hvs.get("Section1A-CompanyAdditionalOwner") is not None : hvSiteData[13] = hvs["Section1A-CompanyAdditionalOwner"]
-  if hvs.get("Section1A-AddressAdditionalOwner") is not None : hvSiteData[14] = hvs["Section1A-AddressAdditionalOwner"]
-  if hvs.get("Section1A-CityAdditionalOwner") is not None : hvSiteData[15] = hvs["Section1A-CityAdditionalOwner"]
-  if hvs.get("Section1A-ProvinceStateAdditionalOwner") is not None : hvSiteData[16] = hvs["Section1A-ProvinceStateAdditionalOwner"]
-  if hvs.get("Section1A-CountryAdditionalOwner") is not None : hvSiteData[17] = hvs["Section1A-CountryAdditionalOwner"]
-  if hvs.get("Section1A-PostalZipCodeAdditionalOwner") is not None : hvSiteData[18] = hvs["Section1A-PostalZipCodeAdditionalOwner"]
-  if hvs.get("Section1A-PhoneAdditionalOwner") is not None : hvSiteData[19] = hvs["Section1A-PhoneAdditionalOwner"]
-  if hvs.get("Section1A-EmailAdditionalOwner") is not None : hvSiteData[20] = hvs["Section1A-EmailAdditionalOwner"]
-  if hvs.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : hvSiteData[21] = hvs["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
-  if hvs.get("receivingsitecontact") is not None : hvSiteData[22] = hvs["receivingsitecontact"]
-  if hvs.get("Section2-firstNameRSC") is not None : hvSiteData[23] = hvs["Section2-firstNameRSC"]
-  if hvs.get("Section2-lastNameRSC") is not None : hvSiteData[24] = hvs["Section2-lastNameRSC"]
-  if hvs.get("Section2-organizationRSC") is not None : hvSiteData[25] = hvs["Section2-organizationRSC"]
-  if hvs.get("Section2-streetAddressRSC") is not None : hvSiteData[26] = hvs["Section2-streetAddressRSC"]
-  if hvs.get("Section2-cityRSC") is not None : hvSiteData[27] = hvs["Section2-cityRSC"]
-  if hvs.get("Section2-provinceStateRSC") is not None : hvSiteData[28] = hvs["Section2-provinceStateRSC"]
-  if hvs.get("Section2-countryRSC") is not None : hvSiteData[29] = hvs["Section2-countryRSC"]
-  if hvs.get("Section2-postalZipCodeRSC") is not None : hvSiteData[30] = hvs["Section2-postalZipCodeRSC"]
-  if hvs.get("section2phoneNumberRSC") is not None : hvSiteData[31] = hvs["section2phoneNumberRSC"]
-  if hvs.get("Section2-simpleemailRSC") is not None : hvSiteData[32] = hvs["Section2-simpleemailRSC"]
-  if hvs.get("Section3-siteIdIncludeAllRelatedNumbers") is not None : hvSiteData[33] = hvs["Section3-siteIdIncludeAllRelatedNumbers"]
-  if hvs.get("Section3-Latitude-Degrees") is not None : hvSiteData[34] = hvs["Section3-Latitude-Degrees"]
-  if hvs.get("Section3-Latitude-Minutes") is not None : hvSiteData[35] = hvs["Section3-Latitude-Minutes"]
-  if hvs.get("Section3-Latitude-Seconds") is not None : hvSiteData[36] = hvs["Section3-Latitude-Seconds"]
-  if hvs.get("Section3-Longitude-Degrees") is not None : hvSiteData[37] = hvs["Section3-Longitude-Degrees"]
-  if hvs.get("Section3-Longitude-Minutes") is not None : hvSiteData[38] = hvs["Section3-Longitude-Minutes"]
-  if hvs.get("Section3-Longitude-Seconds") is not None : hvSiteData[39] = hvs["Section3-Longitude-Seconds"]
-  if hvs.get("ReceivingSiteregionalDistrict") is not None : hvSiteData[40] = hvs["ReceivingSiteregionalDistrict"]
-  #if hvs.get("uploadMapOfHighVolumeSiteLocation") is not None : hvSiteData[41] = hvs["uploadMapOfHighVolumeSiteLocation"]
-  if hvs.get("landOwnership-checkbox") is not None : hvSiteData[42] = hvs["landOwnership-checkbox"]
-  if hvs.get("Section3-LegallyTitled-Address") is not None : hvSiteData[43] = hvs["Section3-LegallyTitled-Address"]
-  if hvs.get("Section3-LegallyTitled-City") is not None : hvSiteData[44] = hvs["Section3-LegallyTitled-City"]
-  if hvs.get("Section3-LegallyTitled-PostalZipCode") is not None : hvSiteData[45] = hvs["Section3-LegallyTitled-PostalZipCode"]
-  #if hvs.get("dataGrid") is not None : hvSiteData[46] = hvs["dataGrid"]
-  #if hvs.get("uploadMapOfHighVolumeSiteLocation1") is not None : hvSiteData[47] = hvs["uploadMapOfHighVolumeSiteLocation1"]
-  #if hvs.get("dataGrid1") is not None : hvSiteData[48] = hvs["dataGrid1"]
-  #if hvs.get("A-UntitledCrownLand-FileNumberColumn") is not None : hvSiteData[49] = hvs["A-UntitledCrownLand-FileNumberColumn"]
-  #if hvs.get("A-UntitledMunicipalLand-PIDColumn") is not None : hvSiteData[50] = hvs["A-UntitledMunicipalLand-PIDColumn"]
-  #if hvs.get("primarylanduse") is not None : hvSiteData[51] = hvs["primarylanduse"]
-  if hvs.get("highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : hvSiteData[52] = hvs["highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
-  if hvs.get("dateSiteBecameHighVolume") is not None : hvSiteData[53] = hvs["dateSiteBecameHighVolume"]
-  if hvs.get("howrelocatedsoilwillbeused") is not None : hvSiteData[54] = hvs["howrelocatedsoilwillbeused"]
-  if hvs.get("soilDepositIsInTheAgriculturalLandReserveAlr1") is not None : hvSiteData[55] = hvs["soilDepositIsInTheAgriculturalLandReserveAlr1"]
-  if hvs.get("receivingSiteIsOnReserveLands1") is not None : hvSiteData[56] = hvs["receivingSiteIsOnReserveLands1"]
-  if hvs.get("Section5-FirstNameQualifiedProfessional") is not None : hvSiteData[57] = hvs["Section5-FirstNameQualifiedProfessional"]
-  if hvs.get("Section5-LastName1QualifiedProfessional") is not None : hvSiteData[58] = hvs["Section5-LastName1QualifiedProfessional"]
-  if hvs.get("Section5-TypeofQP") is not None : hvSiteData[59] = hvs["Section5-TypeofQP"]
-  if hvs.get("Section5-organizationQualifiedProfessional") is not None : hvSiteData[60] = hvs["Section5-organizationQualifiedProfessional"]
-  if hvs.get("Section5-professionalLicenseRegistrationEGPEngRpBio") is not None : hvSiteData[61] = hvs["Section5-professionalLicenseRegistrationEGPEngRpBio"]
-  if hvs.get("Section5-streetAddressQualifiedProfessional") is not None : hvSiteData[62] = hvs["Section5-streetAddressQualifiedProfessional"]
-  if hvs.get("Section5-cityQualifiedProfessional") is not None : hvSiteData[63] = hvs["Section5-cityQualifiedProfessional"]
-  if hvs.get("Section5-provinceStateQualifiedProfessional") is not None : hvSiteData[64] = hvs["Section5-provinceStateQualifiedProfessional"]
-  if hvs.get("Section5-countryQualifiedProfessional") is not None : hvSiteData[65] = hvs["Section5-countryQualifiedProfessional"]
-  if hvs.get("Section5-postalZipCodeQualifiedProfessional") is not None : hvSiteData[66] = hvs["Section5-postalZipCodeQualifiedProfessional"]
-  if hvs.get("simplephonenumber1QualifiedProfessional") is not None : hvSiteData[67] = hvs["simplephonenumber1QualifiedProfessional"]
-  if hvs.get("simpleemail1QualifiedProfessional") is not None : hvSiteData[68] = hvs["simpleemail1QualifiedProfessional"]
-  if hvs.get("firstAndLastNameQualifiedProfessional") is not None : hvSiteData[69] = hvs["firstAndLastNameQualifiedProfessional"]
-  if submission.get("form") is not None : 
-    formStr = json.dumps(submission.get("form"))
-    formJson = json.loads(formStr)
-    _createdAt = datetime.datetime.strptime(formJson['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-    confirmationId = formJson['confirmationId']
-    # not in attributes, but in json
-    if _createdAt is not None : hvSiteData[70] = _createdAt 
-    if confirmationId is not None : hvSiteData[71] = confirmationId
+  print('Mapping hv data to the hv site...')  
 
-  # convert to lat/lon
-  _hvSiteLatLon = convert_deciaml_lat_long(hvSiteData[34], hvSiteData[35], hvSiteData[36], hvSiteData[37], hvSiteData[38], hvSiteData[39])
-  #for testing
-  #hvSiteData[72] = _hvSiteLatLon[0] # High Volume Site latitude
-  #hvSiteData[73] = _hvSiteLatLon[1] # High Volume Site longitude
-  hvSiteData[72] = testHVLats[testingCount3]
-  hvSiteData[73] = testHVLons[testingCount3]
-  testingCount3 = testingCount3 +1
-
-  #PID
-  if submission.get("dataGrid") is not None : 
-    for dg in submission.get("dataGrid"):
-      if dg["A-LegallyTitled-PID"] is not None and dg["A-LegallyTitled-PID"] != '':
-        sourceSiteData[74] = dg["A-LegallyTitled-PID"]
-        break
-  #PIN
-  if submission.get("dataGrid1") is not None : 
-    for dg1 in submission.get("dataGrid1"):
-      if dg1["A-LegallyTitled-PID"] is not None and dg1["A-LegallyTitled-PID"] != '':
-        sourceSiteData[75] = dg1["A-LegallyTitled-PID"]
-        break
-
-  hvSites.append(hvSiteData)
-
-  # 'hvSitesDic' dictionary - key:regionalDistrict / value:hvSiteData
-  hvSiteDataCopy = copy.deepcopy(hvSiteData)
-  for _srd in hvSiteData[40]: # could be more than one
-    if _srd is not None: 
-
-      #for testing
-      _srd = 'metroVancouverRegionalDistrict' 
-
-      if _srd in hvSitesDic:
-        hvSitesDic[_srd].append(hvSiteDataCopy)
-      else:
-        hvSitesDic[_srd] = [hvSiteDataCopy]
-
-
+  _hvDic = map_hv_site(hvs)
+  if _hvDic:
+    hvSites.append(_hvDic)
+    add_regional_district_dic(_hvDic, hvRegDistDic)  
 
 
 print('Creating soil source site CSV...')
@@ -1094,76 +1085,72 @@ with open(RECEIVE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer.writeheader()
   writer.writerows(receivingSites)
 
-
-"""
 print('Creating soil high volume site CSV...')
-with open(hvCSV, 'w', encoding='UTF8', newline='') as f:  
-  writer = csv.writer(f)
-  writer.writerow(hvSiteHeaders)
-
-  print('Parsing ' + str(len(hvsJson)) + ' Sites forms.')
-  # print(hvSites)
-  for hvs in hvSites:
-    # print(hvs)
-    data = [] # the hv data to inject into the csv
-    for hvsData in hvs:
-      data.append(hvsData)
-    writer.writerow(data)
-"""
-
+with open(HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
+  writer = csv.DictWriter(f, fieldnames=hvSiteHeaders)
+  writer.writeheader()
+  writer.writerows(hvSites)
 
 
 print('Connecting to AGOL GIS...')
 # connect to GIS
-gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
+_gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
 
 print('Updating Soil Relocation Soruce Site CSV...')
-srcCsvItem = gis.content.get(srcCSVId)
-if srcCsvItem is None:
+_srcCsvItem = _gis.content.get(SRC_CSV_ID)
+if _srcCsvItem is None:
   print('Error: Source Site CSV Item ID is invalid!')
 else:
-  srcCsvUpdateResult = srcCsvItem.update({}, SOURCE_CSV_FILE)
-  print('Updated Soil Relocation Source Site CSV sucessfully: ' + str(srcCsvUpdateResult))
+  _srcCsvUpdateResult = _srcCsvItem.update({}, SOURCE_CSV_FILE)
+  print('Updated Soil Relocation Source Site CSV sucessfully: ' + str(_srcCsvUpdateResult))
 
   print('Updating Soil Relocation Soruce Site Feature Layer...')
-  srcLyrItem = gis.content.get(srcLayerId)
-  if srcLyrItem is None:
+  _srcLyrItem = _gis.content.get(SRC_CSV_ID)
+  if _srcLyrItem is None:
     print('Error: Source Site Layter Item ID is invalid!')
   else:
-    srcFlc = FeatureLayerCollection.fromitem(srcLyrItem)
-    srcLyrOverwriteResult = srcFlc.manager.overwrite(SOURCE_CSV_FILE)
-    print('Updated Soil Relocation Source Site Feature Layer sucessfully: ' + json.dumps(srcLyrOverwriteResult))
+    _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
+    _srcLyrOverwriteResult = _srcFlc.manager.overwrite(SOURCE_CSV_FILE)
+    print('Updated Soil Relocation Source Site Feature Layer sucessfully: ' + json.dumps(_srcLyrOverwriteResult))
 
 print('Updating Soil Relocation Receiving Site CSV...')
-rcvCsvItem = gis.content.get(rcvCSVId)
-if rcvCsvItem is None:
+_rcvCsvItem = _gis.content.get(RCV_CSV_ID)
+if _rcvCsvItem is None:
   print('Error: Receiving Site CSV Item ID is invalid!')
 else:
-  rcvCsvUpdateResult = rcvCsvItem.update({}, RECEIVE_CSV_FILE)
-  print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(rcvCsvUpdateResult))
+  _rcvCsvUpdateResult = _rcvCsvItem.update({}, RECEIVE_CSV_FILE)
+  print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(_rcvCsvUpdateResult))
 
   print('Updating Soil Relocation Receiving Site Feature Layer...')
-  rcvLyrItem = gis.content.get(rcvLayerId)
-  if rcvLyrItem is None:
+  _rcvLyrItem = _gis.content.get(RCV_CSV_ID)
+  if _rcvLyrItem is None:
     print('Error: Receiving Site Layer Item ID is invalid!')
   else:    
-    rcvFlc = FeatureLayerCollection.fromitem(rcvLyrItem)
-    rcvLyrOverwriteResult = rcvFlc.manager.overwrite(RECEIVE_CSV_FILE)
-    print('Updated Soil Relocation Receiving Site Feature Layer sucessfully: ' + json.dumps(rcvLyrOverwriteResult))
+    _rcvFlc = FeatureLayerCollection.fromitem(_rcvLyrItem)
+    _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(RECEIVE_CSV_FILE)
+    print('Updated Soil Relocation Receiving Site Feature Layer sucessfully: ' + json.dumps(_rcvLyrOverwriteResult))
 
-"""
+
 print('Updating High Volume Receiving Site CSV...')
-hvCsvItem = gis.content.get(hvCSVId)
-hvCsvUpdateResult = hvCsvItem.update({}, HIGH_VOLUME_CSV_FILE)
-print('Updating High Volume Receiving Site Feature Layer...')
-hvLyrItem = gis.content.get(hvLayerId)
-hvFlc = FeatureLayerCollection.fromitem(hvLyrItem)
-hvLyrOverwriteResult = hvFlc.manager.overwrite(HIGH_VOLUME_CSV_FILE)
-"""
+_hvCsvItem = _gis.content.get(HV_CSV_ID)
+if _hvCsvItem is None:
+  print('Error: High Volume Receiving Site CSV Item ID is invalid!')
+else:
+  _hvCsvUpdateResult = _hvCsvItem.update({}, HIGH_VOLUME_CSV_FILE)
+  print('Updated High Volume Receiving Site CSV sucessfully: ' + str(_hvCsvUpdateResult))
+
+  print('Updating High Volume Receiving Site Feature Layer...')
+  _hvLyrItem = _gis.content.get(HV_LAYER_ID)
+  if _hvLyrItem is None:
+    print('Error: High Volume Receiving Site Layer Item ID is invalid!')
+  else:      
+    _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
+    _hvLyrOverwriteResult = _hvFlc.manager.overwrite(HIGH_VOLUME_CSV_FILE)
+    print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
 
 
 
-"""
+
 print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
@@ -1208,9 +1195,8 @@ for subscriber in subscribersJson:
   # print(unsubscribe)
 
   if subscriberEmail is not None and subscriberRegionalDistrict is not None and unsubscribe == False:
-    
 
-    # Notification of soil relocation in selected Regional District(s)
+    # Notification of soil relocation in selected Regional District(s)  =========================================================
     if notifyOnSoilRelocationsInSelectedDistrict == True:
       for _receivingSiteDic in receivingSites:
 
@@ -1230,43 +1216,42 @@ for subscriber in subscribersJson:
         if (_daysDiff >= 1):
           for _srd in subscriberRegionalDistrict:
             # finding if subscriber's regional district in receiving site registration
-            sitesInRD = rcvRegDistDic.get(_srd)
-            popupLinks = create_rcv_popup_links(sitesInRD)
+            _rcvSitesInRD = rcvRegDistDic.get(_srd)
+            _rcvPopupLinks = create_rcv_popup_links(_rcvSitesInRD)
 
             #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
             #if receivingSiteData[31] == regionalDistrict: # ReceivingSiteregionalDistrict
-            if sitesInRD is not None:
-              regDis = convert_regional_district_to_name(_srd)
-              emailMsg = create_site_relocation_email_msg(regDis, popupLinks)
-              send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, emailMsg)
+            if _rcvSitesInRD is not None:
+              _regDis = convert_regional_district_to_name(_srd)
+              _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
+              send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
     
 
-    # Notification of high volume site registration in selected Regional District(s)        
+    # Notification of high volume site registration in selected Regional District(s) =========================================================        
     
     #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
-    #if notifyOnHighVolumeSiteRegistrations == True:
+    if notifyOnHighVolumeSiteRegistrations == True:
+      for _hvSiteDic in hvSites:
+
+        if counterTesting2 == 1:
+          break
+        counterTesting2 = 1
+
+        _createdAt = _hvSiteDic['createAt'] 
+        # print(createdAt)
+        _daysDiff = (today - _createdAt).days
+        # print(daysDiff)
+
+        if (_daysDiff >= 1):
+          for _srd in subscriberRegionalDistrict:
+            # finding if subscriber's regional district in high volume receiving site registration
+            _hvSitesInRD = hvRegDistDic.get(_srd)
+            _hvPopupLinks = create_hv_popup_links(_hvSitesInRD)
+
+            if _hvSitesInRD is not None:
+              _hvRegDis = convert_regional_district_to_name(rd)
+              _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
+              send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
     
-    for hvSiteData in hvSites:
 
-      if counterTesting2 == 1:
-        break
-      counterTesting2 = 1
-
-      createdAt = hvSiteData[70]
-      # print(createdAt)
-      daysDiff = (today - createdAt).days
-      # print(daysDiff)
-
-      if (daysDiff >= 1):
-        for rd in regionalDistrict:
-          # finding if subscriber's regional district in high volumn receiving site registration
-          hvSitesInRD = hvSitesDic.get(rd)
-          hvPopupLinks = create_hv_popup_links(hvSitesInRD)
-
-          if hvSitesInRD is not None:
-            hvRegDis = convert_regional_district_to_name(rd)
-            hvEmailMsg = create_hv_site_email_msg(hvRegDis, hvPopupLinks)
-            send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, hvEmailMsg)
-    
-"""
 print('Completed Soils data publishing')
