@@ -29,8 +29,6 @@ webMapAppId = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
 
-
-
 # Move these to a configuration file
 chefsUrl = 'https://submit.digital.gov.bc.ca/app/api/v1'
 
@@ -59,59 +57,57 @@ testHVLats = ['51.590723','51.672555','52.153714','52.321911']
 testHVLons = ['-121.805686','-124.65016','-125.738196','-123.519695']
 
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
-
-
-regionalDistrictDict = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
-              , caribooRegionalDistrict='Cariboo Regional District'
-              , regionalDistrictOfFraserFortGeorge='Regional District of Fraser-Fort George'
-              , regionalDistrictOfKitimatStikine='Regional District of Kitimat-Stikine'
-              , peaceRiverRegionalDistrict='Peace River Regional District'
-              , northCoastRegionalDistrict='North Coast Regional District'
-              , regionalDistrictOfCentralOkanagan='Regional District of Central Okanagan'
-              , fraserValleyRegionalDistrict='Fraser Valley Regional District'
-              , metroVancouverRegionalDistrict='Metro Vancouver Regional District'
-              , regionalDistrictOfOkanaganSimilkameen='Regional District of Okanagan-Similkameen'
-              , squamishLillooetRegionalDistrict='Squamish-Lillooet Regional District'
-              , thompsonNicolaRegionalDistrict='Thompson-Nicola Regional District'
-              , regionalDistrictOfCentralKootenay='Regional District of Central Kootenay'
-              , columbiaShuswapRegionalDistrict='Columbia-Shuswap Regional District'
-              , regionalDistrictOfEastKootenay='Regional District of East Kootenay'
-              , regionalDistrictOfKootenayBoundary='Regional District of Kootenay Boundary'
-              , regionalDistrictOfNorthOkanagan='Regional District of North Okanagan'
-              , regionalDistrictOfAlberniClayoquot='Regional District of Alberni-Clayoquot'
-              , capitalRegionalDistrict='Capital Regional District'
-              , centralCoastRegionalDistrict='Central Coast Regional District'
-              , comoxValleyRegionalDistrict='Comox Valley Regional District'
-              , cowichanValleyRegionalDistrict='Cowichan Valley Regional District'
-              , regionalDistrictOfNanaimo='Regional District of Nanaimo'
-              , regionalDistrictOfMountWaddington='Regional District of Mount Waddington'
-              , qathetRegionalDistrict='qathet Regional District'
-              , sunshineCoastRegionalDistrict='Sunshine Coast Regional District'
-              , strathconaRegionalDistrict='Strathcona Regional District'
-              , stikineRegionUnincorporated='Stikine Region (Unincorporated)')
+REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
+                                , caribooRegionalDistrict='Cariboo Regional District'
+                                , regionalDistrictOfFraserFortGeorge='Regional District of Fraser-Fort George'
+                                , regionalDistrictOfKitimatStikine='Regional District of Kitimat-Stikine'
+                                , peaceRiverRegionalDistrict='Peace River Regional District'
+                                , northCoastRegionalDistrict='North Coast Regional District'
+                                , regionalDistrictOfCentralOkanagan='Regional District of Central Okanagan'
+                                , fraserValleyRegionalDistrict='Fraser Valley Regional District'
+                                , metroVancouverRegionalDistrict='Metro Vancouver Regional District'
+                                , regionalDistrictOfOkanaganSimilkameen='Regional District of Okanagan-Similkameen'
+                                , squamishLillooetRegionalDistrict='Squamish-Lillooet Regional District'
+                                , thompsonNicolaRegionalDistrict='Thompson-Nicola Regional District'
+                                , regionalDistrictOfCentralKootenay='Regional District of Central Kootenay'
+                                , columbiaShuswapRegionalDistrict='Columbia-Shuswap Regional District'
+                                , regionalDistrictOfEastKootenay='Regional District of East Kootenay'
+                                , regionalDistrictOfKootenayBoundary='Regional District of Kootenay Boundary'
+                                , regionalDistrictOfNorthOkanagan='Regional District of North Okanagan'
+                                , regionalDistrictOfAlberniClayoquot='Regional District of Alberni-Clayoquot'
+                                , capitalRegionalDistrict='Capital Regional District'
+                                , centralCoastRegionalDistrict='Central Coast Regional District'
+                                , comoxValleyRegionalDistrict='Comox Valley Regional District'
+                                , cowichanValleyRegionalDistrict='Cowichan Valley Regional District'
+                                , regionalDistrictOfNanaimo='Regional District of Nanaimo'
+                                , regionalDistrictOfMountWaddington='Regional District of Mount Waddington'
+                                , qathetRegionalDistrict='qathet Regional District'
+                                , sunshineCoastRegionalDistrict='Sunshine Coast Regional District'
+                                , strathconaRegionalDistrict='Strathcona Regional District'
+                                , stikineRegionUnincorporated='Stikine Region (Unincorporated)')
 
 def send_mail(to_email, subject, message):
   to_email = 'rjeong@vividsolutions.com'
-  authPayload = 'grant_type=client_credentials'
-  authHaders = {
+  auth_pay_load = 'grant_type=client_credentials'
+  auth_haders = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'Authorization': 'Basic ' + chesEncodedServiceClientKey
   }
-  authResponse = requests.request("POST", authUrl + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=authHaders, data=authPayload)
+  auth_response = requests.request("POST", authUrl + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
   # print(authResponse.text)
-  authResponseJson = json.loads(authResponse.content)
-  accessToken = authResponseJson['access_token']
+  auth_response_json = json.loads(auth_response.content)
+  access_token = auth_response_json['access_token']
 
   from_email = "noreply@gov.bc.ca"
-  chesPayload = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
-  chesHeaders = {
+  ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
+  ches_headers = {
   'Content-Type': 'application/json',
-  'Authorization': 'Bearer ' + accessToken
+  'Authorization': 'Bearer ' + access_token
   }
-  chesResponse = requests.request("POST", chesUrl + '/api/v1/email', headers=chesHeaders, data=chesPayload)
+  ches_response = requests.request("POST", chesUrl + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
   # print(chesResponse.text)
-  chesContent = json.loads(chesResponse.content)
-  return chesContent
+  ches_content = json.loads(ches_response.content)
+  return ches_content
 
 def is_json(string):
   try:
@@ -139,22 +135,25 @@ def create_site_relocation_email_msg(regional_district, popup_links):
   msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
   msg += '<p>This email is to notify you that soil is being relocated in the Regional District: <span style=font-weight:bold;color:red;>' 
   msg += regional_district
-  msg += '</span></p>\
-        <p>The following new submission(s) were received.<p/>\
-        <p font-style:italic>'
-  msg += popup_links
-  msg += '</p><br/>\
-        <p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
-        <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
-        <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-        Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
-        <ul>\
+  msg += '</span></p>'
+
+  if popup_links != "" and popup_links is not None:
+    msg += '<p>The following new submission(s) were received.<p/>\
+            <p font-style:italic>'
+    msg += popup_links
+    msg += '</p><br/>'
+
+  msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
+          <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
+          <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
+          Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
+          <ul>\
           <li>click on the small arrow on the left of the screen  to open search options</li>\
           <li>Filter by site address, regional district, high volume sites, and more.</li>\
           <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>\
           <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
-        </ul>\
-        <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+          </ul>\
+          <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
 
   msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
@@ -166,22 +165,25 @@ def create_hv_site_email_msg(regional_district, popup_links):
   msg = '<p>High Volume Receiving Site Registrations are received by the ministry under section 55.1 of the <i>Environmental Management Act</i>.  For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
   msg += '<p>This email is to notify you that a registration for a high volume site has been received in Regional District: <span style=font-weight:bold;color:red;>'
   msg += regional_district
-  msg += '</span></p>\
-        <p>The following new high volume receiving site registration(s) were received.<p/>\
-        <p font-style:italic>'
-  msg += popup_links
-  msg += '</p><br/>\
-        <p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
-        <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
-        <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-        Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
-        <ul>\
-          <li>click on the small arrow on the left of the screen to open search options</li>\
-          <li>Filter by site address, regional district, high volume sites, and more.</li>\
-          <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement</li>\
-          <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
-        </ul>\
-        <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+  msg += '</span></p>'
+
+  if popup_links != "" and popup_links is not None:  
+    msg += '<p>The following new high volume receiving site registration(s) were received.<p/>\
+            <p font-style:italic>'
+    msg += popup_links
+    msg += '</p><br/>'
+
+  msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
+          <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
+          <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
+          Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
+          <ul>\
+            <li>click on the small arrow on the left of the screen to open search options</li>\
+            <li>Filter by site address, regional district, high volume sites, and more.</li>\
+            <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement</li>\
+            <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
+          </ul>\
+          <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
   msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + subscriptionFormId + '>form</a></span>.<br/>'
@@ -189,34 +191,34 @@ def create_hv_site_email_msg(regional_district, popup_links):
   return msg
 
 def convert_regional_district_to_name(id):
-  name = regionalDistrictDict.get(id)
+  name = REGIONAL_DISTRICT_NAME_DIC.get(id)
   if name is not None:
     return name
   else:
     return id
 
 # create links to popup on Map using receiving sites searching keywords
-def create_popup_links(rcv_sites):
+def create_rcv_popup_links(rcv_sites):
   links = ''  
   link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + webMapAppId + '&find='
   link_suf = '>Link to new submission</a><br/>'
 
   if rcv_sites is not None:
-    for rcv_site in rcv_sites:
+    for _rcv_site_dic in rcv_sites:
       links += link_prx
 
-      if rcv_site[24] is not None and rcv_site[24].strip() != '':
-        links += urllib.parse.quote(rcv_site[24]) #Site ID
-      #elif rcv_site[24] is not None and rcv_site[24].strip() != '':
-      #  links += urllib.parse.quote(rcv_site[24]) #PID
-      #elif rcv_site[24] is not None and rcv_site[24].strip() != '':
-      #  links += urllib.parse.quote(rcv_site[24]) #PIN
-      elif rcv_site[142] is not None and rcv_site[142].strip() != '' and rcv_site[143] is not None and rcv_site[143].strip() != '':
-        links += urllib.parse.quote(rcv_site[142]+','+rcv_site[143]) #Receiving Site lat/lon
-      elif rcv_site[3] is not None and rcv_site[3].strip() != '':
-        links += urllib.parse.quote(rcv_site[3]) #Receiving Site Owner Address
-      elif rcv_site[2] is not None and rcv_site[2].strip() != '':
-        links += urllib.parse.quote(rcv_site[2])  #Receiving Site Owner Company
+      if _rcv_site_dic['SID'] is not None and _rcv_site_dic['SID'].strip() != '':
+        links += urllib.parse.quote(_rcv_site_dic['SID']) #Site ID
+      elif _rcv_site_dic['PID'] is not None and _rcv_site_dic['PID'].strip() != '':
+        links += urllib.parse.quote(_rcv_site_dic['PID']) #PID
+      elif _rcv_site_dic['PIN'] is not None and _rcv_site_dic['PIN'].strip() != '':
+        links += urllib.parse.quote(_rcv_site_dic['PIN']) #PIN
+      elif _rcv_site_dic['latitude'] is not None and _rcv_site_dic['latitude'].strip() != '' and _rcv_site_dic['longitude'] is not None and _rcv_site_dic['longitude'].strip() != '':
+        links += urllib.parse.quote(_rcv_site_dic['latitude']+','+_rcv_site_dic['latitude']) #Receiving Site lat/lon
+      elif _rcv_site_dic['ownerAddress'] is not None and _rcv_site_dic['ownerAddress'].strip() != '':
+        links += urllib.parse.quote(_rcv_site_dic['ownerAddress']) #Receiving Site Owner Address
+      elif _rcv_site_dic['ownerCompany'] is not None and _rcv_site_dic['ownerCompany'].strip() != '':
+        links += urllib.parse.quote(_rcv_site_dic['ownerCompany'])  #Receiving Site Owner Company
 
       links += link_suf
   return links
@@ -309,8 +311,8 @@ def map_rcv_1st_rcver(submission):
     _rcv_lat_lon = convert_deciaml_lat_long(
       submission["C2-Latitude-DegreesReceivingSite"], submission["C2-Latitude-MinutesReceivingSite"], submission["Section2-Latitude-Seconds1ReceivingSite"], 
       submission["C2-Longitude-DegreesReceivingSite"], submission["C2-Longitude-MinutesReceivingSite"], submission["C2-Longitude-SecondsReceivingSite"])
-    _rcv_dic['latitude'] = _rcv_lat_lon[0]
-    _rcv_dic['longitude'] = _rcv_lat_lon[0]
+    #_rcv_dic['latitude'] = _rcv_lat_lon[0]
+    #_rcv_dic['longitude'] = _rcv_lat_lon[0]
     _rcv_dic['latitude'] = testRcvLats[testing_count2] #for testing
     _rcv_dic['longitude'] = testRcvLons[testing_count2] #for testing
     testing_count2 = testing_count2 + 1
@@ -404,8 +406,8 @@ def map_rcv_2nd_rcver(submission):
     _rcv_lat_lon = convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Latitude-Minutes1FirstAdditionalReceivingSite"], submission["Section2-Latitude-Seconds2FirstAdditionalReceivingSite"], 
       submission["C2-Longitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Longitude-Minutes1FirstAdditionalReceivingSite"], submission["C2-Longitude-Seconds1FirstAdditionalReceivingSite"])
-    _rcv_dic['latitude'] = _rcv_lat_lon[0]
-    _rcv_dic['longitude'] = _rcv_lat_lon[0]
+    #_rcv_dic['latitude'] = _rcv_lat_lon[0]
+    #_rcv_dic['longitude'] = _rcv_lat_lon[0]
     _rcv_dic['latitude'] = testRcvLats[testing_count2] #for testing
     _rcv_dic['longitude'] = testRcvLons[testing_count2] #for testing
     testing_count2 = testing_count2 + 1
@@ -498,8 +500,8 @@ def map_rcv_3rd_rcver(submission):
     _rcv_lat_lon = convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"], submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"], 
       submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"], submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"])
-    _rcv_dic['latitude'] = _rcv_lat_lon[0]
-    _rcv_dic['longitude'] = _rcv_lat_lon[0]
+    #_rcv_dic['latitude'] = _rcv_lat_lon[0]
+    #_rcv_dic['longitude'] = _rcv_lat_lon[0]
     _rcv_dic['latitude'] = testRcvLats[testing_count2] #for testing
     _rcv_dic['longitude'] = testRcvLons[testing_count2] #for testing
     testing_count2 = testing_count2 + 1
@@ -555,11 +557,13 @@ def add_regional_district_dic(rcv_dic, rcv_reg_dist_dic):
     _rcv_dic_copy = copy.deepcopy(rcv_dic)
     _rd_str = rcv_dic['regionalDistrict'] # could be more than one
     if _rd_str is not None:
-      #rd = 'metroVancouverRegionalDistrict' #for testing
       _rd_str = _rd_str.strip('\"')
       _rds = []
       _rds = _rd_str.split(",")
       for _rd in _rds:
+
+        _rd = 'metroVancouverRegionalDistrict' #for testing SHOULD BE REMOVED
+
         if _rd in rcv_reg_dist_dic:
           rcv_reg_dist_dic[_rd].append(_rcv_dic_copy)
         else:
@@ -877,10 +881,10 @@ for submission in submissionsJson:
   if submission.get("form") is not None : 
     formStr = json.dumps(submission.get("form"))
     formJson = json.loads(formStr)
-    createdAt = datetime.datetime.strptime(formJson['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+    _createdAt = datetime.datetime.strptime(formJson['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
     confirmationId = formJson['confirmationId']
     # not in attributes, but in json
-    if createdAt is not None : sourceSiteData[72] = createdAt
+    if _createdAt is not None : sourceSiteData[72] = _createdAt
     if confirmationId is not None : sourceSiteData[73] = confirmationId
 
   _sourceSiteLatLon = convert_deciaml_lat_long(sourceSiteData[28], sourceSiteData[29], sourceSiteData[30], sourceSiteData[31], sourceSiteData[32], sourceSiteData[33])
@@ -1010,10 +1014,10 @@ for hvs in hvsJson:
   if submission.get("form") is not None : 
     formStr = json.dumps(submission.get("form"))
     formJson = json.loads(formStr)
-    createdAt = datetime.datetime.strptime(formJson['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+    _createdAt = datetime.datetime.strptime(formJson['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
     confirmationId = formJson['confirmationId']
     # not in attributes, but in json
-    if createdAt is not None : hvSiteData[70] = createdAt 
+    if _createdAt is not None : hvSiteData[70] = _createdAt 
     if confirmationId is not None : hvSiteData[71] = confirmationId
 
   # convert to lat/lon
@@ -1042,16 +1046,16 @@ for hvs in hvsJson:
 
   # 'hvSitesDic' dictionary - key:regionalDistrict / value:hvSiteData
   hvSiteDataCopy = copy.deepcopy(hvSiteData)
-  for rd in hvSiteData[40]: # could be more than one
-    if rd is not None: 
+  for _srd in hvSiteData[40]: # could be more than one
+    if _srd is not None: 
 
       #for testing
-      rd = 'metroVancouverRegionalDistrict' 
+      _srd = 'metroVancouverRegionalDistrict' 
 
-      if rd in hvSitesDic:
-        hvSitesDic[rd].append(hvSiteDataCopy)
+      if _srd in hvSitesDic:
+        hvSitesDic[_srd].append(hvSiteDataCopy)
       else:
-        hvSitesDic[rd] = [hvSiteDataCopy]
+        hvSitesDic[_srd] = [hvSiteDataCopy]
 
 
 
@@ -1147,13 +1151,13 @@ hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV)
 
 
 
-"""
+
 print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
 
-emailSubjectSR = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
-emailSubjectHV = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
+EMAIL_SUBJECT_SOIL_RELOCATION = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
+EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
 
 today = datetime.datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
 # print(today)
@@ -1168,13 +1172,13 @@ for subscriber in subscribersJson:
   counterTesting = 1
 
   subscriberEmail = ''
-  regionalDistrict = [] # could be more than one
+  subscriberRegionalDistrict = [] # could be more than one
   notifyOnHighVolumeSiteRegistrations = False
   notifyOnSoilRelocationsInSelectedDistrict = False
   unsubscribe = False
 
   if subscriber.get("emailAddress") is not None : subscriberEmail = subscriber["emailAddress"]
-  if subscriber.get("regionalDistrict") is not None : regionalDistrict = subscriber["regionalDistrict"] 
+  if subscriber.get("regionalDistrict") is not None : subscriberRegionalDistrict = subscriber["regionalDistrict"] 
   if subscriber.get("notificationSelection") is not None : 
     notificationSelectionStr = json.dumps(subscriber["notificationSelection"])
     notificationSelectionJson = json.loads(notificationSelectionStr)
@@ -1191,12 +1195,12 @@ for subscriber in subscribersJson:
   # print(notifyOnSoilRelocationsInSelectedDistrict)
   # print(unsubscribe)
 
-  if subscriberEmail is not None and regionalDistrict is not None and unsubscribe == False:
+  if subscriberEmail is not None and subscriberRegionalDistrict is not None and unsubscribe == False:
     
 
     # Notification of soil relocation in selected Regional District(s)
     if notifyOnSoilRelocationsInSelectedDistrict == True:
-      for receivingSiteData in receivingSites:
+      for _receivingSiteDic in receivingSites:
 
         if counterTesting2 == 1:
           break
@@ -1206,29 +1210,30 @@ for subscriber in subscribersJson:
         # This may require finding a way to store a "last run time" for the script, or running the script once per day, 
         # and only sending submissions for where a create-date is within the last 24 hours.
         # d1 = datetime.datetime.utcfromtimestamp(receivingSiteData[140])
-        createdAt = receivingSiteData[140]
-        # print(createdAt)
-        daysDiff = (today - createdAt).days
-        # print(daysDiff)
+        _createdAt = _receivingSiteDic['createAt']
+        # print(_createdAt)
+        _daysDiff = (today - _createdAt).days
+        # print(_daysDiff)
 
-        if (daysDiff >= 1):
-          for rd in regionalDistrict:
+        if (_daysDiff >= 1):
+          for _srd in subscriberRegionalDistrict:
             # finding if subscriber's regional district in receiving site registration
-            sitesInRD = rcvRegDistDic.get(rd)
-            popupLinks = create_popup_links(sitesInRD)
+            sitesInRD = rcvRegDistDic.get(_srd)
+            popupLinks = create_rcv_popup_links(sitesInRD)
 
             #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
             #if receivingSiteData[31] == regionalDistrict: # ReceivingSiteregionalDistrict
             if sitesInRD is not None:
-              regDis = convert_regional_district_to_name(rd)
+              regDis = convert_regional_district_to_name(_srd)
               emailMsg = create_site_relocation_email_msg(regDis, popupLinks)
-              send_mail('rjeong@vividsolutions.com', emailSubjectSR, emailMsg)
+              send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, emailMsg)
     
 
     # Notification of high volume site registration in selected Regional District(s)        
     
     #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
     #if notifyOnHighVolumeSiteRegistrations == True:
+    """
     for hvSiteData in hvSites:
 
       if counterTesting2 == 1:
@@ -1249,7 +1254,7 @@ for subscriber in subscribersJson:
           if hvSitesInRD is not None:
             hvRegDis = convert_regional_district_to_name(rd)
             hvEmailMsg = create_hv_site_email_msg(hvRegDis, hvPopupLinks)
-            send_mail('rjeong@vividsolutions.com', emailSubjectHV, hvEmailMsg)
-"""
+            send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, hvEmailMsg)
+    """
 
 print('Completed Soils data publishing')
