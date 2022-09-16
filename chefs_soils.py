@@ -7,13 +7,13 @@ from arcgis.features import FeatureLayerCollection
 
 
 # CSV file names
-srcCSV = 'soil_relocation_source_sites.csv'
-rcvCSV = 'soil_relocation_receiving_sites.csv'
-hvCSV = 'high_volumn_receiving_sites.csv'
+SOURCE_CSV_FILE = 'soil_relocation_source_sites.csv'
+RECEIVE_CSV_FILE = 'soil_relocation_receiving_sites.csv'
+HIGH_VOLUME_CSV_FILE = 'high_volumn_receiving_sites.csv'
 
 # Soil Relocation Source Sites Item Id
-srcCSVId = 'c34c998c1feb4796a61d7e0aef256c12'
-srcLayerId = '4a35bb807eec41af9000e9d12b45b06e'
+srcCSVId = '4bfbda4fd22f4ab68fc548b3cfdf41cf'
+srcLayerId = 'f99012760e9e4f4394e54abdbfd1f1f8'
 
 # Soil Relocation Receiving Sites Item Id
 rcvCSVId = '426e40d6525747bb801c698357dea3b5'
@@ -28,6 +28,7 @@ webMapAppId = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
 
 
 maphubUrl = r'https://governmentofbc.maps.arcgis.com'
+
 
 # Move these to a configuration file
 chefsUrl = 'https://submit.digital.gov.bc.ca/app/api/v1'
@@ -265,6 +266,144 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
 
   return data
 
+def map_source_site(submission):
+  _src_dic = {}
+  testing_count2 = 0
+
+  if (
+    submission.get("A3-SourceSiteLatitude-Degrees") is not None and
+    submission.get("A3-SourceSiteLatitude-Minutes") is not None and
+    submission.get("A3-SourceSiteLatitude-Seconds") is not None and
+    submission.get("A3-SourceSiteLongitude-Degrees") is not None and
+    submission.get("A3-SourceSiteLongitude-Minutes") is not None and
+    submission.get("A3-SourceSiteLongitude-Seconds") is not None
+  ):
+    print("Mapping sourece site ...")
+
+    for src_header in sourceSiteHeaders:
+      _src_dic[src_header] = None
+
+    if submission.get("A1-FIRSTName") is not None : _src_dic['updateToPreviousForm'] = submission["Intro-New_form_or_update"]
+    if submission.get("A1-FIRSTName") is not None : _src_dic['ownerFirstName'] = submission["A1-FIRSTName"]
+    if submission.get("A1-LASTName") is not None : _src_dic['ownerLastName'] = submission["A1-LASTName"]
+    if submission.get("A1-Company") is not None : _src_dic['ownerCompany'] = submission["A1-Company"]
+    if submission.get("A1-Address") is not None : _src_dic['ownerAddress'] = submission["A1-Address"]
+    if submission.get("A1-City") is not None : _src_dic['ownerCity'] = submission["A1-City"]
+    if submission.get("A1-ProvinceState") is not None : _src_dic['ownerProvince'] = submission["A1-ProvinceState"]
+    if submission.get("A1-Country") is not None : _src_dic['ownerCountry'] = submission["A1-Country"]
+    if submission.get("A1-PostalZipCode") is not None : _src_dic['ownerPostalCode'] = submission["A1-PostalZipCode"]
+    if submission.get("A1-Phone") is not None : _src_dic['ownerPhoneNumber'] = submission["A1-Phone"]
+    if submission.get("A1-Email") is not None : _src_dic['ownerEmail'] = submission["A1-Email"]
+
+    if submission.get("A1-additionalownerFIRSTName") is not None : _src_dic['owner2FirstName'] = submission["A1-additionalownerFIRSTName"]
+    if submission.get("A1-additionalownerLASTName1") is not None : _src_dic['owner2LastName'] = submission["A1-additionalownerLASTName1"]
+    if submission.get("A1-additionalownerCompany1") is not None : _src_dic['owner2Company'] = submission["A1-additionalownerCompany1"]
+    if submission.get("A1-additionalownerAddress1") is not None : _src_dic['owner2Address'] = submission["A1-additionalownerAddress1"]
+    if submission.get("A1-additionalownerCity1") is not None : _src_dic['owner2City'] = submission["A1-additionalownerCity1"]
+    if submission.get("A1-additionalownerPhone1") is not None : _src_dic['owner2PhoneNumber'] = submission["A1-additionalownerPhone1"]
+    if submission.get("A1-additionalownerEmail1") is not None : _src_dic['owner2Email'] = submission["A1-additionalownerEmail1"]
+
+    if submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : _src_dic['additionalOwners'] = submission["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
+    if submission.get("A2-SourceSiteContactFirstName") is not None : _src_dic['contactFirstName'] = submission["A2-SourceSiteContactFirstName"]
+    if submission.get("A2-SourceSiteContactLastName") is not None : _src_dic['contactLastName'] = submission["A2-SourceSiteContactLastName"]
+    if submission.get("A2-SourceSiteContactCompany") is not None : _src_dic['contactCompany'] = submission["A2-SourceSiteContactCompany"]
+    if submission.get("A2-SourceSiteContactAddress") is not None : _src_dic['contactAddress'] = submission["A2-SourceSiteContactAddress"]
+    if submission.get("A2-SourceSiteContactCity") is not None : _src_dic['contactCity'] = submission["A2-SourceSiteContactCity"]
+    if submission.get("SourceSiteContactphoneNumber") is not None : _src_dic['contactPhoneNumber'] = submission["SourceSiteContactphoneNumber"]
+    if submission.get("A2-SourceSiteContactEmail") is not None : _src_dic['contactEmail'] = submission["A2-SourceSiteContactEmail"]
+
+    if submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable") is not None : _src_dic['SID'] = submission["A3-SourcesiteIdentificationNumberSiteIdIfAvailable"]
+
+    # convert lat/lon
+    _src_lat_lon = convert_deciaml_lat_long(
+      submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
+      submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
+    #_src_dic['latitude'] = _src_lat_lon[0]
+    #_src_dic['longitude'] = _src_lat_lon[0]
+    _src_dic['latitude'] = testSrcLats[testing_count2] #for testing
+    _src_dic['longitude'] = testSrcLons[testing_count2] #for testing
+    testing_count2 = testing_count2 + 1
+
+    if submission.get("SourceSiteregionalDistrict") is not None and len(submission['SourceSiteregionalDistrict']) > 0 : 
+      _src_dic['regionalDistrict'] = "\"" + ",".join(submission["SourceSiteregionalDistrict"]) + "\""   # could be more than one
+
+    if submission.get("SourcelandOwnership-checkbox") is not None : _src_dic['landOwnership'] = submission["SourcelandOwnership-checkbox"]
+    if submission.get("A-LegallyTitled-AddressSource") is not None : _src_dic['legallyTitledSiteAddress'] = submission["A-LegallyTitled-AddressSource"]
+    if submission.get("A-LegallyTitled-CitySource") is not None : _src_dic['legallyTitledSiteCity'] = submission["A-LegallyTitled-CitySource"]
+    if submission.get("A-LegallyTitled-PostalZipCodeSource") is not None : _src_dic['legallyTitledSitePostalCode'] = submission["A-LegallyTitled-PostalZipCodeSource"]
+
+    if submission.get("dataGrid") is not None and len(submission["dataGrid"]) > 0: 
+      _dg = submission["dataGrid"][0] # could be more than one, but take only one
+      if _dg.get("A-LegallyTitled-PID") is not None: _src_dic['PID'] = _dg["A-LegallyTitled-PID"]
+      if _dg.get("legalLandDescriptionSource") is not None: _src_dic['legalLandDescription'] = _dg["legalLandDescriptionSource"]
+    elif submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0: 
+      _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
+      if _dg1.get("A-UntitledPINSource") is not None: _src_dic['PIN'] = _dg1["A-UntitledPINSource"]
+      if _dg1.get("legalLandDescriptionUntitledSource") is not None: _src_dic['legalLandDescription'] = _dg1["legalLandDescriptionUntitledSource"]
+    elif submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None : _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
+
+    if submission.get("A-UntitledCrownLand-FileNumberColumnSource") is not None : 
+      for _item in submission["A-UntitledCrownLand-FileNumberColumnSource"]:
+        for _v in _item.values():
+          if _v != '':
+            _src_dic['crownLandFileNumbers'] = _v
+            break    #could be more than one, but take only one
+        if 'crownLandFileNumbers' in _src_dic:
+          break
+
+    if submission.get("A4-schedule2ReferenceSourceSite") is not None and len(submission.get("A4-schedule2ReferenceSourceSite")) > 0 : 
+        _src_dic['sourceSiteLandUse'] = "\"" + ",".join(submission.get("A4-schedule2ReferenceSourceSite")) + "\""
+
+    if submission.get("isTheSourceSiteHighRisk") is not None : _src_dic['highVolumneSite'] = submission["isTheSourceSiteHighRisk"]
+    if submission.get("A5-PurposeOfSoilExcavationSource") is not None : _src_dic['soilRelocationPurpose'] = submission["A5-PurposeOfSoilExcavationSource"]
+    if submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source") is not None : _src_dic['soilStorageType'] = submission["B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source"]
+
+    if submission.get("dataGrid9") is not None and len(submission["dataGrid9"]) > 0: 
+      _dg9 = submission["dataGrid9"][0] # could be more than one, but take only one
+      if _dg9.get("B1-soilVolumeToBeRelocationedInCubicMetresM3Source") is not None: _src_dic['soilVolume'] = _dg9["B1-soilVolumeToBeRelocationedInCubicMetresM3Source"]
+      if _dg9.get("B1-soilClassificationSource") is not None and len(_dg9.get("B1-soilClassificationSource")) > 0 : 
+        _soil_class = []
+        for _k, _v in _dg9.get("B1-soilClassificationSource").items():
+          if _v == True:
+            _soil_class.append(_k)
+            if len(_soil_class) > 0:
+              _src_dic['soilQuality'] = "\"" + ",".join(_soil_class) + "\""
+              break
+
+    if submission.get("B2-describeSoilCharacterizationMethod1") is not None : _src_dic['soilCharacterMethod'] = submission["B2-describeSoilCharacterizationMethod1"]
+    if submission.get("B3-yesOrNoVapourexemptionsource") is not None : _src_dic['vapourExemption'] = submission["B3-yesOrNoVapourexemptionsource"]
+    if submission.get("B3-ifExemptionsApplyPleaseDescribe") is not None : _src_dic['vapourExemptionDesc'] = submission["B3-ifExemptionsApplyPleaseDescribe"]
+    if submission.get("B3-describeVapourCharacterizationMethod") is not None : _src_dic['vapourCharacterMethodDesc'] = submission["B3-describeVapourCharacterizationMethod"]
+    if submission.get("B4-soilRelocationEstimatedStartDateMonthDayYear") is not None : _src_dic['soilRelocationStartDate'] = submission["B4-soilRelocationEstimatedStartDateMonthDayYear"]
+    if submission.get("B4-soilRelocationEstimatedCompletionDateMonthDayYear") is not None : _src_dic['soilRelocationCompletionDate'] = submission["B4-soilRelocationEstimatedCompletionDateMonthDayYear"]
+    if submission.get("B4-RelocationMethod") is not None : _src_dic['relocationMethod'] = submission["B4-RelocationMethod"]
+
+    if submission.get("D1-FirstNameQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalFirstName'] = submission["D1-FirstNameQualifiedProfessional"]
+    if submission.get("LastNameQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalLastName'] = submission["LastNameQualifiedProfessional"]
+    if submission.get("D1-TypeofQP1") is not None : _src_dic['qualifiedProfessionalType'] = submission["D1-TypeofQP1"]
+    if submission.get("D1-professionalLicenseRegistrationEGPEngRpBio") is not None : _src_dic['professionalLicenceRegistration'] = submission["D1-professionalLicenseRegistrationEGPEngRpBio"]
+    if submission.get("D1-organization1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalOrganization'] = submission["D1-organization1QualifiedProfessional"]
+    if submission.get("D1-streetAddress1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalAddress'] = submission["D1-streetAddress1QualifiedProfessional"]
+    if submission.get("D1-city1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalCity'] = submission["D1-city1QualifiedProfessional"]
+    if submission.get("D1-provinceState3QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalProvince'] = submission["D1-provinceState3QualifiedProfessional"]
+    if submission.get("D1-canadaQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalCountry'] = submission["D1-canadaQualifiedProfessional"]
+    if submission.get("D1-postalZipCode3QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalPostalCode'] = submission["D1-postalZipCode3QualifiedProfessional"]
+    if submission.get("simplephonenumber1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalPhoneNumber'] = submission["simplephonenumber1QualifiedProfessional"]
+    if submission.get("EmailAddressQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalEmail'] = submission["EmailAddressQualifiedProfessional"]
+    if submission.get("sig-firstAndLastNameQualifiedProfessional") is not None : _src_dic['signaturerFirstAndLastName'] = submission["sig-firstAndLastNameQualifiedProfessional"]
+    if submission.get("simpledatetime") is not None : _src_dic['dateSigned'] = submission["simpledatetime"]
+
+    if submission.get("form") is not None : 
+      form_str = json.dumps(submission.get("form"))
+      form_json = json.loads(form_str)
+      created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+      confirmation_id = form_json['confirmationId']
+      # not in attributes, but in json
+      _src_dic['createAt'] = created_at
+      if confirmation_id is not None : _src_dic['confirmationId'] = confirmation_id
+
+  return _src_dic
+
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
   testing_count2 = 0
@@ -336,7 +475,6 @@ def map_rcv_1st_rcver(submission):
       if _dg5.get("legalLandDescriptionUntitledCrownLandReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg5["legalLandDescriptionUntitledCrownLandReceivingSite"]
     elif submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None : _rcv_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumn1"]
 
-    #if submission.get("C3-soilClassification1ReceivingSite") is not None : _rcvDic['receivingSiteLandUse'] = submission["C3-soilClassification1ReceivingSite"]
     if submission.get("C3-soilClassification1ReceivingSite") is not None : 
       _land_uses = []
       for _k, _v in submission["C3-soilClassification1ReceivingSite"].items():
@@ -587,91 +725,80 @@ hvsAttributes = fetch_columns(hvsFormId, hvsKey)
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
 submissionsJson = site_list(soilsFormId, soilsKey)
-#print(submissionsJson)
+print(submissionsJson)
 print('Loading Submission attributes and headers...')
 soilsAttributes = fetch_columns(soilsFormId, soilsKey)
 #print(soilsAttributes)
 
 
 sourceSiteHeaders = [
-  "A1_FIRSTName",
-  "A1_LASTName",
-  "A1_Company",
-  "A1_Address",
-  "A1_City",
-  "A1_ProvinceState",
-  "A1_Country",
-  "A1_PostalZipCode",
-  "A1_Phone",
-  "A1_Email",
-  "A1_checkbox_extraowners",
-  "A1_additionalownerFIRSTName",
-  "A1_additionalownerLASTName1",
-  "A1_additionalownerCompany1",
-  "A1_additionalownerAddress1",
-  "A1_additionalownerCity1",
-  "A1_additionalownerPhone1",
-  "A1_additionalownerEmail1",
-  "areThereMoreThanTwoOwnersIncludeTheirInformationBelow",
-  "A1_SourceSiteContact_sameAsAbove",
-  "A2_SourceSiteContactFirstName",
-  "A2_SourceSiteContactLastName",
-  "A2_SourceSiteContactCompany",
-  "A2_SourceSiteContactAddress",
-  "A2_SourceSiteContactCity",
-  "SourceSiteContactphoneNumber",
-  "A2_SourceSiteContactEmail",
-  "A3_SourcesiteIdentificationNumberSiteIdIfAvailable",
-  "A3_SourceSiteLatitude_Degrees",
-  "A3_SourceSiteLatitude_Minutes",
-  "A3_SourceSiteLatitude_Seconds",
-  "A3_SourceSiteLongitude_Degrees",
-  "A3_SourceSiteLongitude_Minutes",
-  "A3_SourceSiteLongitude_Seconds",
-  "SourcelandOwnership_checkbox",
-  "A_LegallyTitled_AddressSource",
-  "A_LegallyTitled_CitySource",
-  "A_LegallyTitled_PostalZipCodeSource",
-  "SourceSiteregionalDistrict",
-  "dataGrid",
-  "FirstAdditionalReceivingsiteuploadLandTitleRecord",
-  "dataGrid1",
-  "A_UntitledCrownLand_FileNumberColumnSource",
-  "A_UntitledMunicipalLand_PIDColumnSource",
-  "A4_schedule2ReferenceSourceSite",
-  "isTheSourceSiteHighRisk",
-  "A5_PurposeOfSoilExcavationSource",
-  "B4_currentTypeOfSoilStorageEGStockpiledInSitu1Source",
-  "dataGrid9",
-  "B2_describeSoilCharacterizationMethod1",
-  "uploadSoilAnalyticalData",
-  "B3_yesOrNoVapourexemptionsource",
-  "B3_ifExemptionsApplyPleaseDescribe",
-  "B3_describeVapourCharacterizationMethod",
-  "uploadVapourAnalyticalData1",
-  "B4_soilRelocationEstimatedStartDateMonthDayYear",
-  "B4_soilRelocationEstimatedCompletionDateMonthDayYear",
-  "B4_RelocationMethod",
-  "D1_FirstNameQualifiedProfessional",
-  "LastNameQualifiedProfessional",
-  "D1_TypeofQP1",
-  "D1_professionalLicenseRegistrationEGPEngRpBio",
-  "D1_organization1QualifiedProfessional",
-  "D1_streetAddress1QualifiedProfessional",
-  "D1_city1QualifiedProfessional",
-  "D1_provinceState3QualifiedProfessional",
-  "D1_canadaQualifiedProfessional",
-  "D1_postalZipCode3QualifiedProfessional",
-  "simplephonenumber1QualifiedProfessional",
-  "EmailAddressQualifiedProfessional",
-  "D2_soilDepositIsInTheAgriculturalLandReserveAlr",
-  "D2_soilDepositIsInTheReserveLands",
-  "createAt", # not in soilsAttributes, but in submissionsJson
-  "confirmationId", # not in soilsAttributes, but in submissionsJson
-  "A3_SourceSiteLatitude",
-  "A3_SourceSiteLongitude",
+  "updateToPreviousForm",
+  "ownerFirstName",
+  "ownerLastName",
+  "ownerCompany",
+  "ownerAddress",
+  "ownerCity",
+  "ownerProvince",
+  "ownerCountry",
+  "ownerPostalCode",
+  "ownerPhoneNumber",
+  "ownerEmail",
+  "owner2FirstName",
+  "owner2LastName",
+  "owner2Company",
+  "owner2Address",
+  "owner2City",
+  "owner2PhoneNumber",
+  "owner2Email",
+  "additionalOwners",
+  "contactFirstName",
+  "contactLastName",
+  "contactCompany",
+  "contactAddress",
+  "contactCity",
+  "contactPhoneNumber",
+  "contactEmail",
+  "SID",
+  "latitude",
+  "longitude",
+  "regionalDistrict",  
+  "landOwnership",
+  "legallyTitledSiteAddress",
+  "legallyTitledSiteCity",
+  "legallyTitledSitePostalCode",
   "PID",
-  "PIN"
+  "legalLandDescription",
+  "PIN",
+  "crownLandFileNumbers",
+  "sourceSiteLandUse",
+  "highVolumneSite",
+  "soilRelocationPurpose",
+  "soilStorageType",
+  "soilVolume",
+  "soilQuality",
+  "soilCharacterMethod",
+  "vapourExemption",
+  "vapourExemptionDesc",
+  "vapourCharacterMethodDesc",
+  "soilRelocationStartDate",
+  "soilRelocationCompletionDate",
+  "relocationMethod",
+  "qualifiedProfessionalFirstName",
+	"qualifiedProfessionalLastName",
+	"qualifiedProfessionalType",
+	"professionalLicenceRegistration",
+	"qualifiedProfessionalOrganization",
+	"qualifiedProfessionalAddress",
+	"qualifiedProfessionalCity",
+	"qualifiedProfessionalProvince",
+	"qualifiedProfessionalCountry",
+	"qualifiedProfessionalPostalCode",
+	"qualifiedProfessionalPhoneNumber",
+	"qualifiedProfessionalEmail",
+  "signaturerFirstAndLastName",
+  "dateSigned",
+  "createAt", # not in soilsAttributes, but in submissionsJson
+  "confirmationId" # not in soilsAttributes, but in submissionsJson
 ]
 
 receivingSiteHeaders = [
@@ -795,122 +922,17 @@ hvSiteHeaders = [
   "PIN"
 ]
 
-sourceSites = [] # [''] * len(submissionsJson)
+sourceSites = []
 receivingSites = []
 rcvRegDistDic = {}
-testingCount1 = 0
 testingCount2 = 0
-# create source site, destination site records
+
+# create source site, receiving site records
 for submission in submissionsJson:
-  # print(submission)
-
-  # Mapping submission data to the source site ============================================================================================
-  sourceSiteData = [''] * 78
-  if submission.get("A1-FIRSTName") is not None : sourceSiteData[0] = submission["A1-FIRSTName"]
-  if submission.get("A1-LASTName") is not None : sourceSiteData[1] = submission["A1-LASTName"]
-  if submission.get("A1-Company") is not None : sourceSiteData[2] = submission["A1-Company"]
-  if submission.get("A1-Address") is not None : sourceSiteData[3] = submission["A1-Address"]
-  if submission.get("A1-City") is not None : sourceSiteData[4] = submission["A1-City"]
-  if submission.get("A1-ProvinceState") is not None : sourceSiteData[5] = submission["A1-ProvinceState"]
-  if submission.get("A1-Country") is not None : sourceSiteData[6] = submission["A1-Country"]
-  if submission.get("A1-PostalZipCode") is not None : sourceSiteData[7] = submission["A1-PostalZipCode"]
-  if submission.get("A1-Phone") is not None : sourceSiteData[8] = submission["A1-Phone"]
-  if submission.get("A1-Email") is not None : sourceSiteData[9] = submission["A1-Email"]
-  if submission.get("A1-checkbox-extraowners") is not None : sourceSiteData[10] = submission["A1-checkbox-extraowners"]
-  if submission.get("A1-additionalownerFIRSTName") is not None : sourceSiteData[11] = submission["A1-additionalownerFIRSTName"] #
-  if submission.get("A1-additionalownerLASTName1") is not None : sourceSiteData[12] = submission["A1-additionalownerLASTName1"] #
-  if submission.get("A1-additionalownerCompany1") is not None : sourceSiteData[13] = submission["A1-additionalownerCompany1"] #
-  if submission.get("A1-additionalownerAddress1") is not None : sourceSiteData[14] = submission["A1-additionalownerAddress1"] #
-  if submission.get("A1-additionalownerCity1") is not None : sourceSiteData[15] = submission["A1-additionalownerCity1"] #
-  if submission.get("A1-additionalownerPhone1") is not None : sourceSiteData[16] = submission["A1-additionalownerPhone1"] #
-  if submission.get("A1-additionalownerEmail1") is not None : sourceSiteData[17] = submission["A1-additionalownerEmail1"] #
-  if submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : sourceSiteData[18] = submission["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
-  if submission.get("A1-SourceSiteContact-sameAsAbove") is not None : sourceSiteData[19] = submission["A1-SourceSiteContact-sameAsAbove"]
-  if submission.get("A2-SourceSiteContactFirstName") is not None : sourceSiteData[20] = submission["A2-SourceSiteContactFirstName"]
-  if submission.get("A2-SourceSiteContactLastName") is not None : sourceSiteData[21] = submission["A2-SourceSiteContactLastName"]
-  if submission.get("A2-SourceSiteContactCompany") is not None : sourceSiteData[22] = submission["A2-SourceSiteContactCompany"]
-  if submission.get("A2-SourceSiteContactAddress") is not None : sourceSiteData[23] = submission["A2-SourceSiteContactAddress"]
-  if submission.get("A2-SourceSiteContactCity") is not None : sourceSiteData[24] = submission["A2-SourceSiteContactCity"]
-  if submission.get("SourceSiteContactphoneNumber") is not None : sourceSiteData[25] = submission["SourceSiteContactphoneNumber"]
-  if submission.get("A2-SourceSiteContactEmail") is not None : sourceSiteData[26] = submission["A2-SourceSiteContactEmail"]
-  if submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable") is not None : sourceSiteData[27] = submission["A3-SourcesiteIdentificationNumberSiteIdIfAvailable"]
-  if submission.get("A3-SourceSiteLatitude-Degrees") is not None : sourceSiteData[28] = submission["A3-SourceSiteLatitude-Degrees"]
-  if submission.get("A3-SourceSiteLatitude-Minutes") is not None : sourceSiteData[29] = submission["A3-SourceSiteLatitude-Minutes"]
-  if submission.get("A3-SourceSiteLatitude-Seconds") is not None : sourceSiteData[30] = submission["A3-SourceSiteLatitude-Seconds"]
-  if submission.get("A3-SourceSiteLongitude-Degrees") is not None : sourceSiteData[31] = submission["A3-SourceSiteLongitude-Degrees"]
-  if submission.get("A3-SourceSiteLongitude-Minutes") is not None : sourceSiteData[32] = submission["A3-SourceSiteLongitude-Minutes"]
-  if submission.get("A3-SourceSiteLongitude-Seconds") is not None : sourceSiteData[33] = submission["A3-SourceSiteLongitude-Seconds"]
-  if submission.get("SourcelandOwnership-checkbox") is not None : sourceSiteData[34] = submission["SourcelandOwnership-checkbox"]
-  if submission.get("A-LegallyTitled-AddressSource") is not None : sourceSiteData[35] = submission["A-LegallyTitled-AddressSource"]
-  if submission.get("A-LegallyTitled-CitySource") is not None : sourceSiteData[36] = submission["A-LegallyTitled-CitySource"]
-  if submission.get("A-LegallyTitled-PostalZipCodeSource") is not None : sourceSiteData[37] = submission["A-LegallyTitled-PostalZipCodeSource"]
-  if submission.get("SourceSiteregionalDistrict") is not None : sourceSiteData[38] = submission["SourceSiteregionalDistrict"]
-  #if submission.get("dataGrid") is not None : sourceSiteData[39] = submission["dataGrid"]
-  #if submission.get("FirstAdditionalReceivingsiteuploadLandTitleRecord") is not None : sourceSiteData[40] = submission["FirstAdditionalReceivingsiteuploadLandTitleRecord"]
-  #if submission.get("dataGrid1") is not None : sourceSiteData[41] = submission["dataGrid1"]
-  #if submission.get("A-UntitledCrownLand-FileNumberColumnSource") is not None : sourceSiteData[42] = submission["A-UntitledCrownLand-FileNumberColumnSource"]
-  #if submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None : sourceSiteData[43] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
-  #if submission.get("A4-schedule2ReferenceSourceSite") is not None : sourceSiteData[44] = submission["A4-schedule2ReferenceSourceSite"]
-  if submission.get("isTheSourceSiteHighRisk") is not None : sourceSiteData[45] = submission["isTheSourceSiteHighRisk"]
-  if submission.get("A5-PurposeOfSoilExcavationSource") is not None : sourceSiteData[46] = submission["A5-PurposeOfSoilExcavationSource"]
-  if submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source") is not None : sourceSiteData[47] = submission["B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source"]
-  #if submission.get("dataGrid9") is not None : sourceSiteData[48] = submission["dataGrid9"]
-  if submission.get("B2-describeSoilCharacterizationMethod1") is not None : sourceSiteData[49] = submission["B2-describeSoilCharacterizationMethod1"]
-  #if submission.get("uploadSoilAnalyticalData") is not None : sourceSiteData[50] = submission["uploadSoilAnalyticalData"]
-  if submission.get("B3-yesOrNoVapourexemptionsource") is not None : sourceSiteData[51] = submission["B3-yesOrNoVapourexemptionsource"]
-  if submission.get("B3-ifExemptionsApplyPleaseDescribe") is not None : sourceSiteData[52] = submission["B3-ifExemptionsApplyPleaseDescribe"]
-  if submission.get("B3-describeVapourCharacterizationMethod") is not None : sourceSiteData[53] = submission["B3-describeVapourCharacterizationMethod"]
-  #if submission.get("uploadVapourAnalyticalData1") is not None : sourceSiteData[54] = submission["uploadVapourAnalyticalData1"]
-  if submission.get("B4-soilRelocationEstimatedStartDateMonthDayYear") is not None : sourceSiteData[55] = submission["B4-soilRelocationEstimatedStartDateMonthDayYear"]
-  if submission.get("B4-soilRelocationEstimatedCompletionDateMonthDayYear") is not None : sourceSiteData[56] = submission["B4-soilRelocationEstimatedCompletionDateMonthDayYear"]
-  if submission.get("B4-RelocationMethod") is not None : sourceSiteData[57] = submission["B4-RelocationMethod"]
-  if submission.get("D1-FirstNameQualifiedProfessional") is not None : sourceSiteData[58] = submission["D1-FirstNameQualifiedProfessional"]
-  if submission.get("LastNameQualifiedProfessional") is not None : sourceSiteData[59] = submission["LastNameQualifiedProfessional"]
-  if submission.get("D1-TypeofQP1") is not None : sourceSiteData[60] = submission["D1-TypeofQP1"]
-  if submission.get("D1-professionalLicenseRegistrationEGPEngRpBio") is not None : sourceSiteData[61] = submission["D1-professionalLicenseRegistrationEGPEngRpBio"]
-  if submission.get("D1-organization1QualifiedProfessional") is not None : sourceSiteData[62] = submission["D1-organization1QualifiedProfessional"]
-  if submission.get("D1-streetAddress1QualifiedProfessional") is not None : sourceSiteData[63] = submission["D1-streetAddress1QualifiedProfessional"]
-  if submission.get("D1-city1QualifiedProfessional") is not None : sourceSiteData[64] = submission["D1-city1QualifiedProfessional"]
-  if submission.get("D1-provinceState3QualifiedProfessional") is not None : sourceSiteData[65] = submission["D1-provinceState3QualifiedProfessional"]
-  if submission.get("D1-canadaQualifiedProfessional") is not None : sourceSiteData[66] = submission["D1-canadaQualifiedProfessional"]
-  if submission.get("D1-postalZipCode3QualifiedProfessional") is not None : sourceSiteData[67] = submission["D1-postalZipCode3QualifiedProfessional"]
-  if submission.get("simplephonenumber1QualifiedProfessional") is not None : sourceSiteData[68] = submission["simplephonenumber1QualifiedProfessional"]
-  if submission.get("EmailAddressQualifiedProfessional") is not None : sourceSiteData[69] = submission["EmailAddressQualifiedProfessional"]
-  if submission.get("D2-soilDepositIsInTheAgriculturalLandReserveAlr") is not None : sourceSiteData[70] = submission["D2-soilDepositIsInTheAgriculturalLandReserveAlr"]
-  if submission.get("D2-soilDepositIsInTheReserveLands") is not None : sourceSiteData[71] = submission["D2-soilDepositIsInTheReserveLands"]
-  if submission.get("form") is not None : 
-    formStr = json.dumps(submission.get("form"))
-    formJson = json.loads(formStr)
-    _createdAt = datetime.datetime.strptime(formJson['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-    confirmationId = formJson['confirmationId']
-    # not in attributes, but in json
-    if _createdAt is not None : sourceSiteData[72] = _createdAt
-    if confirmationId is not None : sourceSiteData[73] = confirmationId
-
-  _sourceSiteLatLon = convert_deciaml_lat_long(sourceSiteData[28], sourceSiteData[29], sourceSiteData[30], sourceSiteData[31], sourceSiteData[32], sourceSiteData[33])
-  #for testing
-  #sourceSiteData[74] = _sourceSiteLatLon[0] # source site latitude
-  #sourceSiteData[75] = _sourceSiteLatLon[1] # source site longitude
-  sourceSiteData[74] = testSrcLats[testingCount1]
-  sourceSiteData[75] = testSrcLons[testingCount1]
-  testingCount1 = testingCount1 +1
-
-  #PID
-  if submission.get("dataGrid") is not None : 
-    for dg in submission.get("dataGrid"):
-      if dg["A-LegallyTitled-PID"] is not None and dg["A-LegallyTitled-PID"] != '':
-        sourceSiteData[76] = dg["A-LegallyTitled-PID"]
-        break
-  #PIN
-  """
-  if submission.get("dataGrid1") is not None : 
-    for dg1 in submission.get("dataGrid1"):
-      if dg1["A-UntitledPINSource"] is not None and dg1["A-UntitledPINSource"] != '':
-        sourceSiteData[77] = dg1["A-UntitledPINSource"]
-        break
-  """
-  sourceSites.append(sourceSiteData)
-
+  # Mapping submission data to the source site =====================================================================
+  _srcDic = map_source_site(submission)
+  if _srcDic:
+    sourceSites.append(_srcDic)
 
   # Mapping submission data to the receiving site =================================================================
   _1rcvDic = map_rcv_1st_rcver(submission)
@@ -930,10 +952,10 @@ for submission in submissionsJson:
   
 
 
-
-hvSites = [] # [''] * len(hvsJson)
+hvSites = []
 hvSitesDic = {}
 testingCount3 = 0
+
 # create high volumn site records
 for hvs in hvsJson:
   # print(hvs)
@@ -1059,46 +1081,19 @@ for hvs in hvsJson:
 
 
 
-"""
+
 print('Creating soil source site CSV...')
-with open(srcCSV, 'w', encoding='UTF8', newline='') as f:  
-  writer = csv.writer(f)
-  writer.writerow(sourceSiteHeaders)
+with open(SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
+  writer = csv.DictWriter(f, fieldnames=sourceSiteHeaders)
+  writer.writeheader()
+  writer.writerows(sourceSites)
 
-  print('Parsing ' + str(len(submissionsJson)) + ' submission forms.')
-  # print(sourceSites)
-  for ss in sourceSites:
-    # print(ss)
-    data = [] # the source data to inject into the csv    
-    for ssData in ss:
-      data.append(ssData)
-    writer.writerow(data)      
-"""
-"""
-
-with open(rcvCSV, 'w', encoding='UTF8', newline='') as f:  
-  writer = csv.writer(f)
-  writer.writerow(receivingSiteHeaders)
-
-  print('Parsing ' + str(len(submissionsJson)) + ' submission forms.')
-  # print(receivingSites)
-  for rsDic in receivingSites:
-    _data = [] # the receiving data to inject into the csv
-    for key, value in rsDic.items():
-      if type(value) == list:
-        value = "\"" + ",".join(value) + "\""
-      #elif type(value) == dict:
-      _data.append(value)
-
-    writer.writerow(_data)          
-"""
-"""
-print('Creating soil destination site CSV...')
-with open(rcvCSV, 'w', encoding='UTF8', newline='') as f:
+print('Creating soil receiving site CSV...')
+with open(RECEIVE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=receivingSiteHeaders)
   writer.writeheader()
   writer.writerows(receivingSites)
-"""
+
 
 """
 print('Creating soil high volume site CSV...')
@@ -1117,41 +1112,58 @@ with open(hvCSV, 'w', encoding='UTF8', newline='') as f:
 """
 
 
-"""
+
 print('Connecting to AGOL GIS...')
 # connect to GIS
 gis = GIS(maphubUrl, username=maphubUser, password=maphubPass)
 
 print('Updating Soil Relocation Soruce Site CSV...')
 srcCsvItem = gis.content.get(srcCSVId)
-srcCsvUpdateResult = srcCsvItem.update({}, srcCSV)
-print('Updating Soil Relocation Soruce Site Feature Layer...')
-srcLyrItem = gis.content.get(srcLayerId)
-srcFlc = FeatureLayerCollection.fromitem(srcLyrItem)
-srcLyrOverwriteResult = srcFlc.manager.overwrite(srcCSV)
+if srcCsvItem is None:
+  print('Error: Source Site CSV Item ID is invalid!')
+else:
+  srcCsvUpdateResult = srcCsvItem.update({}, SOURCE_CSV_FILE)
+  print('Updated Soil Relocation Source Site CSV sucessfully: ' + str(srcCsvUpdateResult))
+
+  print('Updating Soil Relocation Soruce Site Feature Layer...')
+  srcLyrItem = gis.content.get(srcLayerId)
+  if srcLyrItem is None:
+    print('Error: Source Site Layter Item ID is invalid!')
+  else:
+    srcFlc = FeatureLayerCollection.fromitem(srcLyrItem)
+    srcLyrOverwriteResult = srcFlc.manager.overwrite(SOURCE_CSV_FILE)
+    print('Updated Soil Relocation Source Site Feature Layer sucessfully: ' + json.dumps(srcLyrOverwriteResult))
 
 print('Updating Soil Relocation Receiving Site CSV...')
 rcvCsvItem = gis.content.get(rcvCSVId)
-rcvCsvUpdateResult = rcvCsvItem.update({}, rcvCSV)
-print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(rcvCsvUpdateResult))
-print('Updating Soil Relocation Receiving Site Feature Layer...')
-rcvLyrItem = gis.content.get(rcvLayerId)
-rcvFlc = FeatureLayerCollection.fromitem(rcvLyrItem)
-rcvLyrOverwriteResult = rcvFlc.manager.overwrite(rcvCSV)
-print('Updated Soil Relocation Receiving Site Feature Layer sucessfully: ' + json.dumps(rcvLyrOverwriteResult))
+if rcvCsvItem is None:
+  print('Error: Receiving Site CSV Item ID is invalid!')
+else:
+  rcvCsvUpdateResult = rcvCsvItem.update({}, RECEIVE_CSV_FILE)
+  print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(rcvCsvUpdateResult))
 
+  print('Updating Soil Relocation Receiving Site Feature Layer...')
+  rcvLyrItem = gis.content.get(rcvLayerId)
+  if rcvLyrItem is None:
+    print('Error: Receiving Site Layer Item ID is invalid!')
+  else:    
+    rcvFlc = FeatureLayerCollection.fromitem(rcvLyrItem)
+    rcvLyrOverwriteResult = rcvFlc.manager.overwrite(RECEIVE_CSV_FILE)
+    print('Updated Soil Relocation Receiving Site Feature Layer sucessfully: ' + json.dumps(rcvLyrOverwriteResult))
+
+"""
 print('Updating High Volume Receiving Site CSV...')
 hvCsvItem = gis.content.get(hvCSVId)
-hvCsvUpdateResult = hvCsvItem.update({}, hvCSV)
+hvCsvUpdateResult = hvCsvItem.update({}, HIGH_VOLUME_CSV_FILE)
 print('Updating High Volume Receiving Site Feature Layer...')
 hvLyrItem = gis.content.get(hvLayerId)
 hvFlc = FeatureLayerCollection.fromitem(hvLyrItem)
-hvLyrOverwriteResult = hvFlc.manager.overwrite(hvCSV)
+hvLyrOverwriteResult = hvFlc.manager.overwrite(HIGH_VOLUME_CSV_FILE)
 """
 
 
 
-
+"""
 print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
@@ -1233,7 +1245,7 @@ for subscriber in subscribersJson:
     
     #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
     #if notifyOnHighVolumeSiteRegistrations == True:
-    """
+    
     for hvSiteData in hvSites:
 
       if counterTesting2 == 1:
@@ -1255,6 +1267,6 @@ for subscriber in subscribersJson:
             hvRegDis = convert_regional_district_to_name(rd)
             hvEmailMsg = create_hv_site_email_msg(hvRegDis, hvPopupLinks)
             send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, hvEmailMsg)
-    """
-
+    
+"""
 print('Completed Soils data publishing')
