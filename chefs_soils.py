@@ -26,15 +26,16 @@ HV_LAYER_ID = 'c1e349295bf14ee9bd8df89439b2cb80'
 WEB_MAP_APP_ID = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
 
 MAPHUB_URL = r'https://governmentofbc.maps.arcgis.com'
+WEBMAP_POPUP_URL = r'https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html'
 
 # Move these to a configuration file
-CHEFS_API_URL = 'https://submit.digital.gov.bc.ca/app/api/v1'
+CHEFS_API_URL = r'https://submit.digital.gov.bc.ca/app/api/v1'
 
-AUTH_URL = 'https://dev.oidc.gov.bc.ca' # dev
+AUTH_URL = r'https://dev.oidc.gov.bc.ca' # dev
 # AUTH_URL = 'https://test.oidc.gov.bc.ca' # test
 # AUTH_URL	= 'https://oidc.gov.bc.ca' # prod
 
-CHEFS_URL = 'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
+CHEFS_URL = r'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # CHEFS_URL = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
 # CHEFS_URL = 'https://ches.nrs.gov.bc.ca' # prod
 
@@ -80,7 +81,7 @@ REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional Dis
                                 , stikineRegionUnincorporated='Stikine Region (Unincorporated)')
 
 def send_mail(to_email, subject, message):
-  to_email = 'rjeong@vividsolutions.com'
+  to_email = 'rjeong@vividsolutions.com'  #testing SHOULD BE REMOVED!
   auth_pay_load = 'grant_type=client_credentials'
   auth_haders = {
     'Content-Type': 'application/x-www-form-urlencoded',
@@ -99,8 +100,8 @@ def send_mail(to_email, subject, message):
   }
   ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
   # print(chesResponse.text)
-  ches_content = json.loads(ches_response.content)
-  return ches_content
+  #ches_content = json.loads(ches_response.content)
+  return ches_response
 
 def is_json(string):
   try:
@@ -135,30 +136,29 @@ def create_site_relocation_email_msg(regional_district, popup_links):
             <p font-style:italic>'
     msg += popup_links
     msg += '</p><br/>'
-
-  msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
-          <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
-          <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-          Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
-          <ul>\
-          <li>click on the small arrow on the left of the screen  to open search options</li>\
-          <li>Filter by site address, regional district, high volume sites, and more.</li>\
-          <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>\
-          <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
-          </ul>\
-          <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
-
-  msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
-  msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
-  msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+    msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
+            <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
+            <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
+            Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
+            <ul>\
+            <li>click on the small arrow on the left of the screen  to open search options</li>\
+            <li>Filter by site address, regional district, high volume sites, and more.</li>\
+            <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>\
+            <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
+            </ul>\
+            <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+    msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
+    msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+    msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
+    msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   return msg
 
 def create_hv_site_email_msg(regional_district, popup_links):
-  msg = '<p>High Volume Receiving Site Registrations are received by the ministry under section 55.1 of the <i>Environmental Management Act</i>.  For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
+  msg = '<p>High Volume Receiving Site Registrations are received by the ministry under section 55.1 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
   msg += '<p>This email is to notify you that a registration for a high volume site has been received in Regional District: <span style=font-weight:bold;color:red;>'
   msg += regional_district
   msg += '</span></p>'
+
 
   if popup_links != "" and popup_links is not None:  
     msg += '<p>The following new high volume receiving site registration(s) were received.<p/>\
@@ -166,21 +166,23 @@ def create_hv_site_email_msg(regional_district, popup_links):
     msg += popup_links
     msg += '</p><br/>'
 
+
   msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
-          <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
-          <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-          Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
-          <ul>\
+            <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
+            <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
+            Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
+            <ul>\
             <li>click on the small arrow on the left of the screen to open search options</li>\
             <li>Filter by site address, regional district, high volume sites, and more.</li>\
             <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement</li>\
             <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
-          </ul>\
-          <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+            </ul>\
+            <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
   msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
   msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
   msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+
   return msg
 
 def convert_regional_district_to_name(id):
@@ -190,57 +192,43 @@ def convert_regional_district_to_name(id):
   else:
     return id
 
+def create_popup_link_body(_site_dic):
+  _link_body = ''
+
+  if _site_dic['SID'] is not None and _site_dic['SID'].strip() != '':
+    _link_body = urllib.parse.quote(_site_dic['SID']) #Site ID
+  elif _site_dic['PID'] is not None and _site_dic['PID'].strip() != '':
+    _link_body = urllib.parse.quote(_site_dic['PID']) #PID
+  elif _site_dic['PIN'] is not None and _site_dic['PIN'].strip() != '':
+    _link_body = urllib.parse.quote(_site_dic['PIN']) #PIN
+  elif (_site_dic['latitude'] is not None and _site_dic['latitude'].strip() != '') and (_site_dic['longitude'] is not None and _site_dic['longitude'].strip() != ''):
+    _link_body = urllib.parse.quote(_site_dic['latitude']+','+_site_dic['latitude']) #Site lat/lon
+  elif _site_dic['ownerAddress'] is not None and _site_dic['ownerAddress'].strip() != '':
+    _link_body = urllib.parse.quote(_site_dic['ownerAddress']) #Site Owner Address
+  elif _site_dic['ownerCompany'] is not None and _site_dic['ownerCompany'].strip() != '':
+    _link_body = urllib.parse.quote(_site_dic['ownerCompany'])  #Site Owner Company  
+
+  return _link_body
+
 # create links to popup on Map using receiving sites searching keywords
-def create_rcv_popup_links(rcv_sites):
-  _links = ''  
-  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + WEB_MAP_APP_ID + '&find='
-  link_suf = '>Link to new submission</a><br/>'
+def create_popup_links(sites, site_type):
+  _popup_links = '' 
 
-  if rcv_sites is not None:
-    for _rcv_site_dic in rcv_sites:
-      _links += link_prx
+  if sites is not None:
+    for _site_dic in sites:
+      _link_body = create_popup_link_body(_site_dic)
 
-      if _rcv_site_dic['SID'] is not None and _rcv_site_dic['SID'].strip() != '':
-        _links += urllib.parse.quote(_rcv_site_dic['SID']) #Site ID
-      elif _rcv_site_dic['PID'] is not None and _rcv_site_dic['PID'].strip() != '':
-        _links += urllib.parse.quote(_rcv_site_dic['PID']) #PID
-      elif _rcv_site_dic['PIN'] is not None and _rcv_site_dic['PIN'].strip() != '':
-        _links += urllib.parse.quote(_rcv_site_dic['PIN']) #PIN
-      elif _rcv_site_dic['latitude'] is not None and _rcv_site_dic['latitude'].strip() != '' and _rcv_site_dic['longitude'] is not None and _rcv_site_dic['longitude'].strip() != '':
-        _links += urllib.parse.quote(_rcv_site_dic['latitude']+','+_rcv_site_dic['latitude']) #Receiving Site lat/lon
-      elif _rcv_site_dic['ownerAddress'] is not None and _rcv_site_dic['ownerAddress'].strip() != '':
-        _links += urllib.parse.quote(_rcv_site_dic['ownerAddress']) #Receiving Site Owner Address
-      elif _rcv_site_dic['ownerCompany'] is not None and _rcv_site_dic['ownerCompany'].strip() != '':
-        _links += urllib.parse.quote(_rcv_site_dic['ownerCompany'])  #Receiving Site Owner Company
+      # create popup link
+      if _link_body != '' and (site_type  == 'SR' or site_type  == 'HV'): #SR: for Soil Relocation Notication, HV: High Volume Receiving Notification
+        _link = '<a href=' + WEBMAP_POPUP_URL + '?id=' + WEB_MAP_APP_ID + '&find=' 
+        _link += _link_body
+        if site_type  == 'SR':
+          _link += '>Link to new submission</a><br/>'
+        elif site_type  == 'HV':
+          _link += '>Link to new high volume receiving site registration</a><br/>'
 
-      _links += link_suf
-  return _links
-
-# high volume soil receiving sites
-def create_hv_popup_links(hv_sites):
-  _links = ''  
-  link_prx = '<a href=https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=' + WEB_MAP_APP_ID + '&find='
-  link_suf = '>Link to new high volume receiving site registration</a><br/>'
-
-  if hv_sites is not None:
-    for _hv_site_dic in hv_sites:
-      _links += link_prx
-
-      if _hv_site_dic['SID'] is not None and _hv_site_dic['SID'].strip() != '':
-        _links += urllib.parse.quote(_hv_site_dic['SID']) #Site ID
-      elif _hv_site_dic['PID'] is not None and _hv_site_dic['PID'].strip() != '':
-        _links += urllib.parse.quote(_hv_site_dic['PID']) #PID
-      elif _hv_site_dic['PIN'] is not None and _hv_site_dic['PIN'].strip() != '':
-        _links += urllib.parse.quote(_hv_site_dic['PIN']) #PIN
-      elif _hv_site_dic['latitude'] is not None and _hv_site_dic['latitude'].strip() != '' and _hv_site_dic['longitude'] is not None and _hv_site_dic['longitude'].strip() != '':
-        _links += urllib.parse.quote(_hv_site_dic['latitude']+','+_hv_site_dic['longitude']) #Receiving Site lat/lon
-      elif _hv_site_dic['ownerAddress'] is not None and _hv_site_dic['ownerAddress'].strip() != '':
-        _links += urllib.parse.quote(_hv_site_dic['ownerAddress']) #Receiving Site Owner Address
-      elif _hv_site_dic['ownerCompany'] is not None and _hv_site_dic['ownerCompany'].strip() != '':
-        _links += urllib.parse.quote(_hv_site_dic['ownerCompany'])  #Receiving Site Owner Company
-
-      _links += link_suf
-  return _links
+      _popup_links += _link
+  return _popup_links
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
   # Convert to DD in mapLatitude and mapLongitude
@@ -825,6 +813,13 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
         else:
           reg_dist_dic[_rd] = [_dic_copy]
 
+# check if boolen type is
+def is_boolean(_v):
+  _result = False
+  if type(_v) == bool: 
+    _result = True
+  return _result
+
 
 
 CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
@@ -837,20 +832,22 @@ CHES_API_KEY = os.getenv('CHES_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
 
-#print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
-#print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
-#print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
-#print(f"Value of env variable key='CHEFS_HV_API_KEY': {CHEFS_HV_API_KEY}")
-#print(f"Value of env variable key='CHEFS_MAIL_FORM_ID': {CHEFS_MAIL_FORM_ID}")
-#print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
-#print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
-#print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
-#print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
+"""
+print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
+print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
+print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
+print(f"Value of env variable key='CHEFS_HV_API_KEY': {CHEFS_HV_API_KEY}")
+print(f"Value of env variable key='CHEFS_MAIL_FORM_ID': {CHEFS_MAIL_FORM_ID}")
+print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
+print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
+print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
+print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
+"""
 
 # Fetch subscribers list
 print('Loading submission subscribers list...')
 subscribersJson = site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
-# print(subscribersJson)
+print(subscribersJson)
 print('Loading submission subscribers attributes and headers...')
 subscribeAttributes = fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribeAttributes)
@@ -1172,102 +1169,84 @@ else:
 print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
+# For new/old submissions, you'll have to compare the submission create date against the current script runtime. 
+# This may require finding a way to store a "last run time" for the script, or running the script once per day, 
+# and only sending submissions for where a create-date is within the last 24 hours.
 
 EMAIL_SUBJECT_SOIL_RELOCATION = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
 EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
 
 today = datetime.datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
 # print(today)
-counterTesting = 0
-counterTesting2 = 0
+for _subscriber in subscribersJson:
+  #print(_subscriber)
+  _subscriberEmail = None
+  _subscriberRegionalDistrict = [] # could be more than one
+  _unsubscribe = False
+  _notifyHVS = None
+  _notifySoilReloc = None
 
-for subscriber in subscribersJson:
-  print(subscriber)
+  if _subscriber.get("emailAddress") is not None : _subscriberEmail = _subscriber["emailAddress"]
+  if _subscriber.get("regionalDistrict") is not None : _subscriberRegionalDistrict = _subscriber["regionalDistrict"] 
+  if _subscriber.get("unsubscribe") is not None :
+    if (_subscriber["unsubscribe"]).get("unsubscribe") is not None :
+       if is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
+          _unsubscribe = _subscriber["unsubscribe"]["unsubscribe"]
 
-  if counterTesting == 1:
-    break
-  counterTesting = 1
+  if _subscriber.get("notificationSelection") is not None : 
+    _noticeSelection = _subscriber["notificationSelection"]
+    if _noticeSelection.get('notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict') is not None:
+      if is_boolean(_noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
+        _notifyHVS = _noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']
+    if _noticeSelection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
+      if is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
+        _notifySoilReloc = _noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
 
-  subscriberEmail = ''
-  subscriberRegionalDistrict = [] # could be more than one
-  notifyOnHighVolumeSiteRegistrations = False
-  notifyOnSoilRelocationsInSelectedDistrict = False
-  unsubscribe = False
-
-  if subscriber.get("emailAddress") is not None : subscriberEmail = subscriber["emailAddress"]
-  if subscriber.get("regionalDistrict") is not None : subscriberRegionalDistrict = subscriber["regionalDistrict"] 
-  if subscriber.get("notificationSelection") is not None : 
-    notificationSelectionStr = json.dumps(subscriber["notificationSelection"])
-    notificationSelectionJson = json.loads(notificationSelectionStr)
-    notifyOnHighVolumeSiteRegistrations = notificationSelectionJson['notifyOnHighVolumeSiteRegistrations']
-    notifyOnSoilRelocationsInSelectedDistrict = notificationSelectionJson['notifyOnSoilRelocationsInSelectedDistrict']
-  if subscriber.get("notificationSelection1") is not None : 
-    notificationSelection1Str = json.dumps(subscriber["notificationSelection1"])
-    notificationSelection1Json = json.loads(notificationSelection1Str)
-    unsubscribe = notificationSelection1Json['unsubscribe']
-
-  # print('subscriberEmail:' + subscriberEmail)
-  # print(regionalDistrict)
-  # print(notifyOnHighVolumeSiteRegistrations)
-  # print(notifyOnSoilRelocationsInSelectedDistrict)
-  # print(unsubscribe)
-
-  if subscriberEmail is not None and subscriberRegionalDistrict is not None and unsubscribe == False:
+  if (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
+      _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and
+      _unsubscribe == False and 
+      (
+        _notifyHVS == True or
+        _notifySoilReloc == True
+      )):
 
     # Notification of soil relocation in selected Regional District(s)  =========================================================
-    if notifyOnSoilRelocationsInSelectedDistrict == True:
+    if _notifySoilReloc == True:
       for _receivingSiteDic in receivingSites:
-
-        if counterTesting2 == 1:
-          break
-        counterTesting2 = 1
-
-        # For new/old submissions, you'll have to compare the submission create date against the current script runtime. 
-        # This may require finding a way to store a "last run time" for the script, or running the script once per day, 
-        # and only sending submissions for where a create-date is within the last 24 hours.
-        # d1 = datetime.datetime.utcfromtimestamp(receivingSiteData[140])
         _createdAt = _receivingSiteDic['createAt']
         # print(_createdAt)
         _daysDiff = (today - _createdAt).days
         # print(_daysDiff)
 
         if (_daysDiff >= 1):
-          for _srd in subscriberRegionalDistrict:
+          for _srd in _subscriberRegionalDistrict:
             # finding if subscriber's regional district in receiving site registration
             _rcvSitesInRD = rcvRegDistDic.get(_srd)
-            _rcvPopupLinks = create_rcv_popup_links(_rcvSitesInRD)
-
-            #for testing the following condition line commented out, SHOULD BE UNCOMMENT OUT after testing!!!!
-            #if receivingSiteData[31] == regionalDistrict: # ReceivingSiteregionalDistrict
+            _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
             if _rcvSitesInRD is not None:
               _regDis = convert_regional_district_to_name(_srd)
               _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
-              send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
+              _ches_response = send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
+              print("CHEFS response: " + json.loads(_ches_response.status_code))
 
-
-    # Notification of high volume site registration in selected Regional District(s) =========================================================        
-    if notifyOnHighVolumeSiteRegistrations == True:
+    # Notification of high volume site registration in selected Regional District(s) ============================================
+    if _notifyHVS == True:
       for _hvSiteDic in hvSites:
-
-        if counterTesting2 == 1:
-          break
-        counterTesting2 = 1
-
         _createdAt = _hvSiteDic['createAt'] 
         # print(createdAt)
         _daysDiff = (today - _createdAt).days
         # print(daysDiff)
 
         if (_daysDiff >= 1):
-          for _srd in subscriberRegionalDistrict:
+          for _srd in _subscriberRegionalDistrict:
             # finding if subscriber's regional district in high volume receiving site registration
             _hvSitesInRD = hvRegDistDic.get(_srd)
-            _hvPopupLinks = create_hv_popup_links(_hvSitesInRD)
+            _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
 
             if _hvSitesInRD is not None:
               _hvRegDis = convert_regional_district_to_name(_srd)
               _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
-              send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
-    
+              _ches_response = send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
+              print("CHEFS response: " + json.loads(_ches_response.status_code))
 
 print('Completed Soils data publishing')
