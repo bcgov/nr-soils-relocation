@@ -100,7 +100,7 @@ def send_mail(to_email, subject, message):
   }
   ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
   # print(chesResponse.text)
-  #ches_content = json.loads(ches_response.content)
+  _ches_content = json.loads(ches_response.content)
   return ches_response
 
 def is_json(string):
@@ -832,7 +832,7 @@ CHES_API_KEY = os.getenv('CHES_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
 
-"""
+
 print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
 print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
 print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
@@ -842,7 +842,7 @@ print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
 print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
 print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
 print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
-"""
+
 
 # Fetch subscribers list
 print('Loading submission subscribers list...')
@@ -1218,7 +1218,7 @@ for _subscriber in subscribersJson:
         _daysDiff = (today - _createdAt).days
         # print(_daysDiff)
 
-        if (_daysDiff >= 1):
+        if (_daysDiff <= 1):
           for _srd in _subscriberRegionalDistrict:
             # finding if subscriber's regional district in receiving site registration
             _rcvSitesInRD = rcvRegDistDic.get(_srd)
@@ -1226,8 +1226,8 @@ for _subscriber in subscribersJson:
             if _rcvSitesInRD is not None:
               _regDis = convert_regional_district_to_name(_srd)
               _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
-              _ches_response = send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
-              print("CHEFS response: " + json.loads(_ches_response.status_code))
+              _ches_response = send_mail(_subscriberEmail, EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
+              print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
 
     # Notification of high volume site registration in selected Regional District(s) ============================================
     if _notifyHVS == True:
@@ -1237,7 +1237,7 @@ for _subscriber in subscribersJson:
         _daysDiff = (today - _createdAt).days
         # print(daysDiff)
 
-        if (_daysDiff >= 1):
+        if (_daysDiff <= 1):
           for _srd in _subscriberRegionalDistrict:
             # finding if subscriber's regional district in high volume receiving site registration
             _hvSitesInRD = hvRegDistDic.get(_srd)
@@ -1246,7 +1246,7 @@ for _subscriber in subscribersJson:
             if _hvSitesInRD is not None:
               _hvRegDis = convert_regional_district_to_name(_srd)
               _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
-              _ches_response = send_mail('rjeong@vividsolutions.com', EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
-              print("CHEFS response: " + json.loads(_ches_response.status_code))
+              _ches_response = send_mail(_subscriberEmail, EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
+              print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
 
 print('Completed Soils data publishing')
