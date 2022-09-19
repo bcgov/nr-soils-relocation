@@ -39,17 +39,6 @@ CHEFS_URL = r'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # CHEFS_URL = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
 # CHEFS_URL = 'https://ches.nrs.gov.bc.ca' # prod
 
-
-
-testSrcLats = ['53.89428','58.0151','57.07397','55.56444']
-testSrcLons = ['-122.6543','-115.7708','-119.22593','-125.04611']
-
-testRcvLats = ['54.046489','53.317749','52.462704','51.788232']
-testRcvLons = ['-127.023798','-124.95887','-126.265493','-123.377022']
-
-testHVLats = ['51.590723','51.672555','52.153714','52.321911']
-testHVLons = ['-121.805686','-124.65016','-125.738196','-123.519695']
-
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
 REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
                                 , caribooRegionalDistrict='Cariboo Regional District'
@@ -98,10 +87,13 @@ def send_mail(to_email, subject, message):
   'Content-Type': 'application/json',
   'Authorization': 'Bearer ' + access_token
   }
-  ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
+
+  #ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
   # print(chesResponse.text)
-  _ches_content = json.loads(ches_response.content)
-  return ches_response
+  #_ches_content = json.loads(ches_response.content)
+
+  return None
+  #return ches_response
 
 def is_json(string):
   try:
@@ -232,7 +224,6 @@ def create_popup_links(sites, site_type):
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
   # Convert to DD in mapLatitude and mapLongitude
-  data = []
   if (lat_deg is not None and lat_deg != '' and
       lat_min is not None and lat_min != '' and
       lat_sec is not None and lat_sec != '' and
@@ -242,16 +233,10 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
   ):
     lat_dd = (float(lat_deg) + float(lat_min)/60 + float(lat_sec)/(60*60))
     lon_dd = - (float(lon_deg) + float(lon_min)/60 + float(lon_sec)/(60*60))
-
-    data.append(lat_dd)
-    data.append(lon_dd)
-
-  return data
+  return lat_dd, lon_dd
 
 def map_source_site(submission):
   _src_dic = {}
-  testing_count2 = 0
-
   if (
     submission.get("A3-SourceSiteLatitude-Degrees") is not None and
     submission.get("A3-SourceSiteLatitude-Minutes") is not None and
@@ -296,15 +281,11 @@ def map_source_site(submission):
 
     if submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable") is not None : _src_dic['SID'] = submission["A3-SourcesiteIdentificationNumberSiteIdIfAvailable"]
 
-    # convert lat/lon
-    _src_lat_lon = convert_deciaml_lat_long(
+    _src_lat, _src_lon = convert_deciaml_lat_long(
       submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
-    #_src_dic['latitude'] = _src_lat_lon[0]
-    #_src_dic['longitude'] = _src_lat_lon[0]
-    _src_dic['latitude'] = testSrcLats[testing_count2] #for testing
-    _src_dic['longitude'] = testSrcLons[testing_count2] #for testing
-    testing_count2 = testing_count2 + 1
+    _src_dic['latitude'] = _src_lat
+    _src_dic['longitude'] = _src_lon
 
     if submission.get("SourceSiteregionalDistrict") is not None and len(submission['SourceSiteregionalDistrict']) > 0 : 
       _src_dic['regionalDistrict'] = "\"" + ",".join(submission["SourceSiteregionalDistrict"]) + "\""   # could be more than one
@@ -388,7 +369,6 @@ def map_source_site(submission):
 
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
-  testing_count2 = 0
   if (
     submission.get("C2-Latitude-DegreesReceivingSite") is not None and
     submission.get("C2-Latitude-MinutesReceivingSite") is not None and
@@ -428,20 +408,15 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C2-RSC-Email") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite"]
 
-    # convert lat/lon
-    _rcv_lat_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
       submission["C2-Latitude-DegreesReceivingSite"], submission["C2-Latitude-MinutesReceivingSite"], submission["Section2-Latitude-Seconds1ReceivingSite"], 
       submission["C2-Longitude-DegreesReceivingSite"], submission["C2-Longitude-MinutesReceivingSite"], submission["C2-Longitude-SecondsReceivingSite"])
-    #_rcv_dic['latitude'] = _rcv_lat_lon[0]
-    #_rcv_dic['longitude'] = _rcv_lat_lon[0]
-    _rcv_dic['latitude'] = testRcvLats[testing_count2] #for testing
-    _rcv_dic['longitude'] = testRcvLons[testing_count2] #for testing
-    testing_count2 = testing_count2 + 1
+    _rcv_dic['latitude'] = _rcv_lat
+    _rcv_dic['longitude'] = _rcv_lon
 
     if submission.get("ReceivingSiteregionalDistrict") is not None and len(submission['ReceivingSiteregionalDistrict']) > 0 : 
       _rcv_dic['regionalDistrict'] = "\"" + ",".join(submission["ReceivingSiteregionalDistrict"]) + "\""
 
-    #if submission.get("ReceivingSiteregionalDistrict") is not None and len(submission['ReceivingSiteregionalDistrict']) > 0 : _rcvDic['regionalDistrict'] = submission["ReceivingSiteregionalDistrict"][0] # could be more than one, but take only one
     if submission.get("C2-receivinglandOwnership-checkbox") is not None : _rcv_dic['landOwnership'] = submission["C2-receivinglandOwnership-checkbox"]
     if submission.get("C2-LegallyTitled-AddressReceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-AddressReceivingSite"]
     if submission.get("C2-LegallyTitled-CityReceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-CityReceivingSite"]
@@ -482,7 +457,6 @@ def map_rcv_1st_rcver(submission):
 
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
-  testing_count2 = 0
   if (
     submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite") is not None and
     submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite") is not None and
@@ -522,15 +496,11 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C2-RSC-Email1AdditionalReceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email1AdditionalReceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite"]
 
-    # convert lat/lon
-    _rcv_lat_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Latitude-Minutes1FirstAdditionalReceivingSite"], submission["Section2-Latitude-Seconds2FirstAdditionalReceivingSite"], 
       submission["C2-Longitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Longitude-Minutes1FirstAdditionalReceivingSite"], submission["C2-Longitude-Seconds1FirstAdditionalReceivingSite"])
-    #_rcv_dic['latitude'] = _rcv_lat_lon[0]
-    #_rcv_dic['longitude'] = _rcv_lat_lon[0]
-    _rcv_dic['latitude'] = testRcvLats[testing_count2] #for testing
-    _rcv_dic['longitude'] = testRcvLons[testing_count2] #for testing
-    testing_count2 = testing_count2 + 1
+    _rcv_dic['latitude'] = _rcv_lat
+    _rcv_dic['longitude'] = _rcv_lon
 
     if submission.get("FirstAdditionalReceivingSiteregionalDistrict1") is not None and len(submission['FirstAdditionalReceivingSiteregionalDistrict1']) > 0 : 
       _rcv_dic['regionalDistrict'] = "\"" + ",".join(submission["FirstAdditionalReceivingSiteregionalDistrict1"]) + "\""
@@ -550,7 +520,6 @@ def map_rcv_2nd_rcver(submission):
       if _dg6.get("legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg6["legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite"]
     elif submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None : _rcv_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumn2"]
 
-    #if submission.get("C3-soilClassification2FirstAdditionalReceivingSite") is not None : _rcvDic['receivingSiteLandUse'] = submission["C3-soilClassification2FirstAdditionalReceivingSite"]
     if submission.get("C3-soilClassification2FirstAdditionalReceivingSite") is not None : 
       _land_uses = []
       for _k, _v in submission["C3-soilClassification2FirstAdditionalReceivingSite"].items():
@@ -576,7 +545,6 @@ def map_rcv_2nd_rcver(submission):
 
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
-  testing_count2 = 0
   if (
     submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite") is not None and
     submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite") is not None and
@@ -616,15 +584,11 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C2-RSC-Email3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
 
-    # convert lat/lon
-    _rcv_lat_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"], submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"], 
       submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"], submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"])
-    #_rcv_dic['latitude'] = _rcv_lat_lon[0]
-    #_rcv_dic['longitude'] = _rcv_lat_lon[0]
-    _rcv_dic['latitude'] = testRcvLats[testing_count2] #for testing
-    _rcv_dic['longitude'] = testRcvLons[testing_count2] #for testing
-    testing_count2 = testing_count2 + 1
+    _rcv_dic['latitude'] = _rcv_lat
+    _rcv_dic['longitude'] = _rcv_lon
 
     if submission.get("SecondAdditionalReceivingSiteregionalDistrict") is not None and len(submission['SecondAdditionalReceivingSiteregionalDistrict']) > 0 : 
       _rcv_dic['regionalDistrict'] = "\"" + ",".join(submission["SecondAdditionalReceivingSiteregionalDistrict"]) + "\""
@@ -644,7 +608,6 @@ def map_rcv_3rd_rcver(submission):
       if _dg7.get("UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg7["UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite"]
     elif submission.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None : _rcv_dic['legalLandDescription'] = submission["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
 
-    #if submission.get("C3-soilClassification4SecondAdditionalreceivingSite") is not None : _rcvDic['receivingSiteLandUse'] = submission["C3-soilClassification4SecondAdditionalreceivingSite"]
     if submission.get("C3-soilClassification4SecondAdditionalreceivingSite") is not None : 
       _land_uses = []
       for _k, _v in submission["C3-soilClassification4SecondAdditionalreceivingSite"].items():
@@ -652,7 +615,6 @@ def map_rcv_3rd_rcver(submission):
           _land_uses.append(_k)
       if len(_land_uses) > 0:
         _rcv_dic['receivingSiteLandUse'] = "\""+ ",".join(_land_uses) + "\""
-
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
@@ -671,8 +633,6 @@ def map_rcv_3rd_rcver(submission):
 
 def map_hv_site(hvs):
   _hv_dic = {}
-  testingCount3 = 0
-
   if (
     hvs.get("Section3-Latitude-Degrees") is not None and
     hvs.get("Section3-Latitude-Minutes") is not None and
@@ -694,7 +654,7 @@ def map_hv_site(hvs):
     if hvs.get("Section1-provinceStateReceivingSiteOwner") is not None : _hv_dic['ownerProvince'] = hvs["Section1-provinceStateReceivingSiteOwner"]
     if hvs.get("Section1-countryReceivingSiteOwner") is not None : _hv_dic['ownerCountry'] = hvs["Section1-countryReceivingSiteOwner"]
     if hvs.get("Section1-postalZipCodeReceivingSiteOwner") is not None : _hv_dic['ownerPostalCode'] = hvs["Section1-postalZipCodeReceivingSiteOwner"]
-    if hvs.get("ASection1-PhoneReceivingSiteOwner") is not None : _hv_dic['ownerPhoneNumber'] = hvs["Section1-PhoneReceivingSiteOwner"]
+    if hvs.get("Section1-PhoneReceivingSiteOwner") is not None : _hv_dic['ownerPhoneNumber'] = hvs["Section1-PhoneReceivingSiteOwner"]
     if hvs.get("Section1-EmailReceivingSiteOwner") is not None : _hv_dic['ownerEmail'] = hvs["Section1-EmailReceivingSiteOwner"]
 
     if hvs.get("Section1a-FirstNameAdditionalOwner") is not None : _hv_dic['owner2FirstName'] = hvs["Section1a-FirstNameAdditionalOwner"]
@@ -722,15 +682,11 @@ def map_hv_site(hvs):
 
     if hvs.get("Section3-siteIdIncludeAllRelatedNumbers") is not None : _hv_dic['SID'] = hvs["Section3-siteIdIncludeAllRelatedNumbers"]
 
-    # convert lat/lon
-    _hv_lat_lon = convert_deciaml_lat_long(
+    _hv_lat, _hv_lon = convert_deciaml_lat_long(
       hvs["Section3-Latitude-Degrees"], hvs["Section3-Latitude-Minutes"], hvs["Section3-Latitude-Seconds"], 
       hvs["Section3-Longitude-Degrees"], hvs["Section3-Longitude-Minutes"], hvs["Section3-Longitude-Seconds"])
-    #_hv_dic['latitude'] = _hv_lat_lon[0]
-    #_hv_dic['longitude'] = _hv_lat_lon[0]
-    _hv_dic['latitude'] = testHVLats[testingCount3] #for testing
-    _hv_dic['longitude'] = testHVLons[testingCount3] #for testing
-    testingCount3 = testingCount3 + 1
+    _hv_dic['latitude'] = _hv_lat
+    _hv_dic['longitude'] = _hv_lon
 
     if hvs.get("ReceivingSiteregionalDistrict") is not None and len(hvs['ReceivingSiteregionalDistrict']) > 0 : 
       _hv_dic['regionalDistrict'] = "\"" + ",".join(hvs["ReceivingSiteregionalDistrict"]) + "\""   # could be more than one
@@ -795,7 +751,6 @@ def map_hv_site(hvs):
 
 # add Regional Districts in site forms to dictionary - key:regional district string / value:site data dictionary
 def add_regional_district_dic(site_dic, reg_dist_dic):
-
   if 'regionalDistrict' in site_dic and site_dic['regionalDistrict'] is not None: # could be none regional district key
     _dic_copy = {}
     _dic_copy = copy.deepcopy(site_dic)
@@ -805,9 +760,6 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
       _rds = []
       _rds = _rd_str.split(",")
       for _rd in _rds:
-
-        _rd = 'metroVancouverRegionalDistrict' #for testing SHOULD BE REMOVED
-
         if _rd in reg_dist_dic:
           reg_dist_dic[_rd].append(_dic_copy)
         else:
@@ -822,6 +774,8 @@ def is_boolean(_v):
 
 
 
+
+
 CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
 CHEFS_SOILS_API_KEY = os.getenv('CHEFS_SOILS_API_KEY')
 CHEFS_HV_FORM_ID = os.getenv('CHEFS_HV_FORM_ID')
@@ -832,7 +786,7 @@ CHES_API_KEY = os.getenv('CHES_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
 
-
+"""
 print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
 print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
 print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
@@ -842,19 +796,19 @@ print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
 print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
 print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
 print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
-
+"""
 
 # Fetch subscribers list
 print('Loading submission subscribers list...')
 subscribersJson = site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
-print(subscribersJson)
+#print(subscribersJson)
 print('Loading submission subscribers attributes and headers...')
 subscribeAttributes = fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribeAttributes)
 
 print('Loading High Volume Sites list...')
 hvsJson = site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
-# print(hvsJson)
+print(hvsJson)
 print('Loading High Volume Sites attributes and headers...')
 hvsAttributes = fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 # print(hvsAttributes)
@@ -1088,6 +1042,7 @@ for hvs in hvsJson:
     add_regional_district_dic(_hvDic, hvRegDistDic)  
 
 
+"""
 print('Creating soil source site CSV...')
 with open(SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=sourceSiteHeaders)
@@ -1105,8 +1060,10 @@ with open(HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=hvSiteHeaders)
   writer.writeheader()
   writer.writerows(hvSites)
+"""
 
 
+"""
 print('Connecting to AGOL GIS...')
 # connect to GIS
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
@@ -1162,7 +1119,7 @@ else:
     _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
     _hvLyrOverwriteResult = _hvFlc.manager.overwrite(HIGH_VOLUME_CSV_FILE)
     print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
-
+"""
 
 
 
@@ -1178,6 +1135,11 @@ EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Rec
 
 today = datetime.datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
 # print(today)
+
+notifySoilRelocSubscriberDic = {}
+notifyHVSSubscriberDic = {}
+unSubscribers = []
+
 for _subscriber in subscribersJson:
   #print(_subscriber)
   _subscriberEmail = None
@@ -1212,41 +1174,85 @@ for _subscriber in subscribersJson:
 
     # Notification of soil relocation in selected Regional District(s)  =========================================================
     if _notifySoilReloc == True:
-      for _receivingSiteDic in receivingSites:
-        _createdAt = _receivingSiteDic['createAt']
-        # print(_createdAt)
-        _daysDiff = (today - _createdAt).days
-        # print(_daysDiff)
+      for _srd in _subscriberRegionalDistrict:
 
-        if (_daysDiff <= 1):
-          for _srd in _subscriberRegionalDistrict:
-            # finding if subscriber's regional district in receiving site registration
-            _rcvSitesInRD = rcvRegDistDic.get(_srd)
-            _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
-            if _rcvSitesInRD is not None:
-              _regDis = convert_regional_district_to_name(_srd)
-              _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
-              _ches_response = send_mail(_subscriberEmail, EMAIL_SUBJECT_SOIL_RELOCATION, _emailMsg)
-              print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
+        # finding if subscriber's regional district in receiving site registration
+        _rcvSitesInRD = rcvRegDistDic.get(_srd)
+
+        if _rcvSitesInRD is not None:
+          for _receivingSiteDic in _rcvSitesInRD:
+            _createdAt = _receivingSiteDic['createAt']
+            # print(_createdAt)
+            _daysDiff = (today - _createdAt).days
+            # print(_daysDiff)
+
+            if (1 == 1):
+            #if (_daysDiff <= 1):
+
+              _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
+
+              if _rcvSitesInRD is not None:
+                _regDis = convert_regional_district_to_name(_srd)
+                _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
+
+                # create soil relocation notification substriber dictionary
+                # key-Tuple of email address, RegionalDistrict Tuple, value=email maessage
+                if (_subscriberEmail,_srd) not in notifySoilRelocSubscriberDic:
+                  notifySoilRelocSubscriberDic[(_subscriberEmail,_srd)] = _emailMsg
+
 
     # Notification of high volume site registration in selected Regional District(s) ============================================
     if _notifyHVS == True:
-      for _hvSiteDic in hvSites:
-        _createdAt = _hvSiteDic['createAt'] 
-        # print(createdAt)
-        _daysDiff = (today - _createdAt).days
-        # print(daysDiff)
+      for _srd in _subscriberRegionalDistrict:
 
-        if (_daysDiff <= 1):
-          for _srd in _subscriberRegionalDistrict:
-            # finding if subscriber's regional district in high volume receiving site registration
-            _hvSitesInRD = hvRegDistDic.get(_srd)
-            _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
+        # finding if subscriber's regional district in high volume receiving site registration
+        _hvSitesInRD = hvRegDistDic.get(_srd)
 
-            if _hvSitesInRD is not None:
-              _hvRegDis = convert_regional_district_to_name(_srd)
-              _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
-              _ches_response = send_mail(_subscriberEmail, EMAIL_SUBJECT_HIGH_VOLUME, _hvEmailMsg)
-              print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
+        if _hvSitesInRD is not None:
+          for _hvSiteDic in _hvSitesInRD:
+            _createdAt = _hvSiteDic['createAt'] 
+            # print(createdAt)
+            _daysDiff = (today - _createdAt).days
+            # print(daysDiff)
+
+            if (1 == 1):
+            #if (_daysDiff <= 1):  
+
+              _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
+
+              if _hvSitesInRD is not None:
+                _hvRegDis = convert_regional_district_to_name(_srd)
+                _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
+                
+                # create high volume relocation notification substriber dictionary
+                # key-Tuple of email address, RegionalDistrict Tuple, value=email maessage
+                if (_hvEmailMsg,_srd) not in notifyHVSSubscriberDic:
+                  notifyHVSSubscriberDic[(_subscriberEmail,_srd)] = _hvEmailMsg
+
+  elif (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
+        _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and  
+        _unsubscribe == True):
+    # create unSubscriber list
+    for _srd in _subscriberRegionalDistrict:
+        unSubscribers.append((_subscriberEmail,_srd))
+
+print('removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
+for _unSubscriber in unSubscribers:
+  if (_unSubscriber[0],_unSubscriber[1]) in notifySoilRelocSubscriberDic:    
+    notifySoilRelocSubscriberDic.pop(_unSubscriber[0],_unSubscriber[1])
+  if (_unSubscriber[0],_unSubscriber[1]) in notifyHVSSubscriberDic:
+    notifyHVSSubscriberDic.pop((_unSubscriber[0],_unSubscriber[1]))
+
+print('sending Notification of soil relocation in selected Regional District(s) ...')
+for _k, _v in notifySoilRelocSubscriberDic.items():
+  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
+  #print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
+
+print('sending Notification of high volume site registration in selected Regional District(s) ...')
+for _k, _v in notifyHVSSubscriberDic.items():
+  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
+  #print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
+
+
 
 print('Completed Soils data publishing')
