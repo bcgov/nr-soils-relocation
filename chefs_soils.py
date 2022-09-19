@@ -160,6 +160,15 @@ SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing, bulk storage, s
                                 , i6='I6. wood treatment (antisapstain or preservation)'
                                 , i7='I7. wood treatment chemical manufacturing, bulk storage')
 
+RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
+                                  , commercialLandUseCl='Commercial Land Use (CL)'
+                                  , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
+                                  , residentialLandUseLowDensityRlld='Residential Land Use Low Density (RLLD)'
+                                  , urbanParkLandUsePl='Urban Park Land Use (PL)'
+                                  , agriculturalLandUseAl='Agricultural Land Use (AL)'
+                                  , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
+                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
+
 SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                             , commercialLandUseCl='Commercial Land Use (CL)'
                             , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
@@ -273,6 +282,7 @@ RECEIVING_SITE_HEADERS = [
   "PID",
   "legalLandDescription",
   "PIN",
+  "crownLandFileNumbers",  
   "receivingSiteLandUse",
   "CSRFactors",
   "relocatedSoilUse",
@@ -471,6 +481,13 @@ def convert_source_site_use_to_name(id):
   else:
     return id
 
+def convert_receiving_site_use_to_name(id):
+  name = RECEIVING_SITE_USE_NAME_DIC.get(id)
+  if name is not None:
+    return name
+  else:
+    return id
+
 def convert_soil_quality_to_name(id):
   name = SOIL_QUALITY_NAME_DIC.get(id)
   if name is not None:
@@ -527,6 +544,8 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
   ):
     lat_dd = (float(lat_deg) + float(lat_min)/60 + float(lat_sec)/(60*60))
     lon_dd = - (float(lon_deg) + float(lon_min)/60 + float(lon_sec)/(60*60))
+
+    if lon_dd > 0: lon_dd = - lon_dd # longitude degrees should be minus in BC bouding box
   return lat_dd, lon_dd
 
 def map_source_site(submission):
@@ -593,11 +612,12 @@ def map_source_site(submission):
       _dg = submission["dataGrid"][0] # could be more than one, but take only one
       if _dg.get("A-LegallyTitled-PID") is not None: _src_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescriptionSource") is not None: _src_dic['legalLandDescription'] = _dg["legalLandDescriptionSource"]
-    elif submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0: 
+    if submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 and _src_dic['PID'] is None: 
       _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-UntitledPINSource") is not None: _src_dic['PIN'] = _dg1["A-UntitledPINSource"]
       if _dg1.get("legalLandDescriptionUntitledSource") is not None: _src_dic['legalLandDescription'] = _dg1["legalLandDescriptionUntitledSource"]
-    elif submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None : _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
+    if submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None and _src_dic['PID'] is None and _src_dic['PIN'] is None: 
+      _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
 
     if submission.get("A-UntitledCrownLand-FileNumberColumnSource") is not None : 
       for _item in submission["A-UntitledCrownLand-FileNumberColumnSource"]:
@@ -720,17 +740,30 @@ def map_rcv_1st_rcver(submission):
       _dg2 = submission["dataGrid2"][0] # could be more than one, but take only one
       if _dg2.get("A-LegallyTitled-PIDReceivingSite") is not None: _rcv_dic['PID'] = _dg2["A-LegallyTitled-PIDReceivingSite"]
       if _dg2.get("legalLandDescriptionReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg2["legalLandDescriptionReceivingSite"]
-    elif submission.get("dataGrid5") is not None and len(submission["dataGrid5"]) > 0: 
+    if submission.get("dataGrid5") is not None and len(submission["dataGrid5"]) > 0 and _rcv_dic['PID'] is None: 
       _dg5 = submission["dataGrid5"][0] # could be more than one, but take only one
       if _dg5.get("A-LegallyTitled-PID") is not None: _rcv_dic['PIN'] = _dg5["A-LegallyTitled-PID"]
       if _dg5.get("legalLandDescriptionUntitledCrownLandReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg5["legalLandDescriptionUntitledCrownLandReceivingSite"]
-    elif submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None : _rcv_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumn1"]
+    if (submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn1"]) > 0 
+        and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None):
+      _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn1"][0]
+      if _untitled_municipal_land.get("legalLandDescription") is not None:
+        _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescription"]
+
+    if submission.get("A-UntitledCrownLand-FileNumberColumn1") is not None : 
+      for _item in submission["A-UntitledCrownLand-FileNumberColumn1"]:
+        for _v in _item.values():
+          if _v != '':
+            _rcv_dic['crownLandFileNumbers'] = _v
+            break    #could be more than one, but take only one
+        if 'crownLandFileNumbers' in _rcv_dic:
+          break
 
     if submission.get("C3-soilClassification1ReceivingSite") is not None : 
       _land_uses = []
       for _k, _v in submission["C3-soilClassification1ReceivingSite"].items():
         if _v == True:
-          _land_uses.append(_k)
+          _land_uses.append(convert_receiving_site_use_to_name(_k))
       if len(_land_uses) > 0:
         _rcv_dic['receivingSiteLandUse'] = "\"" + ",".join(_land_uses) + "\""
 
@@ -808,17 +841,31 @@ def map_rcv_2nd_rcver(submission):
       _dg3 = submission["dataGrid3"][0] # could be more than one, but take only one
       if _dg3.get("A-LegallyTitled-PIDFirstAdditionalReceivingSite") is not None: _rcv_dic['PID'] = _dg3["A-LegallyTitled-PIDFirstAdditionalReceivingSite"]
       if _dg3.get("legalLandDescriptionFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg3["legalLandDescriptionFirstAdditionalReceivingSite"]
-    elif submission.get("dataGrid6") is not None and len(submission["dataGrid6"]) > 0: 
+    if (submission.get("dataGrid6") is not None and len(submission["dataGrid6"]) > 0 
+        and _rcv_dic['PID'] is None): 
       _dg6 = submission["dataGrid6"][0] # could be more than one, but take only one
       if _dg6.get("A-UntitledCrown-PINFirstAdditionalReceivingSite") is not None: _rcv_dic['PIN'] = _dg6["A-UntitledCrown-PINFirstAdditionalReceivingSite"]
       if _dg6.get("legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg6["legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite"]
-    elif submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None : _rcv_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumn2"]
+    if (submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn2"]) > 0 
+        and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None):
+      _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn2"][0]
+      if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite") is not None:
+        _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite"]
+
+    if submission.get("A-UntitledCrownLand-FileNumberColumn2") is not None : 
+      for _item in submission["A-UntitledCrownLand-FileNumberColumn2"]:
+        for _v in _item.values():
+          if _v != '':
+            _rcv_dic['crownLandFileNumbers'] = _v
+            break    #could be more than one, but take only one
+        if 'crownLandFileNumbers' in _rcv_dic:
+          break
 
     if submission.get("C3-soilClassification2FirstAdditionalReceivingSite") is not None : 
       _land_uses = []
       for _k, _v in submission["C3-soilClassification2FirstAdditionalReceivingSite"].items():
         if _v == True:
-          _land_uses.append(_k)
+          _land_uses.append(convert_receiving_site_use_to_name(_k))
       if len(_land_uses) > 0:
         _rcv_dic['receivingSiteLandUse'] = "\"" + ",".join(_land_uses) + "\""
 
@@ -896,17 +943,32 @@ def map_rcv_3rd_rcver(submission):
       _dg4 = submission["dataGrid4"][0] # could be more than one, but take only one
       if _dg4.get("A-LegallyTitled-PIDSecondAdditionalreceivingSite") is not None: _rcv_dic['PID'] = _dg4["A-LegallyTitled-PIDSecondAdditionalreceivingSite"]
       if _dg4.get("legalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg4["legalLandDescriptionSecondAdditionalreceivingSite"]
-    elif submission.get("dataGrid7") is not None and len(submission["dataGrid7"]) > 0: 
+    if submission.get("dataGrid7") is not None and len(submission["dataGrid7"]) > 0 and _rcv_dic['PID'] is None: 
       _dg7 = submission["dataGrid7"][0] # could be more than one, but take only one
       if _dg7.get("A-UntitledCrownLand-PINSecondAdditionalreceivingSite") is not None: _rcv_dic['PIN'] = _dg7["A-UntitledCrownLand-PINSecondAdditionalreceivingSite"]
       if _dg7.get("UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg7["UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite"]
-    elif submission.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None : _rcv_dic['legalLandDescription'] = submission["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
+    if submission.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None:
+      _rcv_dic['legalLandDescription'] = submission["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
+    if (submission.get("A-UntitledMunicipalLand-PIDColumn3") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn3"]) > 0 
+        and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None):
+      _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn3"][0]
+      if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None:
+        _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
+
+    if submission.get("A-UntitledCrownLand-FileNumberColumn2") is not None : 
+      for _item in submission["A-UntitledCrownLand-FileNumberColumn2"]:
+        for _v in _item.values():
+          if _v != '':
+            _rcv_dic['crownLandFileNumbers'] = _v
+            break    #could be more than one, but take only one
+        if 'crownLandFileNumbers' in _rcv_dic:
+          break
 
     if submission.get("C3-soilClassification4SecondAdditionalreceivingSite") is not None : 
       _land_uses = []
       for _k, _v in submission["C3-soilClassification4SecondAdditionalreceivingSite"].items():
         if _v == True:
-          _land_uses.append(_k)
+          _land_uses.append(convert_receiving_site_use_to_name(_k))
       if len(_land_uses) > 0:
         _rcv_dic['receivingSiteLandUse'] = "\""+ ",".join(_land_uses) + "\""
 
@@ -994,11 +1056,12 @@ def map_hv_site(hvs):
       _dg = hvs["dataGrid"][0] # could be more than one, but take only one
       if _dg.get("A-LegallyTitled-PID") is not None: _hv_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg["legalLandDescription"]
-    elif hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0: 
+    if hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 and _hv_dic['PID'] is None: 
       _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-LegallyTitled-PID") is not None: _hv_dic['PIN'] = _dg1["A-LegallyTitled-PID"]
       if _dg1.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg1["legalLandDescription"]
-    elif hvs.get("legalLandDescription") is not None : _hv_dic['legalLandDescription'] = hvs["legalLandDescription"]
+    if hvs.get("legalLandDescription") is not None and _hv_dic['PID'] is None and _hv_dic['PIN'] is None: 
+      _hv_dic['legalLandDescription'] = hvs["legalLandDescription"]
 
     if hvs.get("A-UntitledCrownLand-FileNumberColumn") is not None : 
       for _item in hvs["A-UntitledCrownLand-FileNumberColumn"]:
