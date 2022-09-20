@@ -21,12 +21,10 @@ jobs:
           python-version: 3.9.12 #install the python version needed
       - name: install pipenv
         run: |
-          pip install --upgrade pip
+          pip install --upgrade pip setuptools wheel
           pip install pipenv
       - name: install python script dependencies
-        run: |
-          pipenv lock --clear
-          pipenv install --deploy
+        run: pipenv lock --skip-lock
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
