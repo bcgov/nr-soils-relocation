@@ -5,7 +5,7 @@ on:
   schedule:
     # * is a special character in YAML, so you have to quote this string
     # Execute at 1:00am every day
-    - cron:  '0 11 * * 1-5'
+    - cron:  '0 1 * * *'
 jobs:
   SRIS_CHEFS_LOAD:
     runs-on: ubuntu-latest
