@@ -383,13 +383,9 @@ def send_mail(to_email, subject, message):
   'Content-Type': 'application/json',
   'Authorization': 'Bearer ' + access_token
   }
-
-  #ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
-  # print(chesResponse.text)
+  ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
   #_ches_content = json.loads(ches_response.content)
-
-  return None
-  #return ches_response
+  return ches_response
 
 def is_json(string):
   try:
@@ -1131,10 +1127,13 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
       _rds = []
       _rds = _rd_str.split(",")
       for _rd in _rds:
-        if _rd in reg_dist_dic:
-          reg_dist_dic[_rd].append(_dic_copy)
-        else:
-          reg_dist_dic[_rd] = [_dic_copy]
+        # reverse-convert name to id for searching key
+        _rd_key = [k for k, v in REGIONAL_DISTRICT_NAME_DIC.items() if v == _rd]
+        if len(_rd_key) > 0:
+          if _rd_key[0] in reg_dist_dic:
+            reg_dist_dic[_rd_key[0]].append(_dic_copy)
+          else:
+            reg_dist_dic[_rd_key[0]] = [_dic_copy]
 
 # check if boolen type is
 def is_boolean(_v):
@@ -1375,8 +1374,7 @@ for _subscriber in subscribersJson:
             _daysDiff = (today - _createdAt).days
             # print(_daysDiff)
 
-            if (1 == 1):
-            #if (_daysDiff <= 1):
+            if (_daysDiff <= 1):
 
               _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
 
@@ -1404,8 +1402,7 @@ for _subscriber in subscribersJson:
             _daysDiff = (today - _createdAt).days
             # print(daysDiff)
 
-            if (1 == 1):
-            #if (_daysDiff <= 1):  
+            if (_daysDiff <= 1):  
 
               _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
 
@@ -1435,12 +1432,12 @@ for _unSubscriber in unSubscribers:
 print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items():
   _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
-  #print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
+  print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
 
 print('Sending Notification of high volume site registration in selected Regional District(s) ...')
 for _k, _v in notifyHVSSubscriberDic.items():
   _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
-  #print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
+  print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
 
 
 
