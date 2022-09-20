@@ -1,6 +1,6 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import json, csv, datetime, copy, os
+import json, csv, datetime, copy, os, re
 import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
@@ -39,7 +39,6 @@ CHEFS_URL = r'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
 # CHEFS_URL = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
 # CHEFS_URL = 'https://ches.nrs.gov.bc.ca' # prod
 
-DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
 REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
                                 , caribooRegionalDistrict='Cariboo Regional District'
                                 , regionalDistrictOfFraserFortGeorge='Regional District of Fraser-Fort George'
@@ -359,6 +358,10 @@ HV_SITE_HEADERS = [
   "confirmationId"
 ]
 
+DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
+EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
+
+
 def send_mail(to_email, subject, message):
   to_email = 'rjeong@vividsolutions.com'  #testing SHOULD BE REMOVED!
   auth_pay_load = 'grant_type=client_credentials'
@@ -533,7 +536,31 @@ def create_popup_links(sites, site_type):
       _popup_links += _link
   return _popup_links
 
+def create_land_file_numbers(cefs_dic, field):
+  _land_file_numbers = []
+  if cefs_dic.get(field) is not None : 
+    for _item in cefs_dic[field]:
+      for _v in _item.values():
+        if _v != '':
+          _land_file_numbers.append(_v)
+
+  if len(_land_file_numbers) > 0 : 
+    _land_file_numbers = "\"" + ",".join(_land_file_numbers) + "\""   # could be more than one    
+
+  return _land_file_numbers
+
+def create_receiving_site_lan_uses(cefs_dic, field):
+  _land_uses = []
+  for _k, _v in cefs_dic[field].items():
+    if _v == True:
+      _land_uses.append(convert_receiving_site_use_to_name(_k))
+  if len(_land_uses) > 0:
+    _land_uses = "\"" + ",".join(_land_uses) + "\""
+  return _land_uses
+
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
+  _lat_dd = 0
+  _lon_dd = 0
   # Convert to DD in mapLatitude and mapLongitude
   if (lat_deg is not None and lat_deg != '' and
       lat_min is not None and lat_min != '' and
@@ -542,11 +569,21 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
       lon_min is not None and lon_min != '' and
       lon_sec is not None and lon_sec != ''
   ):
-    lat_dd = (float(lat_deg) + float(lat_min)/60 + float(lat_sec)/(60*60))
-    lon_dd = - (float(lon_deg) + float(lon_min)/60 + float(lon_sec)/(60*60))
+    # extract floating number from text
+    _lat_deg = re.findall(EXP_EXTRACT_FLOATING, lat_deg)
+    _lat_min = re.findall(EXP_EXTRACT_FLOATING, lat_min)
+    _lat_sec = re.findall(EXP_EXTRACT_FLOATING, lat_sec)
+    _lon_deg = re.findall(EXP_EXTRACT_FLOATING, lon_deg)
+    _lon_min = re.findall(EXP_EXTRACT_FLOATING, lon_min)
+    _lon_sec = re.findall(EXP_EXTRACT_FLOATING, lon_sec)
 
-    if lon_dd > 0: lon_dd = - lon_dd # longitude degrees should be minus in BC bouding box
-  return lat_dd, lon_dd
+    if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0 
+        and len(_lon_deg) > 0 and len(_lon_min) > 0 and len(_lon_sec) > 0):
+      _lat_dd = (float(_lat_deg[0]) + float(_lat_min[0])/60 + float(_lat_sec[0])/(60*60))
+      _lon_dd = - (float(_lon_deg[0]) + float(_lon_min[0])/60 + float(_lon_sec[0])/(60*60))
+
+    if _lon_dd > 0: _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
+  return _lat_dd, _lon_dd
 
 def map_source_site(submission):
   _src_dic = {}
@@ -612,21 +649,17 @@ def map_source_site(submission):
       _dg = submission["dataGrid"][0] # could be more than one, but take only one
       if _dg.get("A-LegallyTitled-PID") is not None: _src_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescriptionSource") is not None: _src_dic['legalLandDescription'] = _dg["legalLandDescriptionSource"]
-    if submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 and _src_dic['PID'] is None: 
+    if (submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 
+        and _src_dic['PID'] is None and _src_dic['PID'] != ''): 
       _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-UntitledPINSource") is not None: _src_dic['PIN'] = _dg1["A-UntitledPINSource"]
       if _dg1.get("legalLandDescriptionUntitledSource") is not None: _src_dic['legalLandDescription'] = _dg1["legalLandDescriptionUntitledSource"]
-    if submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None and _src_dic['PID'] is None and _src_dic['PIN'] is None: 
+    if (submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None 
+        and _src_dic['PID'] is None and _src_dic['PID'] != '' 
+        and _src_dic['PIN'] is None and _src_dic['PIN'] != ''): 
       _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
 
-    if submission.get("A-UntitledCrownLand-FileNumberColumnSource") is not None : 
-      for _item in submission["A-UntitledCrownLand-FileNumberColumnSource"]:
-        for _v in _item.values():
-          if _v != '':
-            _src_dic['crownLandFileNumbers'] = _v
-            break    #could be more than one, but take only one
-        if 'crownLandFileNumbers' in _src_dic:
-          break
+    _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
 
     if submission.get("A4-schedule2ReferenceSourceSite") is not None and len(submission.get("A4-schedule2ReferenceSourceSite")) > 0 : 
       _source_site_land_uses = []
@@ -740,32 +773,20 @@ def map_rcv_1st_rcver(submission):
       _dg2 = submission["dataGrid2"][0] # could be more than one, but take only one
       if _dg2.get("A-LegallyTitled-PIDReceivingSite") is not None: _rcv_dic['PID'] = _dg2["A-LegallyTitled-PIDReceivingSite"]
       if _dg2.get("legalLandDescriptionReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg2["legalLandDescriptionReceivingSite"]
-    if submission.get("dataGrid5") is not None and len(submission["dataGrid5"]) > 0 and _rcv_dic['PID'] is None: 
+    if (submission.get("dataGrid5") is not None and len(submission["dataGrid5"]) > 0 
+        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')): 
       _dg5 = submission["dataGrid5"][0] # could be more than one, but take only one
       if _dg5.get("A-LegallyTitled-PID") is not None: _rcv_dic['PIN'] = _dg5["A-LegallyTitled-PID"]
       if _dg5.get("legalLandDescriptionUntitledCrownLandReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg5["legalLandDescriptionUntitledCrownLandReceivingSite"]
     if (submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn1"]) > 0 
-        and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None):
+        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '') 
+        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')):
       _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn1"][0]
       if _untitled_municipal_land.get("legalLandDescription") is not None:
         _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescription"]
 
-    if submission.get("A-UntitledCrownLand-FileNumberColumn1") is not None : 
-      for _item in submission["A-UntitledCrownLand-FileNumberColumn1"]:
-        for _v in _item.values():
-          if _v != '':
-            _rcv_dic['crownLandFileNumbers'] = _v
-            break    #could be more than one, but take only one
-        if 'crownLandFileNumbers' in _rcv_dic:
-          break
-
-    if submission.get("C3-soilClassification1ReceivingSite") is not None : 
-      _land_uses = []
-      for _k, _v in submission["C3-soilClassification1ReceivingSite"].items():
-        if _v == True:
-          _land_uses.append(convert_receiving_site_use_to_name(_k))
-      if len(_land_uses) > 0:
-        _rcv_dic['receivingSiteLandUse'] = "\"" + ",".join(_land_uses) + "\""
+    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn1')
+    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification1ReceivingSite')
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite"]
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
@@ -842,32 +863,19 @@ def map_rcv_2nd_rcver(submission):
       if _dg3.get("A-LegallyTitled-PIDFirstAdditionalReceivingSite") is not None: _rcv_dic['PID'] = _dg3["A-LegallyTitled-PIDFirstAdditionalReceivingSite"]
       if _dg3.get("legalLandDescriptionFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg3["legalLandDescriptionFirstAdditionalReceivingSite"]
     if (submission.get("dataGrid6") is not None and len(submission["dataGrid6"]) > 0 
-        and _rcv_dic['PID'] is None): 
+        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')): 
       _dg6 = submission["dataGrid6"][0] # could be more than one, but take only one
       if _dg6.get("A-UntitledCrown-PINFirstAdditionalReceivingSite") is not None: _rcv_dic['PIN'] = _dg6["A-UntitledCrown-PINFirstAdditionalReceivingSite"]
       if _dg6.get("legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg6["legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite"]
     if (submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn2"]) > 0 
-        and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None):
+        and _rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''
+        and _rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == ''):
       _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn2"][0]
       if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite") is not None:
         _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite"]
 
-    if submission.get("A-UntitledCrownLand-FileNumberColumn2") is not None : 
-      for _item in submission["A-UntitledCrownLand-FileNumberColumn2"]:
-        for _v in _item.values():
-          if _v != '':
-            _rcv_dic['crownLandFileNumbers'] = _v
-            break    #could be more than one, but take only one
-        if 'crownLandFileNumbers' in _rcv_dic:
-          break
-
-    if submission.get("C3-soilClassification2FirstAdditionalReceivingSite") is not None : 
-      _land_uses = []
-      for _k, _v in submission["C3-soilClassification2FirstAdditionalReceivingSite"].items():
-        if _v == True:
-          _land_uses.append(convert_receiving_site_use_to_name(_k))
-      if len(_land_uses) > 0:
-        _rcv_dic['receivingSiteLandUse'] = "\"" + ",".join(_land_uses) + "\""
+    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn2')
+    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification2FirstAdditionalReceivingSite')
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite"]
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
@@ -943,34 +951,20 @@ def map_rcv_3rd_rcver(submission):
       _dg4 = submission["dataGrid4"][0] # could be more than one, but take only one
       if _dg4.get("A-LegallyTitled-PIDSecondAdditionalreceivingSite") is not None: _rcv_dic['PID'] = _dg4["A-LegallyTitled-PIDSecondAdditionalreceivingSite"]
       if _dg4.get("legalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg4["legalLandDescriptionSecondAdditionalreceivingSite"]
-    if submission.get("dataGrid7") is not None and len(submission["dataGrid7"]) > 0 and _rcv_dic['PID'] is None: 
+    if (submission.get("dataGrid7") is not None and len(submission["dataGrid7"]) > 0 
+        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')):
       _dg7 = submission["dataGrid7"][0] # could be more than one, but take only one
       if _dg7.get("A-UntitledCrownLand-PINSecondAdditionalreceivingSite") is not None: _rcv_dic['PIN'] = _dg7["A-UntitledCrownLand-PINSecondAdditionalreceivingSite"]
       if _dg7.get("UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg7["UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite"]
-    if submission.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None:
-      _rcv_dic['legalLandDescription'] = submission["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
     if (submission.get("A-UntitledMunicipalLand-PIDColumn3") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn3"]) > 0 
-        and _rcv_dic['PID'] is None and _rcv_dic['PIN'] is None):
+        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
+        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')):
       _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn3"][0]
       if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None:
         _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
 
-    if submission.get("A-UntitledCrownLand-FileNumberColumn2") is not None : 
-      for _item in submission["A-UntitledCrownLand-FileNumberColumn2"]:
-        for _v in _item.values():
-          if _v != '':
-            _rcv_dic['crownLandFileNumbers'] = _v
-            break    #could be more than one, but take only one
-        if 'crownLandFileNumbers' in _rcv_dic:
-          break
-
-    if submission.get("C3-soilClassification4SecondAdditionalreceivingSite") is not None : 
-      _land_uses = []
-      for _k, _v in submission["C3-soilClassification4SecondAdditionalreceivingSite"].items():
-        if _v == True:
-          _land_uses.append(convert_receiving_site_use_to_name(_k))
-      if len(_land_uses) > 0:
-        _rcv_dic['receivingSiteLandUse'] = "\""+ ",".join(_land_uses) + "\""
+    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn2')        
+    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification4SecondAdditionalreceivingSite')
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
@@ -1056,24 +1050,18 @@ def map_hv_site(hvs):
       _dg = hvs["dataGrid"][0] # could be more than one, but take only one
       if _dg.get("A-LegallyTitled-PID") is not None: _hv_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg["legalLandDescription"]
-    if hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 and _hv_dic['PID'] is None: 
+    if (hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 
+        and ( _hv_dic['PID'] is None or (_hv_dic['PID'].strip()) == '')):
       _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-LegallyTitled-PID") is not None: _hv_dic['PIN'] = _dg1["A-LegallyTitled-PID"]
       if _dg1.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg1["legalLandDescription"]
-    if hvs.get("legalLandDescription") is not None and _hv_dic['PID'] is None and _hv_dic['PIN'] is None: 
+    if (hvs.get("legalLandDescription") is not None 
+        and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
+        and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): 
       _hv_dic['legalLandDescription'] = hvs["legalLandDescription"]
 
-    if hvs.get("A-UntitledCrownLand-FileNumberColumn") is not None : 
-      for _item in hvs["A-UntitledCrownLand-FileNumberColumn"]:
-        for _v in _item.values():
-          if _v != '':
-            _hv_dic['crownLandFileNumbers'] = _v
-            break    #could be more than one, but take only one
-        if 'crownLandFileNumbers' in _hv_dic:
-          break
-
-    if hvs.get("primarylanduse") is not None and len(hvs.get("primarylanduse")) > 0 : 
-      _hv_dic['receivingSiteLandUse'] = "\"" + ",".join(hvs.get("primarylanduse")) + "\""
+    _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(hvs, 'A-UntitledCrownLand-FileNumberColumn')
+    _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, 'primarylanduse')
 
     if hvs.get("highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _hv_dic['hvsConfirmation'] = hvs["highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
     if hvs.get("dateSiteBecameHighVolume") is not None : _hv_dic['dateSiteBecameHighVolume'] = hvs["dateSiteBecameHighVolume"]
