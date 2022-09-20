@@ -12,19 +12,19 @@ jobs:
     environment: prod
     steps:
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to GitHub runner.
+        uses: actions/checkout@v3 # checkout the repository content to GitHub runner.
         with:
           ref: deploy/prod # Specify the branch to checkout.
       - name: setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9.12 #install the python version needed
       - name: install pipenv
         run: |
           pip install --upgrade pip setuptools wheel
-          pip install pipenv
-      - name: install python script dependencies
-        run: pipenv install --deploy
+          #pip install pipenv
+      #- name: install python script dependencies
+      #  run: pipenv install --deploy
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
