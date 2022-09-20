@@ -22,7 +22,7 @@ jobs:
       - name: install pipenv
         run: |
           pip install --upgrade pip setuptools wheel
-          #pip install pipenv
+          pip install pipenv
       #- name: install python script dependencies
       #  run: pipenv install --deploy
       - name: execute the python script
