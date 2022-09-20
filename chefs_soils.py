@@ -11,16 +11,16 @@ RECEIVE_CSV_FILE = 'soil_relocation_receiving_sites.csv'
 HIGH_VOLUME_CSV_FILE = 'high_volume_receiving_sites.csv'
 
 # Soil Relocation Source Sites Item Id
-SRC_CSV_ID = '4bfbda4fd22f4ab68fc548b3cfdf41cf'
-SRC_CSV_ID = 'f99012760e9e4f4394e54abdbfd1f1f8'
+SRC_CSV_ID = 'b08a6224f08c49f6b0061afb0200170d'
+SRC_LAYER_ID = '760680ac983e442e9817f5d41ddf7d1e'
 
 # Soil Relocation Receiving Sites Item Id
-RCV_CSV_ID = '426e40d6525747bb801c698357dea3b5'
-RCV_CSV_ID = 'af9724382684495cbbc8aeeb6e20ea26'
+RCV_CSV_ID = 'b08a6224f08c49f6b0061afb0200170d'
+RCV_LAYER_ID = '85eb5679dec94326b402c93c811564da'
 
 # High Volume Receiving Sites Item Id
-HV_CSV_ID = '7718b38fac0643a8b73de8cf556c5d14'
-HV_LAYER_ID = 'c1e349295bf14ee9bd8df89439b2cb80'
+HV_CSV_ID = '7a995fc4a9ee4bb0b1149b451ee7bc0b'
+HV_LAYER_ID = '8001eab1d4964e2494864ea2bad51c48'
 
 # WEB Mapping Application Itme Id
 WEB_MAP_APP_ID = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
@@ -207,7 +207,6 @@ SOURCE_SITE_HEADERS = [
   "SID",
   "latitude",
   "longitude",
-  "regionalDistrict",  
   "landOwnership",
   "legallyTitledSiteAddress",
   "legallyTitledSiteCity",
@@ -544,10 +543,10 @@ def create_land_file_numbers(cefs_dic, field):
         if _v != '':
           _land_file_numbers.append(_v)
 
-  if len(_land_file_numbers) > 0 : 
+  if len(_land_file_numbers) > 0: 
     _land_file_numbers = "\"" + ",".join(_land_file_numbers) + "\""   # could be more than one    
 
-  return _land_file_numbers
+  return _land_file_numbers if len(_land_file_numbers) > 0 else None
 
 def create_receiving_site_lan_uses(cefs_dic, field):
   _land_uses = []
@@ -557,6 +556,19 @@ def create_receiving_site_lan_uses(cefs_dic, field):
   if len(_land_uses) > 0:
     _land_uses = "\"" + ",".join(_land_uses) + "\""
   return _land_uses
+
+def create_regional_district(cefs_dic, field):
+  _regional_districts = []
+
+  if cefs_dic.get(field) is not None and len(cefs_dic[field]) > 0 : 
+    for _item in cefs_dic[field]:
+      _regional_districts.append(convert_regional_district_to_name(_item))
+    
+    if len(_regional_districts) > 0:
+      _regional_districts = "\"" + ",".join(_regional_districts) + "\"" 
+
+  return _regional_districts if len(_regional_districts)  > 0  else None
+
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
   _lat_dd = 0
@@ -585,6 +597,7 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
     if _lon_dd > 0: _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
   return _lat_dd, _lon_dd
 
+# submission version 8
 def map_source_site(submission):
   _src_dic = {}
   if (
@@ -636,9 +649,6 @@ def map_source_site(submission):
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
     _src_dic['latitude'] = _src_lat
     _src_dic['longitude'] = _src_lon
-
-    if submission.get("SourceSiteregionalDistrict") is not None and len(submission['SourceSiteregionalDistrict']) > 0 : 
-      _src_dic['regionalDistrict'] = "\"" + ",".join(submission["SourceSiteregionalDistrict"]) + "\""   # could be more than one
 
     if submission.get("SourcelandOwnership-checkbox") is not None : _src_dic['landOwnership'] = submission["SourcelandOwnership-checkbox"]
     if submission.get("A-LegallyTitled-AddressSource") is not None : _src_dic['legallyTitledSiteAddress'] = submission["A-LegallyTitled-AddressSource"]
@@ -714,6 +724,7 @@ def map_source_site(submission):
 
   return _src_dic
 
+# submission version 8
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
   if (
@@ -761,8 +772,7 @@ def map_rcv_1st_rcver(submission):
     _rcv_dic['latitude'] = _rcv_lat
     _rcv_dic['longitude'] = _rcv_lon
 
-    if submission.get("ReceivingSiteregionalDistrict") is not None and len(submission['ReceivingSiteregionalDistrict']) > 0 : 
-      _rcv_dic['regionalDistrict'] = "\"" + ",".join(submission["ReceivingSiteregionalDistrict"]) + "\""
+    _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'ReceivingSiteregionalDistrict')
 
     if submission.get("C2-receivinglandOwnership-checkbox") is not None : _rcv_dic['landOwnership'] = submission["C2-receivinglandOwnership-checkbox"]
     if submission.get("C2-LegallyTitled-AddressReceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-AddressReceivingSite"]
@@ -803,6 +813,7 @@ def map_rcv_1st_rcver(submission):
 
   return _rcv_dic
 
+# submission version 8
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
   if (
@@ -850,8 +861,7 @@ def map_rcv_2nd_rcver(submission):
     _rcv_dic['latitude'] = _rcv_lat
     _rcv_dic['longitude'] = _rcv_lon
 
-    if submission.get("FirstAdditionalReceivingSiteregionalDistrict1") is not None and len(submission['FirstAdditionalReceivingSiteregionalDistrict1']) > 0 : 
-      _rcv_dic['regionalDistrict'] = "\"" + ",".join(submission["FirstAdditionalReceivingSiteregionalDistrict1"]) + "\""
+    _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'FirstAdditionalReceivingSiteregionalDistrict1')
 
     if submission.get("Firstadditionalreceiving-landOwnership-checkbox1") is not None : _rcv_dic['landOwnership'] = submission["Firstadditionalreceiving-landOwnership-checkbox1"]
     if submission.get("C2-LegallyTitled-Address1FirstAdditionalReceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address1FirstAdditionalReceivingSite"]
@@ -892,6 +902,7 @@ def map_rcv_2nd_rcver(submission):
 
   return _rcv_dic
 
+# submission version 8
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
   if (
@@ -939,8 +950,7 @@ def map_rcv_3rd_rcver(submission):
     _rcv_dic['latitude'] = _rcv_lat
     _rcv_dic['longitude'] = _rcv_lon
 
-    if submission.get("SecondAdditionalReceivingSiteregionalDistrict") is not None and len(submission['SecondAdditionalReceivingSiteregionalDistrict']) > 0 : 
-      _rcv_dic['regionalDistrict'] = "\"" + ",".join(submission["SecondAdditionalReceivingSiteregionalDistrict"]) + "\""
+    _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'SecondAdditionalReceivingSiteregionalDistrict')
 
     if submission.get("Secondadditionalreceiving-landOwnership-checkbox3") is not None : _rcv_dic['landOwnership'] = submission["Secondadditionalreceiving-landOwnership-checkbox3"]
     if submission.get("C2-LegallyTitled-Address3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address3SecondAdditionalreceivingSite"]
@@ -1038,8 +1048,7 @@ def map_hv_site(hvs):
     _hv_dic['latitude'] = _hv_lat
     _hv_dic['longitude'] = _hv_lon
 
-    if hvs.get("ReceivingSiteregionalDistrict") is not None and len(hvs['ReceivingSiteregionalDistrict']) > 0 : 
-      _hv_dic['regionalDistrict'] = "\"" + ",".join(hvs["ReceivingSiteregionalDistrict"]) + "\""   # could be more than one
+    _hv_dic['regionalDistrict'] = create_regional_district(hvs, 'ReceivingSiteregionalDistrict')
 
     if hvs.get("landOwnership-checkbox") is not None : _hv_dic['landOwnership'] = hvs["landOwnership-checkbox"]
     if hvs.get("Section3-LegallyTitled-Address") is not None : _hv_dic['legallyTitledSiteAddress'] = hvs["Section3-LegallyTitled-Address"]
@@ -1084,7 +1093,7 @@ def map_hv_site(hvs):
     if hvs.get("simpledatetime") is not None : _hv_dic['dateSigned'] = hvs["simpledatetime"]
 
     if hvs.get("form") is not None : 
-      _form_str = json.dumps(submission.get("form"))
+      _form_str = json.dumps(hvs.get("form"))
       _form_json = json.loads(_form_str)
       _created_at = datetime.datetime.strptime(_form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
       _confirmation_id = _form_json['confirmationId']
@@ -1165,7 +1174,7 @@ subscribeAttributes = fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribeAttributes)
 
 
-
+# submission version 8
 print('Creating source site, receiving site records...')
 sourceSites = []
 receivingSites = []
@@ -1192,7 +1201,7 @@ for submission in submissionsJson:
     receivingSites.append(_3rcvDic)
     add_regional_district_dic(_3rcvDic, rcvRegDistDic)  
 
-
+# high volume submission version 6
 print('Creating high volume site records records...')
 hvSites = []
 hvRegDistDic = {}
@@ -1205,28 +1214,28 @@ for hvs in hvsJson:
     add_regional_district_dic(_hvDic, hvRegDistDic)  
 
 
-"""
+
 print('Creating soil source site CSV...')
 with open(SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
-  writer = csv.DictWriter(f, fieldnames=sourceSiteHeaders)
+  writer = csv.DictWriter(f, fieldnames=SOURCE_SITE_HEADERS)
   writer.writeheader()
   writer.writerows(sourceSites)
 
 print('Creating soil receiving site CSV...')
 with open(RECEIVE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
-  writer = csv.DictWriter(f, fieldnames=receivingSiteHeaders)
+  writer = csv.DictWriter(f, fieldnames=RECEIVING_SITE_HEADERS)
   writer.writeheader()
   writer.writerows(receivingSites)
 
 print('Creating soil high volume site CSV...')
 with open(HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
-  writer = csv.DictWriter(f, fieldnames=hvSiteHeaders)
+  writer = csv.DictWriter(f, fieldnames=HV_SITE_HEADERS)
   writer.writeheader()
   writer.writerows(hvSites)
-"""
 
 
-"""
+
+
 print('Connecting to AGOL GIS...')
 # connect to GIS
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
@@ -1240,7 +1249,7 @@ else:
   print('Updated Soil Relocation Source Site CSV sucessfully: ' + str(_srcCsvUpdateResult))
 
   print('Updating Soil Relocation Soruce Site Feature Layer...')
-  _srcLyrItem = _gis.content.get(SRC_CSV_ID)
+  _srcLyrItem = _gis.content.get(SRC_LAYER_ID)
   if _srcLyrItem is None:
     print('Error: Source Site Layter Item ID is invalid!')
   else:
@@ -1257,7 +1266,7 @@ else:
   print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(_rcvCsvUpdateResult))
 
   print('Updating Soil Relocation Receiving Site Feature Layer...')
-  _rcvLyrItem = _gis.content.get(RCV_CSV_ID)
+  _rcvLyrItem = _gis.content.get(RCV_LAYER_ID)
   if _rcvLyrItem is None:
     print('Error: Receiving Site Layer Item ID is invalid!')
   else:    
@@ -1282,7 +1291,7 @@ else:
     _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
     _hvLyrOverwriteResult = _hvFlc.manager.overwrite(HIGH_VOLUME_CSV_FILE)
     print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
-"""
+
 
 
 
@@ -1399,19 +1408,19 @@ for _subscriber in subscribersJson:
     for _srd in _subscriberRegionalDistrict:
         unSubscribers.append((_subscriberEmail,_srd))
 
-print('removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
+print('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
 for _unSubscriber in unSubscribers:
   if (_unSubscriber[0],_unSubscriber[1]) in notifySoilRelocSubscriberDic:    
     notifySoilRelocSubscriberDic.pop(_unSubscriber[0],_unSubscriber[1])
   if (_unSubscriber[0],_unSubscriber[1]) in notifyHVSSubscriberDic:
     notifyHVSSubscriberDic.pop((_unSubscriber[0],_unSubscriber[1]))
 
-print('sending Notification of soil relocation in selected Regional District(s) ...')
+print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items():
   _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
   #print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
 
-print('sending Notification of high volume site registration in selected Regional District(s) ...')
+print('Sending Notification of high volume site registration in selected Regional District(s) ...')
 for _k, _v in notifyHVSSubscriberDic.items():
   _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
   #print("CHEFS response: " + _ches_response.status_code + ", subscriber email: " + _subscriberEmail)
