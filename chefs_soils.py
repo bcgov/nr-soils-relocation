@@ -177,6 +177,10 @@ SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                             , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
                             , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
 
+LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
+                            , untitled='Untitled Crown Land'
+                            , untitledMunicipalLand='Untitled Municipal Land')
+
 SOURCE_SITE_HEADERS = [
   "updateToPreviousForm",
   "ownerFirstName",
@@ -497,6 +501,13 @@ def convert_soil_quality_to_name(id):
   else:
     return id
 
+def convert_land_ownership_to_name(id):
+  name = LAND_OWNERSHIP_NAME_DIC.get(id)
+  if name is not None:
+    return name
+  else:
+    return id
+
 def create_popup_link_body(_site_dic):
   _link_body = ''
 
@@ -569,6 +580,11 @@ def create_regional_district(cefs_dic, field):
 
   return _regional_districts if len(_regional_districts)  > 0  else None
 
+def create_land_ownership(cefs_dic, field):
+  _land_ownership = None
+  if cefs_dic.get(field) is not None : 
+    _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
+  return _land_ownership
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
   _lat_dd = 0
@@ -650,7 +666,8 @@ def map_source_site(submission):
     _src_dic['latitude'] = _src_lat
     _src_dic['longitude'] = _src_lon
 
-    if submission.get("SourcelandOwnership-checkbox") is not None : _src_dic['landOwnership'] = submission["SourcelandOwnership-checkbox"]
+    _src_dic['landOwnership'] = create_land_ownership(submission, 'SourcelandOwnership-checkbox')
+
     if submission.get("A-LegallyTitled-AddressSource") is not None : _src_dic['legallyTitledSiteAddress'] = submission["A-LegallyTitled-AddressSource"]
     if submission.get("A-LegallyTitled-CitySource") is not None : _src_dic['legallyTitledSiteCity'] = submission["A-LegallyTitled-CitySource"]
     if submission.get("A-LegallyTitled-PostalZipCodeSource") is not None : _src_dic['legallyTitledSitePostalCode'] = submission["A-LegallyTitled-PostalZipCodeSource"]
@@ -773,8 +790,8 @@ def map_rcv_1st_rcver(submission):
     _rcv_dic['longitude'] = _rcv_lon
 
     _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'ReceivingSiteregionalDistrict')
+    _rcv_dic['landOwnership'] = create_land_ownership(submission, 'C2-receivinglandOwnership-checkbox')
 
-    if submission.get("C2-receivinglandOwnership-checkbox") is not None : _rcv_dic['landOwnership'] = submission["C2-receivinglandOwnership-checkbox"]
     if submission.get("C2-LegallyTitled-AddressReceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-AddressReceivingSite"]
     if submission.get("C2-LegallyTitled-CityReceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-CityReceivingSite"]
     if submission.get("C2-LegallyTitled-PostalReceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalReceivingSite"]
@@ -862,8 +879,8 @@ def map_rcv_2nd_rcver(submission):
     _rcv_dic['longitude'] = _rcv_lon
 
     _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'FirstAdditionalReceivingSiteregionalDistrict1')
+    _rcv_dic['landOwnership'] = create_land_ownership(submission, 'Firstadditionalreceiving-landOwnership-checkbox1')
 
-    if submission.get("Firstadditionalreceiving-landOwnership-checkbox1") is not None : _rcv_dic['landOwnership'] = submission["Firstadditionalreceiving-landOwnership-checkbox1"]
     if submission.get("C2-LegallyTitled-Address1FirstAdditionalReceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address1FirstAdditionalReceivingSite"]
     if submission.get("C2-LegallyTitled-City1FirstAdditionalReceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City1FirstAdditionalReceivingSite"]
     if submission.get("C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite"]
@@ -951,8 +968,8 @@ def map_rcv_3rd_rcver(submission):
     _rcv_dic['longitude'] = _rcv_lon
 
     _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'SecondAdditionalReceivingSiteregionalDistrict')
+    _rcv_dic['landOwnership'] = create_land_ownership(submission, 'Secondadditionalreceiving-landOwnership-checkbox3')
 
-    if submission.get("Secondadditionalreceiving-landOwnership-checkbox3") is not None : _rcv_dic['landOwnership'] = submission["Secondadditionalreceiving-landOwnership-checkbox3"]
     if submission.get("C2-LegallyTitled-Address3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address3SecondAdditionalreceivingSite"]
     if submission.get("C2-LegallyTitled-City3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City3SecondAdditionalreceivingSite"]
     if submission.get("C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite"]
@@ -1049,8 +1066,8 @@ def map_hv_site(hvs):
     _hv_dic['longitude'] = _hv_lon
 
     _hv_dic['regionalDistrict'] = create_regional_district(hvs, 'ReceivingSiteregionalDistrict')
+    _hv_dic['landOwnership'] = create_land_ownership(submission, 'landOwnership-checkbox')
 
-    if hvs.get("landOwnership-checkbox") is not None : _hv_dic['landOwnership'] = hvs["landOwnership-checkbox"]
     if hvs.get("Section3-LegallyTitled-Address") is not None : _hv_dic['legallyTitledSiteAddress'] = hvs["Section3-LegallyTitled-Address"]
     if hvs.get("Section3-LegallyTitled-City") is not None : _hv_dic['legallyTitledSiteCity'] = hvs["Section3-LegallyTitled-City"]
     if hvs.get("Section3-LegallyTitled-PostalZipCode") is not None : _hv_dic['legallyTitledSitePostalCode'] = hvs["Section3-LegallyTitled-PostalZipCode"]
