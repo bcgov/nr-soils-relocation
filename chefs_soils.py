@@ -11,7 +11,7 @@ RECEIVE_CSV_FILE = 'soil_relocation_receiving_sites.csv'
 HIGH_VOLUME_CSV_FILE = 'high_volume_receiving_sites.csv'
 
 # Soil Relocation Source Sites Item Id
-SRC_CSV_ID = 'b08a6224f08c49f6b0061afb0200170d'
+SRC_CSV_ID = 'ce7a67aa68174977b12a78d514570675'
 SRC_LAYER_ID = '760680ac983e442e9817f5d41ddf7d1e'
 
 # Soil Relocation Receiving Sites Item Id
