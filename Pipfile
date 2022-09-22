@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-requests = "==2.28.1"
-arcgis = "==2.0.1"
+requests = "*"
+arcgis = "==2.0.0"
 
 [requires]
 python_version = "3.9.12"
