@@ -23,8 +23,8 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install pipenv
-      - name: install python script dependencies
-        run: pipenv install --deploy
+          pip install requests
+          pip install arcgis
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
