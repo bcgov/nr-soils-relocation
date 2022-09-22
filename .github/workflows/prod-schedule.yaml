@@ -27,6 +27,7 @@ jobs:
           pip install cryptography
           pip install requests_ntlm
           pip install cachetools
+          pip install lxml
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
