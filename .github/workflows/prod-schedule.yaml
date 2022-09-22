@@ -36,4 +36,4 @@ jobs:
           MAPHUB_USER: ${{ secrets.MAPHUB_USER }}
           MAPHUB_PASS: ${{ secrets.MAPHUB_PASS }}
         run: |
-          pipenv run python chefs_soils.py
+          python chefs_soils.py
