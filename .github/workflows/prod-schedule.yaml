@@ -29,6 +29,7 @@ jobs:
           pip install cachetools
           pip install lxml
           pip install requests_oauthlib
+          pip install requests_toolbelt
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
