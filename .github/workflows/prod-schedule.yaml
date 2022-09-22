@@ -12,19 +12,27 @@ jobs:
     environment: prod
     steps:
       - name: checkout repo content
-        uses: actions/checkout@v3 # checkout the repository content to GitHub runner.
+        uses: actions/checkout@v2 # checkout the repository content to GitHub runner.
         with:
           ref: deploy/prod # Specify the branch to checkout.
       - name: setup python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9.12 #install the python version needed
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"   
       - name: install pipenv
         run: |
-          pip install --upgrade pip setuptools wheel requests
-          pip install pipenv
-      - name: install python script dependencies
-        run: pipenv install --deploy
+          python -m pip install --upgrade pipenv wheel        
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}          
+      - name: Install dependencies
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        run: |
+          pipenv install --deploy --dev          
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
