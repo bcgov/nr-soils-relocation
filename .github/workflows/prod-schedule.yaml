@@ -24,6 +24,7 @@ jobs:
           pip install --upgrade pip
           pip install requests
           pip install arcgis --no-deps
+          pip install cryptography
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
