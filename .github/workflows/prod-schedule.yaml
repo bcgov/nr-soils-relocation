@@ -32,6 +32,7 @@ jobs:
           pip install requests_toolbelt
           pip install six
           pip install ujson
+          pip install pytz          
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
