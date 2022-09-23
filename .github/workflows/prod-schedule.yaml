@@ -4,8 +4,8 @@ on:
 
   schedule:
     # * is a special character in YAML, so you have to quote this string
-    # Execute: Runs at 11:00 UTC on Mon, Tue, Wed, Thu and Fri.
-    - cron:  '0 11 * * 1-5'
+    # Execute: Runs at 08:00 AM UTC(01:00 AM PST) every day.
+    - cron:  '0 8 * * *'
 jobs:
   SRIS_CHEFS_LOAD:
     runs-on: ubuntu-latest
