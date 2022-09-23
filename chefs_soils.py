@@ -536,64 +536,59 @@ def map_source_site(submission):
   ):  
     print("Mapping sourece site ...")
 
+    #initialize
     for src_header in SOURCE_SITE_HEADERS:
       _src_dic[src_header] = None
 
-    if submission.get("A1-FIRSTName") is not None : _src_dic['updateToPreviousForm'] = submission["Intro-New_form_or_update"]
-    if submission.get("A1-FIRSTName") is not None : _src_dic['ownerFirstName'] = submission["A1-FIRSTName"]
-    if submission.get("A1-LASTName") is not None : _src_dic['ownerLastName'] = submission["A1-LASTName"]
-    if submission.get("A1-Company") is not None : _src_dic['ownerCompany'] = submission["A1-Company"]
-    if submission.get("A1-Address") is not None : _src_dic['ownerAddress'] = submission["A1-Address"]
-    if submission.get("A1-City") is not None : _src_dic['ownerCity'] = submission["A1-City"]
-    if submission.get("A1-ProvinceState") is not None : _src_dic['ownerProvince'] = submission["A1-ProvinceState"]
-    if submission.get("A1-Country") is not None : _src_dic['ownerCountry'] = submission["A1-Country"]
-    if submission.get("A1-PostalZipCode") is not None : _src_dic['ownerPostalCode'] = submission["A1-PostalZipCode"]
-    if submission.get("A1-Phone") is not None : _src_dic['ownerPhoneNumber'] = submission["A1-Phone"]
-    if submission.get("A1-Email") is not None : _src_dic['ownerEmail'] = submission["A1-Email"]
+    _src_dic['updateToPreviousForm'] = submission.get("Intro-New_form_or_update")
+    _src_dic['ownerFirstName'] = submission.get("A1-FIRSTName")
+    _src_dic['ownerLastName'] = submission.get("A1-LASTName")
+    _src_dic['ownerCompany'] = submission.get("A1-Company")
+    _src_dic['ownerAddress'] = submission.get("A1-Address")
+    _src_dic['ownerCity'] = submission.get("A1-City")
+    _src_dic['ownerProvince'] = submission.get("A1-ProvinceState")
+    _src_dic['ownerCountry'] = submission.get("A1-Country")
+    _src_dic['ownerPostalCode'] = submission.get("A1-PostalZipCode")
+    _src_dic['ownerPhoneNumber'] = submission.get("A1-Phone")
+    _src_dic['ownerEmail'] = submission.get("A1-Email")
+    _src_dic['owner2FirstName'] = submission.get("A1-additionalownerFIRSTName")
+    _src_dic['owner2LastName'] = submission.get("A1-additionalownerLASTName1")
+    _src_dic['owner2Company'] = submission.get("A1-additionalownerCompany1")
+    _src_dic['owner2Address'] = submission.get("A1-additionalownerAddress1")
+    _src_dic['owner2City'] = submission.get("A1-additionalownerCity1")
+    _src_dic['owner2PhoneNumber'] = submission.get("A1-additionalownerPhone1")
+    _src_dic['owner2Email'] = submission.get("A1-additionalownerEmail1")
+    _src_dic['additionalOwners'] = submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow")
+    _src_dic['contactFirstName'] = submission.get("A2-SourceSiteContactFirstName")
+    _src_dic['contactLastName'] = submission.get("A2-SourceSiteContactLastName")
+    _src_dic['contactCompany'] = submission.get("A2-SourceSiteContactCompany")
+    _src_dic['contactAddress'] = submission.get("A2-SourceSiteContactAddress")
+    _src_dic['contactCity'] = submission.get("A2-SourceSiteContactCity")
+    _src_dic['contactPhoneNumber'] = submission.get("SourceSiteContactphoneNumber")
+    _src_dic['contactEmail'] = submission.get("A2-SourceSiteContactEmail")
+    _src_dic['SID'] = submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable")
 
-    if submission.get("A1-additionalownerFIRSTName") is not None : _src_dic['owner2FirstName'] = submission["A1-additionalownerFIRSTName"]
-    if submission.get("A1-additionalownerLASTName1") is not None : _src_dic['owner2LastName'] = submission["A1-additionalownerLASTName1"]
-    if submission.get("A1-additionalownerCompany1") is not None : _src_dic['owner2Company'] = submission["A1-additionalownerCompany1"]
-    if submission.get("A1-additionalownerAddress1") is not None : _src_dic['owner2Address'] = submission["A1-additionalownerAddress1"]
-    if submission.get("A1-additionalownerCity1") is not None : _src_dic['owner2City'] = submission["A1-additionalownerCity1"]
-    if submission.get("A1-additionalownerPhone1") is not None : _src_dic['owner2PhoneNumber'] = submission["A1-additionalownerPhone1"]
-    if submission.get("A1-additionalownerEmail1") is not None : _src_dic['owner2Email'] = submission["A1-additionalownerEmail1"]
-
-    if submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : _src_dic['additionalOwners'] = submission["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
-    if submission.get("A2-SourceSiteContactFirstName") is not None : _src_dic['contactFirstName'] = submission["A2-SourceSiteContactFirstName"]
-    if submission.get("A2-SourceSiteContactLastName") is not None : _src_dic['contactLastName'] = submission["A2-SourceSiteContactLastName"]
-    if submission.get("A2-SourceSiteContactCompany") is not None : _src_dic['contactCompany'] = submission["A2-SourceSiteContactCompany"]
-    if submission.get("A2-SourceSiteContactAddress") is not None : _src_dic['contactAddress'] = submission["A2-SourceSiteContactAddress"]
-    if submission.get("A2-SourceSiteContactCity") is not None : _src_dic['contactCity'] = submission["A2-SourceSiteContactCity"]
-    if submission.get("SourceSiteContactphoneNumber") is not None : _src_dic['contactPhoneNumber'] = submission["SourceSiteContactphoneNumber"]
-    if submission.get("A2-SourceSiteContactEmail") is not None : _src_dic['contactEmail'] = submission["A2-SourceSiteContactEmail"]
-
-    if submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable") is not None : _src_dic['SID'] = submission["A3-SourcesiteIdentificationNumberSiteIdIfAvailable"]
-
-    _src_lat, _src_lon = helper.convert_deciaml_lat_long(
+    _src_dic['latitude'], _src_dic['longitude'] = helper.convert_deciaml_lat_long(
       submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
-    _src_dic['latitude'] = _src_lat
-    _src_dic['longitude'] = _src_lon
 
     _src_dic['landOwnership'] = create_land_ownership(submission, 'SourcelandOwnership-checkbox')
-
-    if submission.get("A-LegallyTitled-AddressSource") is not None : _src_dic['legallyTitledSiteAddress'] = submission["A-LegallyTitled-AddressSource"]
-    if submission.get("A-LegallyTitled-CitySource") is not None : _src_dic['legallyTitledSiteCity'] = submission["A-LegallyTitled-CitySource"]
-    if submission.get("A-LegallyTitled-PostalZipCodeSource") is not None : _src_dic['legallyTitledSitePostalCode'] = submission["A-LegallyTitled-PostalZipCodeSource"]
+    _src_dic['legallyTitledSiteAddress'] = submission.get("A-LegallyTitled-AddressSource")
+    _src_dic['legallyTitledSiteCity'] = submission.get("A-LegallyTitled-CitySource")
+    _src_dic['legallyTitledSitePostalCode'] = submission.get("A-LegallyTitled-PostalZipCodeSource")
 
     if submission.get("dataGrid") is not None and len(submission["dataGrid"]) > 0: 
       _dg = submission["dataGrid"][0] # could be more than one, but take only one
       if _dg.get("A-LegallyTitled-PID") is not None: _src_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescriptionSource") is not None: _src_dic['legalLandDescription'] = _dg["legalLandDescriptionSource"]
     if (submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 
-        and _src_dic['PID'] is None and _src_dic['PID'] != ''): 
+        and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')): 
       _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-UntitledPINSource") is not None: _src_dic['PIN'] = _dg1["A-UntitledPINSource"]
       if _dg1.get("legalLandDescriptionUntitledSource") is not None: _src_dic['legalLandDescription'] = _dg1["legalLandDescriptionUntitledSource"]
     if (submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None 
-        and _src_dic['PID'] is None and _src_dic['PID'] != '' 
-        and _src_dic['PIN'] is None and _src_dic['PIN'] != ''): 
+        and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
+        and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): 
       _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
 
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
@@ -604,9 +599,9 @@ def map_source_site(submission):
         _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
       _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-    if submission.get("isTheSourceSiteHighRisk") is not None : _src_dic['highVolumeSite'] = submission["isTheSourceSiteHighRisk"]
-    if submission.get("A5-PurposeOfSoilExcavationSource") is not None : _src_dic['soilRelocationPurpose'] = submission["A5-PurposeOfSoilExcavationSource"]
-    if submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source") is not None : _src_dic['soilStorageType'] = submission["B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source"]
+    _src_dic['highVolumeSite'] = submission.get("isTheSourceSiteHighRisk")
+    _src_dic['soilRelocationPurpose'] = submission.get("A5-PurposeOfSoilExcavationSource")
+    _src_dic['soilStorageType'] = submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source")
 
     if submission.get("dataGrid9") is not None and len(submission["dataGrid9"]) > 0: 
       _dg9 = submission["dataGrid9"][0] # could be more than one, but take only one
@@ -617,30 +612,28 @@ def map_source_site(submission):
               _src_dic['soilQuality'] = convert_soil_quality_to_name(_k)
               break
 
-    if submission.get("B2-describeSoilCharacterizationMethod1") is not None : _src_dic['soilCharacterMethod'] = submission["B2-describeSoilCharacterizationMethod1"]
-    if submission.get("B3-yesOrNoVapourexemptionsource") is not None : _src_dic['vapourExemption'] = submission["B3-yesOrNoVapourexemptionsource"]
-    if submission.get("B3-ifExemptionsApplyPleaseDescribe") is not None : _src_dic['vapourExemptionDesc'] = submission["B3-ifExemptionsApplyPleaseDescribe"]
-    if submission.get("B3-describeVapourCharacterizationMethod") is not None : _src_dic['vapourCharacterMethodDesc'] = submission["B3-describeVapourCharacterizationMethod"]
-    if submission.get("B4-soilRelocationEstimatedStartDateMonthDayYear") is not None : _src_dic['soilRelocationStartDate'] = helper.convert_simple_datetime_format_in_str(submission["B4-soilRelocationEstimatedStartDateMonthDayYear"])
-    if submission.get("B4-soilRelocationEstimatedCompletionDateMonthDayYear") is not None : _src_dic['soilRelocationCompletionDate'] = helper.convert_simple_datetime_format_in_str(submission["B4-soilRelocationEstimatedCompletionDateMonthDayYear"])
-    if submission.get("B4-RelocationMethod") is not None : _src_dic['relocationMethod'] = submission["B4-RelocationMethod"]
-
-    if submission.get("D1-FirstNameQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalFirstName'] = submission["D1-FirstNameQualifiedProfessional"]
-    if submission.get("LastNameQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalLastName'] = submission["LastNameQualifiedProfessional"]
-    if submission.get("D1-TypeofQP1") is not None : _src_dic['qualifiedProfessionalType'] = submission["D1-TypeofQP1"]
-    if submission.get("D1-professionalLicenseRegistrationEGPEngRpBio") is not None : _src_dic['professionalLicenceRegistration'] = submission["D1-professionalLicenseRegistrationEGPEngRpBio"]
-    if submission.get("D1-organization1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalOrganization'] = submission["D1-organization1QualifiedProfessional"]
-    if submission.get("D1-streetAddress1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalAddress'] = submission["D1-streetAddress1QualifiedProfessional"]
-    if submission.get("D1-city1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalCity'] = submission["D1-city1QualifiedProfessional"]
-    if submission.get("D1-provinceState3QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalProvince'] = submission["D1-provinceState3QualifiedProfessional"]
-    if submission.get("D1-canadaQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalCountry'] = submission["D1-canadaQualifiedProfessional"]
-    if submission.get("D1-postalZipCode3QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalPostalCode'] = submission["D1-postalZipCode3QualifiedProfessional"]
-    if submission.get("simplephonenumber1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalPhoneNumber'] = submission["simplephonenumber1QualifiedProfessional"]
-    if submission.get("EmailAddressQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalEmail'] = submission["EmailAddressQualifiedProfessional"]
-    if submission.get("sig-firstAndLastNameQualifiedProfessional") is not None : _src_dic['signaturerFirstAndLastName'] = submission["sig-firstAndLastNameQualifiedProfessional"]
-    if submission.get("simpledatetime") is not None : _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission["simpledatetime"])
-
-    _src_dic['createAt'], _src_dic['confirmationId'] = helper.get_create_date_and_confirm_id (submission)
+    _src_dic['soilCharacterMethod'] = submission.get("B2-describeSoilCharacterizationMethod1")
+    _src_dic['vapourExemption'] = submission.get("B3-yesOrNoVapourexemptionsource")
+    _src_dic['vapourExemptionDesc'] = submission.get("B3-ifExemptionsApplyPleaseDescribe")
+    _src_dic['vapourCharacterMethodDesc'] = submission.get("B3-describeVapourCharacterizationMethod")
+    _src_dic['soilRelocationStartDate'] = helper.convert_simple_datetime_format_in_str(submission.get("B4-soilRelocationEstimatedStartDateMonthDayYear"))
+    _src_dic['soilRelocationCompletionDate'] = helper.convert_simple_datetime_format_in_str(submission.get("B4-soilRelocationEstimatedCompletionDateMonthDayYear"))
+    _src_dic['relocationMethod'] = submission.get("B4-RelocationMethod")
+    _src_dic['qualifiedProfessionalFirstName'] = submission.get("D1-FirstNameQualifiedProfessional")
+    _src_dic['qualifiedProfessionalLastName'] = submission.get("LastNameQualifiedProfessional")
+    _src_dic['qualifiedProfessionalType'] = submission.get("D1-TypeofQP1")
+    _src_dic['professionalLicenceRegistration'] = submission.get("D1-professionalLicenseRegistrationEGPEngRpBio")
+    _src_dic['qualifiedProfessionalOrganization'] = submission.get("D1-organization1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalAddress'] = submission.get("D1-streetAddress1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalCity'] = submission.get("D1-city1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalProvince'] = submission.get("D1-provinceState3QualifiedProfessional")
+    _src_dic['qualifiedProfessionalCountry'] = submission.get("D1-canadaQualifiedProfessional")
+    _src_dic['qualifiedProfessionalPostalCode'] = submission.get("D1-postalZipCode3QualifiedProfessional")
+    _src_dic['qualifiedProfessionalPhoneNumber'] = submission.get("simplephonenumber1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalEmail'] = submission.get("EmailAddressQualifiedProfessional")
+    _src_dic['signaturerFirstAndLastName'] = submission.get("sig-firstAndLastNameQualifiedProfessional")
+    _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))
+    _src_dic['createAt'], _src_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
   return _src_dic
 
@@ -936,7 +929,7 @@ def map_hv_site(hvs):
       if _dg.get("A-LegallyTitled-PID") is not None: _hv_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg["legalLandDescription"]
     if (hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 
-        and ( _hv_dic['PID'] is None or (_hv_dic['PID'].strip()) == '')):
+        and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')):
       _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-LegallyTitled-PID") is not None: _hv_dic['PIN'] = _dg1["A-LegallyTitled-PID"]
       if _dg1.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg1["legalLandDescription"]
