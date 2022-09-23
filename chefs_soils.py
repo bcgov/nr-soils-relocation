@@ -4,40 +4,31 @@ import json, csv, datetime, copy, os, re
 import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
+import helper
 
-# CSV file names
-SOURCE_CSV_FILE = 'soil_relocation_source_sites.csv'
-RECEIVE_CSV_FILE = 'soil_relocation_receiving_sites.csv'
-HIGH_VOLUME_CSV_FILE = 'high_volume_receiving_sites.csv'
+#### to track the version of forms (Sept/22/2022)
+# CHEFS generates new vresion of forms when changes of data fields, manages data by each version
+# 1.soil relocation form version: v8
+# 2.high volume submission version v6
+# 3.subscriber form version: v9
 
-# Soil Relocation Source Sites Item Id
-SRC_CSV_ID = 'ce7a67aa68174977b12a78d514570675'
-SRC_LAYER_ID = '760680ac983e442e9817f5d41ddf7d1e'
+config = helper.read_config()
+MAPHUB_URL = config['AGOL']['MAPHUB_URL']
+WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
+CHEFS_API_URL = config['CHEFS']['CHEFS_API_URL']
+AUTH_URL = config['CHEFS']['AUTH_URL']
+CHEFS_URL = config['CHEFS']['CHEFS_URL']
+SOURCE_CSV_FILE = config['CSV']['SOURCE_CSV_FILE']
+RECEIVE_CSV_FILE = config['CSV']['RECEIVE_CSV_FILE']
+HIGH_VOLUME_CSV_FILE = config['CSV']['HIGH_VOLUME_CSV_FILE']
+SRC_CSV_ID = config['AGOL_ITEMS']['SRC_CSV_ID']
+SRC_LAYER_ID = config['AGOL_ITEMS']['SRC_LAYER_ID']
+RCV_CSV_ID = config['AGOL_ITEMS']['RCV_CSV_ID']
+RCV_LAYER_ID = config['AGOL_ITEMS']['RCV_LAYER_ID']
+HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
+HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
+WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
 
-# Soil Relocation Receiving Sites Item Id
-RCV_CSV_ID = 'b08a6224f08c49f6b0061afb0200170d'
-RCV_LAYER_ID = '85eb5679dec94326b402c93c811564da'
-
-# High Volume Receiving Sites Item Id
-HV_CSV_ID = '7a995fc4a9ee4bb0b1149b451ee7bc0b'
-HV_LAYER_ID = '8001eab1d4964e2494864ea2bad51c48'
-
-# WEB Mapping Application Itme Id
-WEB_MAP_APP_ID = '8a6afeae8fdd4960a0ea0df1fa34aa74' #should be changed
-
-MAPHUB_URL = r'https://governmentofbc.maps.arcgis.com'
-WEBMAP_POPUP_URL = r'https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html'
-
-# Move these to a configuration file
-CHEFS_API_URL = r'https://submit.digital.gov.bc.ca/app/api/v1'
-
-AUTH_URL = r'https://dev.oidc.gov.bc.ca' # dev
-# AUTH_URL = 'https://test.oidc.gov.bc.ca' # test
-# AUTH_URL	= 'https://oidc.gov.bc.ca' # prod
-
-CHEFS_URL = r'https://ches-dev.apps.silver.devops.gov.bc.ca' # dev
-# CHEFS_URL = 'https://ches-test.apps.silver.devops.gov.bc.ca' # test
-# CHEFS_URL = 'https://ches.nrs.gov.bc.ca' # prod
 
 REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
                                 , caribooRegionalDistrict='Cariboo Regional District'
@@ -344,17 +335,17 @@ HV_SITE_HEADERS = [
   "soilDepositIsALR",
   "soilDepositIsReserveLands",
   "qualifiedProfessionalFirstName",
-	"qualifiedProfessionalLastName",
-	"qualifiedProfessionalType",
-	"professionalLicenceRegistration",
-	"qualifiedProfessionalOrganization",
-	"qualifiedProfessionalAddress",
-	"qualifiedProfessionalCity",
-	"qualifiedProfessionalProvince",
-	"qualifiedProfessionalCountry",
-	"qualifiedProfessionalPostalCode",
-	"qualifiedProfessionalPhoneNumber",
-	"qualifiedProfessionalEmail",
+  "qualifiedProfessionalLastName",
+  "qualifiedProfessionalType",
+  "professionalLicenceRegistration",
+  "qualifiedProfessionalOrganization",
+  "qualifiedProfessionalAddress",
+  "qualifiedProfessionalCity",
+  "qualifiedProfessionalProvince",
+  "qualifiedProfessionalCountry",
+  "qualifiedProfessionalPostalCode",
+  "qualifiedProfessionalPhoneNumber",
+  "qualifiedProfessionalEmail",
   "signaturerFirstAndLastName",
   "dateSigned",
   "createAt",
@@ -366,14 +357,12 @@ EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
 
 
 def send_mail(to_email, subject, message):
-  to_email = 'rjeong@vividsolutions.com'  #testing SHOULD BE REMOVED!
   auth_pay_load = 'grant_type=client_credentials'
   auth_haders = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'Authorization': 'Basic ' + CHES_API_KEY
   }
   auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
-  # print(authResponse.text)
   auth_response_json = json.loads(auth_response.content)
   access_token = auth_response_json['access_token']
 
@@ -609,7 +598,16 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
     if _lon_dd > 0: _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
   return _lat_dd, _lon_dd
 
-# submission version 8
+def get_create_date_and_confirm_id(cefs_dic):
+  _created_at = None
+  _confirmation_id = None
+  if cefs_dic.get('form') is not None : 
+    form_str = json.dumps(cefs_dic.get('form'))
+    form_json = json.loads(form_str)
+    _created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
+    _confirmation_id = form_json['confirmationId']
+  return _created_at, _confirmation_id
+
 def map_source_site(submission):
   _src_dic = {}
   if (
@@ -726,18 +724,10 @@ def map_source_site(submission):
     if submission.get("sig-firstAndLastNameQualifiedProfessional") is not None : _src_dic['signaturerFirstAndLastName'] = submission["sig-firstAndLastNameQualifiedProfessional"]
     if submission.get("simpledatetime") is not None : _src_dic['dateSigned'] = submission["simpledatetime"]
 
-    if submission.get("form") is not None : 
-      form_str = json.dumps(submission.get("form"))
-      form_json = json.loads(form_str)
-      created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-      confirmation_id = form_json['confirmationId']
-      # not in attributes, but in json
-      _src_dic['createAt'] = created_at
-      if confirmation_id is not None : _src_dic['confirmationId'] = confirmation_id
+    _src_dic['createAt'], _src_dic['confirmationId'] = get_create_date_and_confirm_id (submission)
 
   return _src_dic
 
-# submission version 8
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
   if (
@@ -815,18 +805,10 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite"]
 
-    if submission.get("form") is not None : 
-      form_str = json.dumps(submission.get("form"))
-      form_json = json.loads(form_str)
-      created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-      confirmation_id = form_json['confirmationId']
-      # not in attributes, but in json
-      _rcv_dic['createAt'] = created_at
-      if confirmation_id is not None : _rcv_dic['confirmationId'] = confirmation_id
+    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = get_create_date_and_confirm_id(submission)
 
   return _rcv_dic
 
-# submission version 8
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
   if (
@@ -904,18 +886,10 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite"]
 
-    if submission.get("form") is not None : 
-      form_str = json.dumps(submission.get("form"))
-      form_json = json.loads(form_str)
-      created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-      confirmation_id = form_json['confirmationId']
-      # not in attributes, but in json
-      _rcv_dic['createAt'] = created_at
-      if confirmation_id is not None : _rcv_dic['confirmationId'] = confirmation_id
+    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = get_create_date_and_confirm_id(submission)
 
   return _rcv_dic
 
-# submission version 8
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
   if (
@@ -993,14 +967,7 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
 
-    if submission.get("form") is not None : 
-      form_str = json.dumps(submission.get("form"))
-      form_json = json.loads(form_str)
-      created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-      confirmation_id = form_json['confirmationId']
-      # not in attributes, but in json
-      _rcv_dic['createAt'] = created_at
-      if confirmation_id is not None : _rcv_dic['confirmationId'] = confirmation_id  
+    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = get_create_date_and_confirm_id(submission)
 
   return _rcv_dic
 
@@ -1105,14 +1072,7 @@ def map_hv_site(hvs):
     if hvs.get("firstAndLastNameQualifiedProfessional") is not None : _hv_dic['signaturerFirstAndLastName'] = hvs["firstAndLastNameQualifiedProfessional"]
     if hvs.get("simpledatetime") is not None : _hv_dic['dateSigned'] = hvs["simpledatetime"]
 
-    if hvs.get("form") is not None : 
-      _form_str = json.dumps(hvs.get("form"))
-      _form_json = json.loads(_form_str)
-      _created_at = datetime.datetime.strptime(_form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-      _confirmation_id = _form_json['confirmationId']
-      # not in attributes, but in json
-      _hv_dic['createAt'] = _created_at
-      if _confirmation_id is not None : _hv_dic['confirmationId'] = _confirmation_id
+    _hv_dic['createAt'], _hv_dic['confirmationId'] = get_create_date_and_confirm_id(hvs)
 
   return _hv_dic
 
@@ -1166,10 +1126,11 @@ print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
 print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
 """
 
+
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
 submissionsJson = site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
-print(submissionsJson)
+#print(submissionsJson)
 print('Loading Submission attributes and headers...')
 soilsAttributes = fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 #print(soilsAttributes)
@@ -1190,7 +1151,6 @@ subscribeAttributes = fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribeAttributes)
 
 
-# submission version 8
 print('Creating source site, receiving site records...')
 sourceSites = []
 receivingSites = []
@@ -1217,7 +1177,6 @@ for submission in submissionsJson:
     receivingSites.append(_3rcvDic)
     add_regional_district_dic(_3rcvDic, rcvRegDistDic)  
 
-# high volume submission version 6
 print('Creating high volume site records records...')
 hvSites = []
 hvRegDistDic = {}
@@ -1232,6 +1191,7 @@ for hvs in hvsJson:
 
 
 print('Creating soil source site CSV...')
+print('>> current directory:' + os.getcwd())
 with open(SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=SOURCE_SITE_HEADERS)
   writer.writeheader()
@@ -1326,7 +1286,7 @@ today = datetime.datetime.now().replace(hour = 0, minute = 0, second = 0, micros
 
 notifySoilRelocSubscriberDic = {}
 notifyHVSSubscriberDic = {}
-unSubscribers = []
+unSubscribersDic = {}
 
 for _subscriber in subscribersJson:
   #print(_subscriber)
@@ -1335,6 +1295,8 @@ for _subscriber in subscribersJson:
   _unsubscribe = False
   _notifyHVS = None
   _notifySoilReloc = None
+  _subscription_created_at = None
+  _subscription_confirm_id = None
 
   if _subscriber.get("emailAddress") is not None : _subscriberEmail = _subscriber["emailAddress"]
   if _subscriber.get("regionalDistrict") is not None : _subscriberRegionalDistrict = _subscriber["regionalDistrict"] 
@@ -1351,6 +1313,8 @@ for _subscriber in subscribersJson:
     if _noticeSelection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
       if is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
         _notifySoilReloc = _noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
+
+  _subscription_created_at, _subscription_confirm_id = get_create_date_and_confirm_id(_subscriber)
 
   if (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
       _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and
@@ -1369,24 +1333,25 @@ for _subscriber in subscribersJson:
 
         if _rcvSitesInRD is not None:
           for _receivingSiteDic in _rcvSitesInRD:
-            _createdAt = _receivingSiteDic['createAt']
-            # print(_createdAt)
-            _daysDiff = (today - _createdAt).days
-            # print(_daysDiff)
+            _daysDiff = (today - _receivingSiteDic['createAt']).days if _receivingSiteDic['createAt'] is not None else -1
 
-            if (_daysDiff <= 1):
-
+            if (_daysDiff <= 1 and _daysDiff >= 0):
               _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
+              _regDisName = convert_regional_district_to_name(_srd)
+              _emailMsg = create_site_relocation_email_msg(_regDisName, _rcvPopupLinks)
 
-              if _rcvSitesInRD is not None:
-                _regDis = convert_regional_district_to_name(_srd)
-                _emailMsg = create_site_relocation_email_msg(_regDis, _rcvPopupLinks)
-
-                # create soil relocation notification substriber dictionary
-                # key-Tuple of email address, RegionalDistrict Tuple, value=email maessage
-                if (_subscriberEmail,_srd) not in notifySoilRelocSubscriberDic:
-                  notifySoilRelocSubscriberDic[(_subscriberEmail,_srd)] = _emailMsg
-
+              # create soil relocation notification substriber dictionary
+              # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
+              if (_subscriberEmail,_srd) not in notifySoilRelocSubscriberDic:
+                notifySoilRelocSubscriberDic[(_subscriberEmail,_srd)] = (_emailMsg, _subscription_created_at, _subscription_confirm_id)
+                #print("notifySoilRelocSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+              else:
+                _subscrb_created = notifySoilRelocSubscriberDic.get((_subscriberEmail,_srd))[1]
+                if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                  notifySoilRelocSubscriberDic.update({(_subscriberEmail,_srd):(_emailMsg, _subscription_created_at, _subscription_confirm_id)})
+                  #print("notifySoilRelocSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
 
     # Notification of high volume site registration in selected Regional District(s) ============================================
     if _notifyHVS == True:
@@ -1397,48 +1362,72 @@ for _subscriber in subscribersJson:
 
         if _hvSitesInRD is not None:
           for _hvSiteDic in _hvSitesInRD:
-            _createdAt = _hvSiteDic['createAt'] 
-            # print(createdAt)
-            _daysDiff = (today - _createdAt).days
-            # print(daysDiff)
+            _daysDiff = (today - _hvSiteDic['createAt']).days if _hvSiteDic['createAt'] is not None else -1
 
-            if (_daysDiff <= 1):  
-
+            if (_daysDiff <= 1 and _daysDiff >= 0):
               _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
+              _hvRegDis = convert_regional_district_to_name(_srd)
+              _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
 
-              if _hvSitesInRD is not None:
-                _hvRegDis = convert_regional_district_to_name(_srd)
-                _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
-                
-                # create high volume relocation notification substriber dictionary
-                # key-Tuple of email address, RegionalDistrict Tuple, value=email maessage
-                if (_hvEmailMsg,_srd) not in notifyHVSSubscriberDic:
-                  notifyHVSSubscriberDic[(_subscriberEmail,_srd)] = _hvEmailMsg
+              # create high volume relocation notification substriber dictionary
+              # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
+              if (_subscriberEmail,_srd) not in notifyHVSSubscriberDic:
+                notifyHVSSubscriberDic[(_subscriberEmail,_srd)] = (_hvEmailMsg, _subscription_created_at, _subscription_confirm_id)
+                #print("notifyHVSSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+              else:
+                _subscrb_created = notifyHVSSubscriberDic.get((_subscriberEmail,_srd))[1]
+                if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                  notifyHVSSubscriberDic.update({(_subscriberEmail,_srd):(_hvEmailMsg, _subscription_created_at, _subscription_confirm_id)})
+                  #print("notifyHVSSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                  #    + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
 
   elif (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
         _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and  
         _unsubscribe == True):
     # create unSubscriber list
     for _srd in _subscriberRegionalDistrict:
-        unSubscribers.append((_subscriberEmail,_srd))
+      if (_subscriberEmail,_srd) not in unSubscribersDic:
+        unSubscribersDic[(_subscriberEmail,_srd)] = _subscription_created_at
+        #print("unSubscribersDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+        #      + str(_subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
+      else:  
+        _unsubscrb_created = unSubscribersDic.get((_subscriberEmail,_srd))
+        if (_subscription_created_at is not None and _subscription_created_at > _unsubscrb_created):
+          unSubscribersDic.update({(_subscriberEmail,_srd):_subscription_created_at})
+          #print("unSubscribersDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+          #    + str( _subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
 
 print('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
-for _unSubscriber in unSubscribers:
-  if (_unSubscriber[0],_unSubscriber[1]) in notifySoilRelocSubscriberDic:    
-    notifySoilRelocSubscriberDic.pop(_unSubscriber[0],_unSubscriber[1])
-  if (_unSubscriber[0],_unSubscriber[1]) in notifyHVSSubscriberDic:
-    notifyHVSSubscriberDic.pop((_unSubscriber[0],_unSubscriber[1]))
+# Processing of data subscribed and unsubscribed by the same email in the same region -
+# This is processed based on the most recent submission date.
+for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.items():
+  if (_k1_subscriberEmail,_k2_srd) in notifySoilRelocSubscriberDic:
+    _subscribe_create_at = notifySoilRelocSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[1]
+    _subscribe_confirm_id = notifySoilRelocSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[2]    
+    if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
+      notifySoilRelocSubscriberDic.pop(_k1_subscriberEmail,_k2_srd)
+      #print("remove subscription from notifySoilRelocSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
+      #      + _k2_srd + ', confirm id:' +str( _subscription_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
+
+  if (_k1_subscriberEmail,_k2_srd) in notifyHVSSubscriberDic:
+    _subscribe_create_at = notifyHVSSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[1]
+    _subscribe_confirm_id = notifyHVSSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[2]        
+    if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
+      notifyHVSSubscriberDic.pop((_k1_subscriberEmail,_k2_srd))
+      #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
+      #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
+
 
 print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items():
-  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
-  print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
+  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+  #print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
 
 print('Sending Notification of high volume site registration in selected Regional District(s) ...')
 for _k, _v in notifyHVSSubscriberDic.items():
-  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v)
-  print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
-
+  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+  #print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
 
 
 print('Completed Soils data publishing')
