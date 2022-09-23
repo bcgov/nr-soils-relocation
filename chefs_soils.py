@@ -1304,7 +1304,7 @@ for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.it
       #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
       #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
 
-"""
+
 print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items():
   _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
@@ -1314,6 +1314,6 @@ print('Sending Notification of high volume site registration in selected Regiona
 for _k, _v in notifyHVSSubscriberDic.items():
   _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
   #print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
-"""
+
 
 print('Completed Soils data publishing')
