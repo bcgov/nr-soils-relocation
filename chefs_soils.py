@@ -1,6 +1,6 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import json, csv, datetime, copy, os, re
+import json, csv, datetime, copy, os
 import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
@@ -353,7 +353,6 @@ HV_SITE_HEADERS = [
 ]
 
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
-EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
 
 
 def send_mail(to_email, subject, message):
@@ -571,32 +570,7 @@ def create_land_ownership(cefs_dic, field):
     _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
   return _land_ownership
 
-def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
-  _lat_dd = 0
-  _lon_dd = 0
-  # Convert to DD in mapLatitude and mapLongitude
-  if (lat_deg is not None and lat_deg != '' and
-      lat_min is not None and lat_min != '' and
-      lat_sec is not None and lat_sec != '' and
-      lon_deg is not None and lon_deg != '' and
-      lon_min is not None and lon_min != '' and
-      lon_sec is not None and lon_sec != ''
-  ):
-    # extract floating number from text
-    _lat_deg = re.findall(EXP_EXTRACT_FLOATING, lat_deg)
-    _lat_min = re.findall(EXP_EXTRACT_FLOATING, lat_min)
-    _lat_sec = re.findall(EXP_EXTRACT_FLOATING, lat_sec)
-    _lon_deg = re.findall(EXP_EXTRACT_FLOATING, lon_deg)
-    _lon_min = re.findall(EXP_EXTRACT_FLOATING, lon_min)
-    _lon_sec = re.findall(EXP_EXTRACT_FLOATING, lon_sec)
 
-    if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0 
-        and len(_lon_deg) > 0 and len(_lon_min) > 0 and len(_lon_sec) > 0):
-      _lat_dd = (float(_lat_deg[0]) + float(_lat_min[0])/60 + float(_lat_sec[0])/(60*60))
-      _lon_dd = - (float(_lon_deg[0]) + float(_lon_min[0])/60 + float(_lon_sec[0])/(60*60))
-
-    if _lon_dd > 0: _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
-  return _lat_dd, _lon_dd
 
 def get_create_date_and_confirm_id(cefs_dic):
   _created_at = None
@@ -654,7 +628,7 @@ def map_source_site(submission):
 
     if submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable") is not None : _src_dic['SID'] = submission["A3-SourcesiteIdentificationNumberSiteIdIfAvailable"]
 
-    _src_lat, _src_lon = convert_deciaml_lat_long(
+    _src_lat, _src_lon = helper.convert_deciaml_lat_long(
       submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
     _src_dic['latitude'] = _src_lat
@@ -769,7 +743,7 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C2-RSC-Email") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite"]
 
-    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission["C2-Latitude-DegreesReceivingSite"], submission["C2-Latitude-MinutesReceivingSite"], submission["Section2-Latitude-Seconds1ReceivingSite"], 
       submission["C2-Longitude-DegreesReceivingSite"], submission["C2-Longitude-MinutesReceivingSite"], submission["C2-Longitude-SecondsReceivingSite"])
     _rcv_dic['latitude'] = _rcv_lat
@@ -850,7 +824,7 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C2-RSC-Email1AdditionalReceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email1AdditionalReceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite"]
 
-    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Latitude-Minutes1FirstAdditionalReceivingSite"], submission["Section2-Latitude-Seconds2FirstAdditionalReceivingSite"], 
       submission["C2-Longitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Longitude-Minutes1FirstAdditionalReceivingSite"], submission["C2-Longitude-Seconds1FirstAdditionalReceivingSite"])
     _rcv_dic['latitude'] = _rcv_lat
@@ -931,7 +905,7 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C2-RSC-Email3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
 
-    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"], submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"], 
       submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"], submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"])
     _rcv_dic['latitude'] = _rcv_lat
@@ -1022,7 +996,7 @@ def map_hv_site(hvs):
 
     if hvs.get("Section3-siteIdIncludeAllRelatedNumbers") is not None : _hv_dic['SID'] = hvs["Section3-siteIdIncludeAllRelatedNumbers"]
 
-    _hv_lat, _hv_lon = convert_deciaml_lat_long(
+    _hv_lat, _hv_lon = helper.convert_deciaml_lat_long(
       hvs["Section3-Latitude-Degrees"], hvs["Section3-Latitude-Minutes"], hvs["Section3-Latitude-Seconds"], 
       hvs["Section3-Longitude-Degrees"], hvs["Section3-Longitude-Minutes"], hvs["Section3-Longitude-Seconds"])
     _hv_dic['latitude'] = _hv_lat
@@ -1418,7 +1392,7 @@ for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.it
       #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
       #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
 
-
+"""
 print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items():
   _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
@@ -1428,6 +1402,6 @@ print('Sending Notification of high volume site registration in selected Regiona
 for _k, _v in notifyHVSSubscriberDic.items():
   _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
   #print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
-
+"""
 
 print('Completed Soils data publishing')
