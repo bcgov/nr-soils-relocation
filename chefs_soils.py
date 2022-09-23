@@ -1,10 +1,11 @@
-import requests
-from requests.auth import HTTPBasicAuth
-import json, csv, datetime, copy, os, re
+import json, csv, copy, os
 import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
 import helper
+import datetime
+import pytz
+from pytz import timezone
 
 #### to track the version of forms (Sept/22/2022)
 # CHEFS generates new vresion of forms when changes of data fields, manages data by each version
@@ -15,9 +16,6 @@ import helper
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
-CHEFS_API_URL = config['CHEFS']['CHEFS_API_URL']
-AUTH_URL = config['CHEFS']['AUTH_URL']
-CHEFS_URL = config['CHEFS']['CHEFS_URL']
 SOURCE_CSV_FILE = config['CSV']['SOURCE_CSV_FILE']
 RECEIVE_CSV_FILE = config['CSV']['RECEIVE_CSV_FILE']
 HIGH_VOLUME_CSV_FILE = config['CSV']['HIGH_VOLUME_CSV_FILE']
@@ -353,50 +351,9 @@ HV_SITE_HEADERS = [
 ]
 
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
-EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
 
 
-def send_mail(to_email, subject, message):
-  auth_pay_load = 'grant_type=client_credentials'
-  auth_haders = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Authorization': 'Basic ' + CHES_API_KEY
-  }
-  auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
-  auth_response_json = json.loads(auth_response.content)
-  access_token = auth_response_json['access_token']
 
-  from_email = "noreply@gov.bc.ca"
-  ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
-  ches_headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer ' + access_token
-  }
-  ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
-  #_ches_content = json.loads(ches_response.content)
-  return ches_response
-
-def is_json(string):
-  try:
-    json.loads(str(string))
-  except ValueError as e:
-    return False
-  return True
-
-def site_list(form_id, form_key):
-  request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-  # print('Parsing JSON response')
-  content = json.loads(request.content)
-  return content
-
-def fetch_columns(form_id, form_key):
-  request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-  request_json = json.loads(request.content)
-  version = request_json[0]['id']
-
-  attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-  attributes = json.loads(attribute_request.content)
-  return attributes
 
 def create_site_relocation_email_msg(regional_district, popup_links):
   msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
@@ -571,113 +528,67 @@ def create_land_ownership(cefs_dic, field):
     _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
   return _land_ownership
 
-def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
-  _lat_dd = 0
-  _lon_dd = 0
-  # Convert to DD in mapLatitude and mapLongitude
-  if (lat_deg is not None and lat_deg != '' and
-      lat_min is not None and lat_min != '' and
-      lat_sec is not None and lat_sec != '' and
-      lon_deg is not None and lon_deg != '' and
-      lon_min is not None and lon_min != '' and
-      lon_sec is not None and lon_sec != ''
-  ):
-    # extract floating number from text
-    _lat_deg = re.findall(EXP_EXTRACT_FLOATING, lat_deg)
-    _lat_min = re.findall(EXP_EXTRACT_FLOATING, lat_min)
-    _lat_sec = re.findall(EXP_EXTRACT_FLOATING, lat_sec)
-    _lon_deg = re.findall(EXP_EXTRACT_FLOATING, lon_deg)
-    _lon_min = re.findall(EXP_EXTRACT_FLOATING, lon_min)
-    _lon_sec = re.findall(EXP_EXTRACT_FLOATING, lon_sec)
-
-    if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0 
-        and len(_lon_deg) > 0 and len(_lon_min) > 0 and len(_lon_sec) > 0):
-      _lat_dd = (float(_lat_deg[0]) + float(_lat_min[0])/60 + float(_lat_sec[0])/(60*60))
-      _lon_dd = - (float(_lon_deg[0]) + float(_lon_min[0])/60 + float(_lon_sec[0])/(60*60))
-
-    if _lon_dd > 0: _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
-  return _lat_dd, _lon_dd
-
-def get_create_date_and_confirm_id(cefs_dic):
-  _created_at = None
-  _confirmation_id = None
-  if cefs_dic.get('form') is not None : 
-    form_str = json.dumps(cefs_dic.get('form'))
-    form_json = json.loads(form_str)
-    _created_at = datetime.datetime.strptime(form_json['createdAt'], DATE_TIME_FORMAT).replace(tzinfo = None, hour = 0, minute = 0, second = 0, microsecond = 0) # remove the timezone awareness
-    _confirmation_id = form_json['confirmationId']
-  return _created_at, _confirmation_id
 
 def map_source_site(submission):
   _src_dic = {}
-  if (
-    submission.get("A3-SourceSiteLatitude-Degrees") is not None and
-    submission.get("A3-SourceSiteLatitude-Minutes") is not None and
-    submission.get("A3-SourceSiteLatitude-Seconds") is not None and
-    submission.get("A3-SourceSiteLongitude-Degrees") is not None and
-    submission.get("A3-SourceSiteLongitude-Minutes") is not None and
-    submission.get("A3-SourceSiteLongitude-Seconds") is not None
-  ):
+  if (helper.validate_lat_lon(submission.get("A3-SourceSiteLatitude-Degrees"), submission.get("A3-SourceSiteLatitude-Minutes"), submission.get("A3-SourceSiteLatitude-Seconds"), 
+                      submission.get("A3-SourceSiteLongitude-Degrees"), submission.get("A3-SourceSiteLongitude-Minutes"), submission.get("A3-SourceSiteLongitude-Seconds"))
+  ):  
     print("Mapping sourece site ...")
 
+    #initialize
     for src_header in SOURCE_SITE_HEADERS:
       _src_dic[src_header] = None
 
-    if submission.get("A1-FIRSTName") is not None : _src_dic['updateToPreviousForm'] = submission["Intro-New_form_or_update"]
-    if submission.get("A1-FIRSTName") is not None : _src_dic['ownerFirstName'] = submission["A1-FIRSTName"]
-    if submission.get("A1-LASTName") is not None : _src_dic['ownerLastName'] = submission["A1-LASTName"]
-    if submission.get("A1-Company") is not None : _src_dic['ownerCompany'] = submission["A1-Company"]
-    if submission.get("A1-Address") is not None : _src_dic['ownerAddress'] = submission["A1-Address"]
-    if submission.get("A1-City") is not None : _src_dic['ownerCity'] = submission["A1-City"]
-    if submission.get("A1-ProvinceState") is not None : _src_dic['ownerProvince'] = submission["A1-ProvinceState"]
-    if submission.get("A1-Country") is not None : _src_dic['ownerCountry'] = submission["A1-Country"]
-    if submission.get("A1-PostalZipCode") is not None : _src_dic['ownerPostalCode'] = submission["A1-PostalZipCode"]
-    if submission.get("A1-Phone") is not None : _src_dic['ownerPhoneNumber'] = submission["A1-Phone"]
-    if submission.get("A1-Email") is not None : _src_dic['ownerEmail'] = submission["A1-Email"]
+    _src_dic['updateToPreviousForm'] = submission.get("Intro-New_form_or_update")
+    _src_dic['ownerFirstName'] = submission.get("A1-FIRSTName")
+    _src_dic['ownerLastName'] = submission.get("A1-LASTName")
+    _src_dic['ownerCompany'] = submission.get("A1-Company")
+    _src_dic['ownerAddress'] = submission.get("A1-Address")
+    _src_dic['ownerCity'] = submission.get("A1-City")
+    _src_dic['ownerProvince'] = submission.get("A1-ProvinceState")
+    _src_dic['ownerCountry'] = submission.get("A1-Country")
+    _src_dic['ownerPostalCode'] = submission.get("A1-PostalZipCode")
+    _src_dic['ownerPhoneNumber'] = submission.get("A1-Phone")
+    _src_dic['ownerEmail'] = submission.get("A1-Email")
+    _src_dic['owner2FirstName'] = submission.get("A1-additionalownerFIRSTName")
+    _src_dic['owner2LastName'] = submission.get("A1-additionalownerLASTName1")
+    _src_dic['owner2Company'] = submission.get("A1-additionalownerCompany1")
+    _src_dic['owner2Address'] = submission.get("A1-additionalownerAddress1")
+    _src_dic['owner2City'] = submission.get("A1-additionalownerCity1")
+    _src_dic['owner2PhoneNumber'] = submission.get("A1-additionalownerPhone1")
+    _src_dic['owner2Email'] = submission.get("A1-additionalownerEmail1")
+    _src_dic['additionalOwners'] = submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow")
+    _src_dic['contactFirstName'] = submission.get("A2-SourceSiteContactFirstName")
+    _src_dic['contactLastName'] = submission.get("A2-SourceSiteContactLastName")
+    _src_dic['contactCompany'] = submission.get("A2-SourceSiteContactCompany")
+    _src_dic['contactAddress'] = submission.get("A2-SourceSiteContactAddress")
+    _src_dic['contactCity'] = submission.get("A2-SourceSiteContactCity")
+    _src_dic['contactPhoneNumber'] = submission.get("SourceSiteContactphoneNumber")
+    _src_dic['contactEmail'] = submission.get("A2-SourceSiteContactEmail")
+    _src_dic['SID'] = submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable")
 
-    if submission.get("A1-additionalownerFIRSTName") is not None : _src_dic['owner2FirstName'] = submission["A1-additionalownerFIRSTName"]
-    if submission.get("A1-additionalownerLASTName1") is not None : _src_dic['owner2LastName'] = submission["A1-additionalownerLASTName1"]
-    if submission.get("A1-additionalownerCompany1") is not None : _src_dic['owner2Company'] = submission["A1-additionalownerCompany1"]
-    if submission.get("A1-additionalownerAddress1") is not None : _src_dic['owner2Address'] = submission["A1-additionalownerAddress1"]
-    if submission.get("A1-additionalownerCity1") is not None : _src_dic['owner2City'] = submission["A1-additionalownerCity1"]
-    if submission.get("A1-additionalownerPhone1") is not None : _src_dic['owner2PhoneNumber'] = submission["A1-additionalownerPhone1"]
-    if submission.get("A1-additionalownerEmail1") is not None : _src_dic['owner2Email'] = submission["A1-additionalownerEmail1"]
-
-    if submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : _src_dic['additionalOwners'] = submission["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
-    if submission.get("A2-SourceSiteContactFirstName") is not None : _src_dic['contactFirstName'] = submission["A2-SourceSiteContactFirstName"]
-    if submission.get("A2-SourceSiteContactLastName") is not None : _src_dic['contactLastName'] = submission["A2-SourceSiteContactLastName"]
-    if submission.get("A2-SourceSiteContactCompany") is not None : _src_dic['contactCompany'] = submission["A2-SourceSiteContactCompany"]
-    if submission.get("A2-SourceSiteContactAddress") is not None : _src_dic['contactAddress'] = submission["A2-SourceSiteContactAddress"]
-    if submission.get("A2-SourceSiteContactCity") is not None : _src_dic['contactCity'] = submission["A2-SourceSiteContactCity"]
-    if submission.get("SourceSiteContactphoneNumber") is not None : _src_dic['contactPhoneNumber'] = submission["SourceSiteContactphoneNumber"]
-    if submission.get("A2-SourceSiteContactEmail") is not None : _src_dic['contactEmail'] = submission["A2-SourceSiteContactEmail"]
-
-    if submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable") is not None : _src_dic['SID'] = submission["A3-SourcesiteIdentificationNumberSiteIdIfAvailable"]
-
-    _src_lat, _src_lon = convert_deciaml_lat_long(
+    _src_dic['latitude'], _src_dic['longitude'] = helper.convert_deciaml_lat_long(
       submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
-    _src_dic['latitude'] = _src_lat
-    _src_dic['longitude'] = _src_lon
 
     _src_dic['landOwnership'] = create_land_ownership(submission, 'SourcelandOwnership-checkbox')
-
-    if submission.get("A-LegallyTitled-AddressSource") is not None : _src_dic['legallyTitledSiteAddress'] = submission["A-LegallyTitled-AddressSource"]
-    if submission.get("A-LegallyTitled-CitySource") is not None : _src_dic['legallyTitledSiteCity'] = submission["A-LegallyTitled-CitySource"]
-    if submission.get("A-LegallyTitled-PostalZipCodeSource") is not None : _src_dic['legallyTitledSitePostalCode'] = submission["A-LegallyTitled-PostalZipCodeSource"]
+    _src_dic['legallyTitledSiteAddress'] = submission.get("A-LegallyTitled-AddressSource")
+    _src_dic['legallyTitledSiteCity'] = submission.get("A-LegallyTitled-CitySource")
+    _src_dic['legallyTitledSitePostalCode'] = submission.get("A-LegallyTitled-PostalZipCodeSource")
 
     if submission.get("dataGrid") is not None and len(submission["dataGrid"]) > 0: 
       _dg = submission["dataGrid"][0] # could be more than one, but take only one
       if _dg.get("A-LegallyTitled-PID") is not None: _src_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescriptionSource") is not None: _src_dic['legalLandDescription'] = _dg["legalLandDescriptionSource"]
     if (submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 
-        and _src_dic['PID'] is None and _src_dic['PID'] != ''): 
+        and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')): 
       _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-UntitledPINSource") is not None: _src_dic['PIN'] = _dg1["A-UntitledPINSource"]
       if _dg1.get("legalLandDescriptionUntitledSource") is not None: _src_dic['legalLandDescription'] = _dg1["legalLandDescriptionUntitledSource"]
     if (submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None 
-        and _src_dic['PID'] is None and _src_dic['PID'] != '' 
-        and _src_dic['PIN'] is None and _src_dic['PIN'] != ''): 
+        and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
+        and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): 
       _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
 
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
@@ -688,9 +599,9 @@ def map_source_site(submission):
         _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
       _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-    if submission.get("isTheSourceSiteHighRisk") is not None : _src_dic['highVolumeSite'] = submission["isTheSourceSiteHighRisk"]
-    if submission.get("A5-PurposeOfSoilExcavationSource") is not None : _src_dic['soilRelocationPurpose'] = submission["A5-PurposeOfSoilExcavationSource"]
-    if submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source") is not None : _src_dic['soilStorageType'] = submission["B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source"]
+    _src_dic['highVolumeSite'] = submission.get("isTheSourceSiteHighRisk")
+    _src_dic['soilRelocationPurpose'] = submission.get("A5-PurposeOfSoilExcavationSource")
+    _src_dic['soilStorageType'] = submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source")
 
     if submission.get("dataGrid9") is not None and len(submission["dataGrid9"]) > 0: 
       _dg9 = submission["dataGrid9"][0] # could be more than one, but take only one
@@ -701,43 +612,36 @@ def map_source_site(submission):
               _src_dic['soilQuality'] = convert_soil_quality_to_name(_k)
               break
 
-    if submission.get("B2-describeSoilCharacterizationMethod1") is not None : _src_dic['soilCharacterMethod'] = submission["B2-describeSoilCharacterizationMethod1"]
-    if submission.get("B3-yesOrNoVapourexemptionsource") is not None : _src_dic['vapourExemption'] = submission["B3-yesOrNoVapourexemptionsource"]
-    if submission.get("B3-ifExemptionsApplyPleaseDescribe") is not None : _src_dic['vapourExemptionDesc'] = submission["B3-ifExemptionsApplyPleaseDescribe"]
-    if submission.get("B3-describeVapourCharacterizationMethod") is not None : _src_dic['vapourCharacterMethodDesc'] = submission["B3-describeVapourCharacterizationMethod"]
-    if submission.get("B4-soilRelocationEstimatedStartDateMonthDayYear") is not None : _src_dic['soilRelocationStartDate'] = submission["B4-soilRelocationEstimatedStartDateMonthDayYear"]
-    if submission.get("B4-soilRelocationEstimatedCompletionDateMonthDayYear") is not None : _src_dic['soilRelocationCompletionDate'] = submission["B4-soilRelocationEstimatedCompletionDateMonthDayYear"]
-    if submission.get("B4-RelocationMethod") is not None : _src_dic['relocationMethod'] = submission["B4-RelocationMethod"]
-
-    if submission.get("D1-FirstNameQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalFirstName'] = submission["D1-FirstNameQualifiedProfessional"]
-    if submission.get("LastNameQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalLastName'] = submission["LastNameQualifiedProfessional"]
-    if submission.get("D1-TypeofQP1") is not None : _src_dic['qualifiedProfessionalType'] = submission["D1-TypeofQP1"]
-    if submission.get("D1-professionalLicenseRegistrationEGPEngRpBio") is not None : _src_dic['professionalLicenceRegistration'] = submission["D1-professionalLicenseRegistrationEGPEngRpBio"]
-    if submission.get("D1-organization1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalOrganization'] = submission["D1-organization1QualifiedProfessional"]
-    if submission.get("D1-streetAddress1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalAddress'] = submission["D1-streetAddress1QualifiedProfessional"]
-    if submission.get("D1-city1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalCity'] = submission["D1-city1QualifiedProfessional"]
-    if submission.get("D1-provinceState3QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalProvince'] = submission["D1-provinceState3QualifiedProfessional"]
-    if submission.get("D1-canadaQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalCountry'] = submission["D1-canadaQualifiedProfessional"]
-    if submission.get("D1-postalZipCode3QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalPostalCode'] = submission["D1-postalZipCode3QualifiedProfessional"]
-    if submission.get("simplephonenumber1QualifiedProfessional") is not None : _src_dic['qualifiedProfessionalPhoneNumber'] = submission["simplephonenumber1QualifiedProfessional"]
-    if submission.get("EmailAddressQualifiedProfessional") is not None : _src_dic['qualifiedProfessionalEmail'] = submission["EmailAddressQualifiedProfessional"]
-    if submission.get("sig-firstAndLastNameQualifiedProfessional") is not None : _src_dic['signaturerFirstAndLastName'] = submission["sig-firstAndLastNameQualifiedProfessional"]
-    if submission.get("simpledatetime") is not None : _src_dic['dateSigned'] = submission["simpledatetime"]
-
-    _src_dic['createAt'], _src_dic['confirmationId'] = get_create_date_and_confirm_id (submission)
+    _src_dic['soilCharacterMethod'] = submission.get("B2-describeSoilCharacterizationMethod1")
+    _src_dic['vapourExemption'] = submission.get("B3-yesOrNoVapourexemptionsource")
+    _src_dic['vapourExemptionDesc'] = submission.get("B3-ifExemptionsApplyPleaseDescribe")
+    _src_dic['vapourCharacterMethodDesc'] = submission.get("B3-describeVapourCharacterizationMethod")
+    _src_dic['soilRelocationStartDate'] = helper.convert_simple_datetime_format_in_str(submission.get("B4-soilRelocationEstimatedStartDateMonthDayYear"))
+    _src_dic['soilRelocationCompletionDate'] = helper.convert_simple_datetime_format_in_str(submission.get("B4-soilRelocationEstimatedCompletionDateMonthDayYear"))
+    _src_dic['relocationMethod'] = submission.get("B4-RelocationMethod")
+    _src_dic['qualifiedProfessionalFirstName'] = submission.get("D1-FirstNameQualifiedProfessional")
+    _src_dic['qualifiedProfessionalLastName'] = submission.get("LastNameQualifiedProfessional")
+    _src_dic['qualifiedProfessionalType'] = submission.get("D1-TypeofQP1")
+    _src_dic['professionalLicenceRegistration'] = submission.get("D1-professionalLicenseRegistrationEGPEngRpBio")
+    _src_dic['qualifiedProfessionalOrganization'] = submission.get("D1-organization1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalAddress'] = submission.get("D1-streetAddress1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalCity'] = submission.get("D1-city1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalProvince'] = submission.get("D1-provinceState3QualifiedProfessional")
+    _src_dic['qualifiedProfessionalCountry'] = submission.get("D1-canadaQualifiedProfessional")
+    _src_dic['qualifiedProfessionalPostalCode'] = submission.get("D1-postalZipCode3QualifiedProfessional")
+    _src_dic['qualifiedProfessionalPhoneNumber'] = submission.get("simplephonenumber1QualifiedProfessional")
+    _src_dic['qualifiedProfessionalEmail'] = submission.get("EmailAddressQualifiedProfessional")
+    _src_dic['signaturerFirstAndLastName'] = submission.get("sig-firstAndLastNameQualifiedProfessional")
+    _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))
+    _src_dic['createAt'], _src_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
   return _src_dic
 
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
-  if (
-    submission.get("C2-Latitude-DegreesReceivingSite") is not None and
-    submission.get("C2-Latitude-MinutesReceivingSite") is not None and
-    submission.get("Section2-Latitude-Seconds1ReceivingSite") is not None and
-    submission.get("C2-Longitude-DegreesReceivingSite") is not None and
-    submission.get("C2-Longitude-MinutesReceivingSite") is not None and
-    submission.get("C2-Longitude-SecondsReceivingSite") is not None
-  ):
+  if (helper.validate_lat_lon(submission.get("C2-Latitude-DegreesReceivingSite"), submission.get("C2-Latitude-MinutesReceivingSite"), submission.get("Section2-Latitude-Seconds1ReceivingSite"), 
+                      submission.get("C2-Longitude-DegreesReceivingSite"), submission.get("C2-Longitude-MinutesReceivingSite"), submission.get("C2-Longitude-SecondsReceivingSite"))
+  ):  
     print("Mapping 1st receiver ...")
 
     for rcv_header in RECEIVING_SITE_HEADERS:
@@ -769,7 +673,7 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C2-RSC-Email") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite"]
 
-    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission["C2-Latitude-DegreesReceivingSite"], submission["C2-Latitude-MinutesReceivingSite"], submission["Section2-Latitude-Seconds1ReceivingSite"], 
       submission["C2-Longitude-DegreesReceivingSite"], submission["C2-Longitude-MinutesReceivingSite"], submission["C2-Longitude-SecondsReceivingSite"])
     _rcv_dic['latitude'] = _rcv_lat
@@ -805,20 +709,15 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite"]
 
-    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = get_create_date_and_confirm_id(submission)
+    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
   return _rcv_dic
 
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
-  if (
-    submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite") is not None and
-    submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite") is not None and
-    submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite") is not None and
-    submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite") is not None and
-    submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite") is not None and
-    submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite") is not None
-  ):
+  if (helper.validate_lat_lon(submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite"), submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite"), 
+                      submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite"))
+  ):  
     print("Mapping 2nd receiver ...")
 
     for rcv_header in RECEIVING_SITE_HEADERS:
@@ -850,7 +749,7 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C2-RSC-Email1AdditionalReceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email1AdditionalReceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite"]
 
-    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Latitude-Minutes1FirstAdditionalReceivingSite"], submission["Section2-Latitude-Seconds2FirstAdditionalReceivingSite"], 
       submission["C2-Longitude-Degrees1FirstAdditionalReceivingSite"], submission["C2-Longitude-Minutes1FirstAdditionalReceivingSite"], submission["C2-Longitude-Seconds1FirstAdditionalReceivingSite"])
     _rcv_dic['latitude'] = _rcv_lat
@@ -886,20 +785,15 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite"]
 
-    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = get_create_date_and_confirm_id(submission)
+    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
   return _rcv_dic
 
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
-  if (
-    submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite") is not None and
-    submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite") is not None and
-    submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite") is not None and
-    submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite") is not None and
-    submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite") is not None and
-    submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite") is not None
-  ):
+  if (helper.validate_lat_lon(submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite"), submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite"), 
+                      submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite"))
+  ):  
     print("Mapping 3rd receiver ...")
 
     for rcv_header in RECEIVING_SITE_HEADERS:
@@ -931,7 +825,7 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C2-RSC-Email3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
 
-    _rcv_lat, _rcv_lon = convert_deciaml_lat_long(
+    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"], submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"], 
       submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"], submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"])
     _rcv_dic['latitude'] = _rcv_lat
@@ -967,19 +861,14 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
 
-    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = get_create_date_and_confirm_id(submission)
+    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
   return _rcv_dic
 
 def map_hv_site(hvs):
   _hv_dic = {}
-  if (
-    hvs.get("Section3-Latitude-Degrees") is not None and
-    hvs.get("Section3-Latitude-Minutes") is not None and
-    hvs.get("Section3-Latitude-Seconds") is not None and
-    hvs.get("Section3-Longitude-Degrees") is not None and
-    hvs.get("Section3-Longitude-Minutes") is not None and
-    hvs.get("Section3-Longitude-Seconds") is not None
+  if (helper.validate_lat_lon(hvs.get("Section3-Latitude-Degrees"), hvs.get("Section3-Latitude-Minutes"), hvs.get("Section3-Latitude-Seconds"), 
+                      hvs.get("Section3-Longitude-Degrees"), hvs.get("Section3-Longitude-Minutes"), hvs.get("Section3-Longitude-Seconds"))
   ):
     print("Mapping sourece site ...")
 
@@ -1022,7 +911,7 @@ def map_hv_site(hvs):
 
     if hvs.get("Section3-siteIdIncludeAllRelatedNumbers") is not None : _hv_dic['SID'] = hvs["Section3-siteIdIncludeAllRelatedNumbers"]
 
-    _hv_lat, _hv_lon = convert_deciaml_lat_long(
+    _hv_lat, _hv_lon = helper.convert_deciaml_lat_long(
       hvs["Section3-Latitude-Degrees"], hvs["Section3-Latitude-Minutes"], hvs["Section3-Latitude-Seconds"], 
       hvs["Section3-Longitude-Degrees"], hvs["Section3-Longitude-Minutes"], hvs["Section3-Longitude-Seconds"])
     _hv_dic['latitude'] = _hv_lat
@@ -1040,7 +929,7 @@ def map_hv_site(hvs):
       if _dg.get("A-LegallyTitled-PID") is not None: _hv_dic['PID'] = _dg["A-LegallyTitled-PID"]
       if _dg.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg["legalLandDescription"]
     if (hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 
-        and ( _hv_dic['PID'] is None or (_hv_dic['PID'].strip()) == '')):
+        and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')):
       _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
       if _dg1.get("A-LegallyTitled-PID") is not None: _hv_dic['PIN'] = _dg1["A-LegallyTitled-PID"]
       if _dg1.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg1["legalLandDescription"]
@@ -1053,7 +942,7 @@ def map_hv_site(hvs):
     _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, 'primarylanduse')
 
     if hvs.get("highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _hv_dic['hvsConfirmation'] = hvs["highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
-    if hvs.get("dateSiteBecameHighVolume") is not None : _hv_dic['dateSiteBecameHighVolume'] = hvs["dateSiteBecameHighVolume"]
+    if hvs.get("dateSiteBecameHighVolume") is not None : _hv_dic['dateSiteBecameHighVolume'] = helper.convert_simple_datetime_format_in_str(hvs["dateSiteBecameHighVolume"])
     if hvs.get("howrelocatedsoilwillbeused") is not None : _hv_dic['howRelocatedSoilWillBeUsed'] = hvs["howrelocatedsoilwillbeused"]
     if hvs.get("soilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _hv_dic['soilDepositIsALR'] = hvs["soilDepositIsInTheAgriculturalLandReserveAlr1"]
     if hvs.get("receivingSiteIsOnReserveLands1") is not None : _hv_dic['soilDepositIsReserveLands'] = hvs["receivingSiteIsOnReserveLands1"]
@@ -1070,9 +959,9 @@ def map_hv_site(hvs):
     if hvs.get("simplephonenumber1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalPhoneNumber'] = hvs["simplephonenumber1QualifiedProfessional"]
     if hvs.get("simpleemail1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalEmail'] = hvs["simpleemail1QualifiedProfessional"]
     if hvs.get("firstAndLastNameQualifiedProfessional") is not None : _hv_dic['signaturerFirstAndLastName'] = hvs["firstAndLastNameQualifiedProfessional"]
-    if hvs.get("simpledatetime") is not None : _hv_dic['dateSigned'] = hvs["simpledatetime"]
+    if hvs.get("simpledatetime") is not None : _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs["simpledatetime"])
 
-    _hv_dic['createAt'], _hv_dic['confirmationId'] = get_create_date_and_confirm_id(hvs)
+    _hv_dic['createAt'], _hv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(hvs)
 
   return _hv_dic
 
@@ -1095,12 +984,8 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
           else:
             reg_dist_dic[_rd_key[0]] = [_dic_copy]
 
-# check if boolen type is
-def is_boolean(_v):
-  _result = False
-  if type(_v) == bool: 
-    _result = True
-  return _result
+
+
 
 
 
@@ -1110,7 +995,6 @@ CHEFS_HV_FORM_ID = os.getenv('CHEFS_HV_FORM_ID')
 CHEFS_HV_API_KEY = os.getenv('CHEFS_HV_API_KEY')
 CHEFS_MAIL_FORM_ID = os.getenv('CHEFS_MAIL_FORM_ID')
 CHEFS_MAIL_API_KEY = os.getenv('CHEFS_MAIL_API_KEY')
-CHES_API_KEY = os.getenv('CHES_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
 
@@ -1121,7 +1005,7 @@ print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
 print(f"Value of env variable key='CHEFS_HV_API_KEY': {CHEFS_HV_API_KEY}")
 print(f"Value of env variable key='CHEFS_MAIL_FORM_ID': {CHEFS_MAIL_FORM_ID}")
 print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
-print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
+
 print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
 print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
 """
@@ -1129,25 +1013,25 @@ print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
 
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
-submissionsJson = site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
+submissionsJson = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 #print(submissionsJson)
 print('Loading Submission attributes and headers...')
-soilsAttributes = fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
+soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 #print(soilsAttributes)
 
 print('Loading High Volume Sites list...')
-hvsJson = site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
+hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 #print(hvsJson)
 print('Loading High Volume Sites attributes and headers...')
-hvsAttributes = fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
+hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 # print(hvsAttributes)
 
 # Fetch subscribers list
 print('Loading submission subscribers list...')
-subscribersJson = site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
+subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 #print(subscribersJson)
 print('Loading submission subscribers attributes and headers...')
-subscribeAttributes = fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
+subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 # print(subscribeAttributes)
 
 
@@ -1281,7 +1165,7 @@ print('Sending subscriber emails...')
 EMAIL_SUBJECT_SOIL_RELOCATION = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
 EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
 
-today = datetime.datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+today = datetime.datetime.now(tz=pytz.timezone('Canada/Pacific'))
 # print(today)
 
 notifySoilRelocSubscriberDic = {}
@@ -1302,19 +1186,19 @@ for _subscriber in subscribersJson:
   if _subscriber.get("regionalDistrict") is not None : _subscriberRegionalDistrict = _subscriber["regionalDistrict"] 
   if _subscriber.get("unsubscribe") is not None :
     if (_subscriber["unsubscribe"]).get("unsubscribe") is not None :
-       if is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
+       if helper.is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
           _unsubscribe = _subscriber["unsubscribe"]["unsubscribe"]
 
   if _subscriber.get("notificationSelection") is not None : 
     _noticeSelection = _subscriber["notificationSelection"]
     if _noticeSelection.get('notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict') is not None:
-      if is_boolean(_noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
+      if helper.is_boolean(_noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
         _notifyHVS = _noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']
     if _noticeSelection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
-      if is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
+      if helper.is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
         _notifySoilReloc = _noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
 
-  _subscription_created_at, _subscription_confirm_id = get_create_date_and_confirm_id(_subscriber)
+  _subscription_created_at, _subscription_confirm_id = helper.get_create_date_and_confirm_id(_subscriber)
 
   if (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
       _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and
@@ -1333,9 +1217,10 @@ for _subscriber in subscribersJson:
 
         if _rcvSitesInRD is not None:
           for _receivingSiteDic in _rcvSitesInRD:
-            _daysDiff = (today - _receivingSiteDic['createAt']).days if _receivingSiteDic['createAt'] is not None else -1
 
-            if (_daysDiff <= 1 and _daysDiff >= 0):
+            #print('today:',today,',created at:',_receivingSiteDic['createAt'],'confirm Id:',_receivingSiteDic['confirmationId'])
+            _diff = helper.get_difference_datetimes_in_hour(today, _receivingSiteDic['createAt'])
+            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
               _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
               _regDisName = convert_regional_district_to_name(_srd)
               _emailMsg = create_site_relocation_email_msg(_regDisName, _rcvPopupLinks)
@@ -1362,9 +1247,10 @@ for _subscriber in subscribersJson:
 
         if _hvSitesInRD is not None:
           for _hvSiteDic in _hvSitesInRD:
-            _daysDiff = (today - _hvSiteDic['createAt']).days if _hvSiteDic['createAt'] is not None else -1
 
-            if (_daysDiff <= 1 and _daysDiff >= 0):
+            #print('today:',today,',created at:',_hvSiteDic['createAt'],'confirm Id:',_hvSiteDic['confirmationId'])
+            _diff = helper.get_difference_datetimes_in_hour(today, _hvSiteDic['createAt'])
+            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
               _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
               _hvRegDis = convert_regional_district_to_name(_srd)
               _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
@@ -1418,16 +1304,16 @@ for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.it
       #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
       #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
 
-
+"""
 print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items():
-  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+  _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
   #print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
 
 print('Sending Notification of high volume site registration in selected Regional District(s) ...')
 for _k, _v in notifyHVSSubscriberDic.items():
-  _ches_response = send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+  _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
   #print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
-
+"""
 
 print('Completed Soils data publishing')
