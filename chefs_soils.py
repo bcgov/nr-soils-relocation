@@ -252,6 +252,9 @@ RECEIVING_SITE_HEADERS = [
   "ownerCompany",
   "ownerAddress",
   "ownerCity",
+  "ownerProvince",
+  "ownerCountry",
+  "ownerPostalCode",
   "ownerPhoneNumber",
   "ownerEmail",
   "owner2FirstName",
@@ -259,6 +262,9 @@ RECEIVING_SITE_HEADERS = [
   "owner2Company",
   "owner2Address",
   "owner2City",
+  "owner2Province",
+  "owner2Country",
+  "owner2PostalCode",  
   "owner2PhoneNumber",
   "owner2Email",
   "additionalOwners",
@@ -267,6 +273,9 @@ RECEIVING_SITE_HEADERS = [
   "contactCompany",
   "contactAddress",
   "contactCity",
+  "contactProvince",
+  "contactCountry",
+  "contactPostalCode",  
   "contactPhoneNumber",
   "contactEmail",
   "SID",
@@ -285,6 +294,8 @@ RECEIVING_SITE_HEADERS = [
   "CSRFactors",
   "relocatedSoilUse",
   "highVolumeSite",
+  "soilDepositIsALR",
+  "soilDepositIsReserveLands",
   "createAt",
   "confirmationId"
 ]  
@@ -666,6 +677,9 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C1-CompanyReceivingSiteOwner") is not None : _rcv_dic['ownerCompany'] = submission["C1-CompanyReceivingSiteOwner"]
     if submission.get("C1-AddressReceivingSiteOwner") is not None : _rcv_dic['ownerAddress'] = submission["C1-AddressReceivingSiteOwner"]
     if submission.get("C1-CityReceivingSiteOwner") is not None : _rcv_dic['ownerCity'] = submission["C1-CityReceivingSiteOwner"]
+    if submission.get("A1-receivingsiteownerProvinceState4") is not None : _rcv_dic['ownerProvince'] = submission["A1-receivingsiteownerProvinceState4"]    
+    if submission.get("A1-receivingsiteownerCountry4") is not None : _rcv_dic['ownerCountry'] = submission["A1-receivingsiteownerCountry4"]
+    if submission.get("A1-receivingsiteownerPostalCode3") is not None : _rcv_dic['ownerPostalCode'] = submission["A1-receivingsiteownerPostalCode3"]
     if submission.get("C1-PhoneRecevingSiteOwner") is not None : _rcv_dic['ownerPhoneNumber'] = submission["C1-PhoneRecevingSiteOwner"]
     if submission.get("C1-EmailReceivingSiteOwner") is not None : _rcv_dic['ownerEmail'] = submission["C1-EmailReceivingSiteOwner"]
 
@@ -674,6 +688,9 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C1-Company1ReceivingSiteAdditionalOwners") is not None : _rcv_dic['owner2Company'] = submission["C1-Company1ReceivingSiteAdditionalOwners"]
     if submission.get("C1-Address1ReceivingSiteAdditionalOwners") is not None : _rcv_dic['owner2Address'] = submission["C1-Address1ReceivingSiteAdditionalOwners"]
     if submission.get("C1-City1ReceivingSiteAdditionalOwners") is not None : _rcv_dic['owner2City'] = submission["C1-City1ReceivingSiteAdditionalOwners"]
+    if submission.get("A1-additionareceivingsiteownerProvinceState5") is not None : _rcv_dic['owner2Province'] = submission["A1-additionareceivingsiteownerProvinceState5"]
+    if submission.get("A1-additionareceivingsiteownerCountry5") is not None : _rcv_dic['owner2Country'] = submission["A1-additionareceivingsiteownerCountry5"]
+    if submission.get("A1-additionalreceivingsiteownerPostalCode4") is not None : _rcv_dic['owner2PostalCode'] = submission["A1-additionalreceivingsiteownerPostalCode4"]    
     if submission.get("C1-Phone1ReceivingSiteAdditionalOwners") is not None : _rcv_dic['owner2PhoneNumber'] = submission["C1-Phone1ReceivingSiteAdditionalOwners"]
     if submission.get("C1-Email1ReceivingSiteAdditionalOwners") is not None : _rcv_dic['owner2Email'] = submission["C1-Email1ReceivingSiteAdditionalOwners"]
 
@@ -683,6 +700,9 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C2-RSC-Company") is not None : _rcv_dic['contactCompany'] = submission["C2-RSC-Company"]
     if submission.get("C2-RSC-Address") is not None : _rcv_dic['contactAddress'] = submission["C2-RSC-Address"]
     if submission.get("C2-RSC-City") is not None : _rcv_dic['contactCity'] = submission["C2-RSC-City"]
+    if submission.get("A1-additionareceivingsitecontactpersonProvinceState6") is not None : _rcv_dic['contactProvince'] = submission["A1-additionareceivingsitecontactpersonProvinceState6"]
+    if submission.get("A1-additionareceivingsitecontactpersonCountry6") is not None : _rcv_dic['contactCountry'] = submission["A1-additionareceivingsitecontactpersonCountry6"]
+    if submission.get("A1-additionalreceivingsitecontactpersonPostalCode5") is not None : _rcv_dic['contactPostalCode'] = submission["A1-additionalreceivingsitecontactpersonPostalCode5"]
     if submission.get("C2-RSCphoneNumber1") is not None : _rcv_dic['contactPhoneNumber'] = submission["C2-RSCphoneNumber1"]
     if submission.get("C2-RSC-Email") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailableReceivingSite"]
@@ -720,8 +740,10 @@ def map_rcv_1st_rcver(submission):
     _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification1ReceivingSite')
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
+    if submission.get("D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1"]
+    if submission.get("D2-receivingsitesoilDepositIsInTheReserveLands1") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-receivingsitesoilDepositIsInTheReserveLands1"]
 
     _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
@@ -742,6 +764,9 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C1-Company2FirstAdditionalReceivingSite") is not None : _rcv_dic['ownerCompany'] = submission["C1-Company2FirstAdditionalReceivingSite"]
     if submission.get("C1-Address2FirstAdditionalReceivingSite") is not None : _rcv_dic['ownerAddress'] = submission["C1-Address2FirstAdditionalReceivingSite"]
     if submission.get("C1-City2FirstAdditionalReceivingSite") is not None : _rcv_dic['ownerCity'] = submission["C1-City2FirstAdditionalReceivingSite"]
+    if submission.get("A1-firstadditionalreceivingsiteownerProvinceState7") is not None : _rcv_dic['ownerProvince'] = submission["A1-firstadditionalreceivingsiteownerProvinceState7"]    
+    if submission.get("A1-firstadditionalreceivingsiteownerCountry7") is not None : _rcv_dic['ownerCountry'] = submission["A1-firstadditionalreceivingsiteownerCountry7"]
+    if submission.get("A1-firstadditionalreceivingsiteownerPostalCode6") is not None : _rcv_dic['ownerPostalCode'] = submission["A1-firstadditionalreceivingsiteownerPostalCode6"]
     if submission.get("phoneNumber4FirstAdditionalReceivingSite") is not None : _rcv_dic['ownerPhoneNumber'] = submission["phoneNumber4FirstAdditionalReceivingSite"]
     if submission.get("C1-Email2FirstAdditionalReceivingSite") is not None : _rcv_dic['ownerEmail'] = submission["C1-Email2FirstAdditionalReceivingSite"]
 
@@ -750,6 +775,9 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C1-Company3AdditionalReceivingSiteOwner") is not None : _rcv_dic['owner2Company'] = submission["C1-Company3AdditionalReceivingSiteOwner"]
     if submission.get("C1-Address3AdditionalReceivingSiteOwner") is not None : _rcv_dic['owner2Address'] = submission["C1-Address3AdditionalReceivingSiteOwner"]
     if submission.get("C1-City3AdditionalReceivingSiteOwner") is not None : _rcv_dic['owner2City'] = submission["C1-City3AdditionalReceivingSiteOwner"]
+    if submission.get("A1-firstadditionalreceivingmoreownersProvinceState8") is not None : _rcv_dic['owner2Province'] = submission["A1-additionareceivingsiteownerProvinceState5"]
+    if submission.get("A1-firstadditionalreceivingmoreownersCountry8") is not None : _rcv_dic['owner2Country'] = submission["A1-firstadditionalreceivingmoreownersCountry8"]
+    if submission.get("A1-firstadditionalreceivingmoreownersPostalCode7") is not None : _rcv_dic['owner2PostalCode'] = submission["A1-firstadditionalreceivingmoreownersPostalCode7"]    
     if submission.get("phoneNumber2AdditionalReceivingSiteOwner") is not None : _rcv_dic['owner2PhoneNumber'] = submission["phoneNumber2AdditionalReceivingSiteOwner"]
     if submission.get("C1-Email3AdditionalReceivingSiteOwner") is not None : _rcv_dic['owner2Email'] = submission["C1-Email3AdditionalReceivingSiteOwner"]
 
@@ -759,6 +787,9 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C2-RSC-Company1AdditionalReceivingSite") is not None : _rcv_dic['contactCompany'] = submission["C2-RSC-Company1AdditionalReceivingSite"]
     if submission.get("C2-RSC-Address1AdditionalReceivingSite") is not None : _rcv_dic['contactAddress'] = submission["C2-RSC-Address1AdditionalReceivingSite"]
     if submission.get("C2-RSC-City1AdditionalReceivingSite") is not None : _rcv_dic['contactCity'] = submission["C2-RSC-City1AdditionalReceivingSite"]
+    if submission.get("A1-firstadditionalreceivingsitecontactProvinceState9") is not None : _rcv_dic['contactProvince'] = submission["A1-firstadditionalreceivingsitecontactProvinceState9"]
+    if submission.get("A1-firstadditionalreceivingsitecontactCountry9") is not None : _rcv_dic['contactCountry'] = submission["A1-firstadditionalreceivingsitecontactCountry9"]
+    if submission.get("A1-firstadditionalreceivingsitecontactPostalCode8") is not None : _rcv_dic['contactPostalCode'] = submission["A1-firstadditionalreceivingsitecontactPostalCode8"]
     if submission.get("phoneNumber3AdditionalReceivingSite") is not None : _rcv_dic['contactPhoneNumber'] = submission["phoneNumber3AdditionalReceivingSite"]
     if submission.get("C2-RSC-Email1AdditionalReceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email1AdditionalReceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable1FirstAdditionalReceivingSite"]
@@ -796,8 +827,10 @@ def map_rcv_2nd_rcver(submission):
     _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification2FirstAdditionalReceivingSite')
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
+    if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2"]
+    if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2"]
 
     _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
@@ -818,6 +851,9 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C1-Company6SecondAdditionalreceivingSite") is not None : _rcv_dic['ownerCompany'] = submission["C1-Company6SecondAdditionalreceivingSite"]
     if submission.get("C1-Address6SecondAdditionalreceivingSite") is not None : _rcv_dic['ownerAddress'] = submission["C1-Address6SecondAdditionalreceivingSite"]
     if submission.get("C1-City6SecondAdditionalreceivingSite") is not None : _rcv_dic['ownerCity'] = submission["C1-City6SecondAdditionalreceivingSite"]
+    if submission.get("A1-secondadditionalreceivingsiteownerProvinceState10") is not None : _rcv_dic['ownerProvince'] = submission["A1-secondadditionalreceivingsiteownerProvinceState10"]    
+    if submission.get("A1-secondadditionalreceivingsiteownerCountry10") is not None : _rcv_dic['ownerCountry'] = submission["A1-secondadditionalreceivingsiteownerCountry10"]
+    if submission.get("A1-secondadditionalreceivingsiteownerPostalCode9") is not None : _rcv_dic['ownerPostalCode'] = submission["A1-secondadditionalreceivingsiteownerPostalCode9"]
     if submission.get("phoneNumber7SecondAdditionalreceivingSite") is not None : _rcv_dic['ownerPhoneNumber'] = submission["phoneNumber7SecondAdditionalreceivingSite"]
     if submission.get("C1-Email6SecondAdditionalreceivingSite") is not None : _rcv_dic['ownerEmail'] = submission["C1-Email6SecondAdditionalreceivingSite"]
 
@@ -826,6 +862,9 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C1-Company7SecondAdditionalreceivingSite") is not None : _rcv_dic['owner2Company'] = submission["C1-Company7SecondAdditionalreceivingSite"]
     if submission.get("C1-Address7SecondAdditionalreceivingSite") is not None : _rcv_dic['owner2Address'] = submission["C1-Address7SecondAdditionalreceivingSite"]
     if submission.get("C1-City7SecondAdditionalreceivingSite") is not None : _rcv_dic['owner2City'] = submission["C1-City7SecondAdditionalreceivingSite"]
+    if submission.get("A1-secondadditionalreceivingsiteadditionalownerProvinceState11") is not None : _rcv_dic['owner2Province'] = submission["A1-secondadditionalreceivingsiteadditionalownerProvinceState11"]
+    if submission.get("A1-secondadditionalreceivingsiteadditionalownerCountry11") is not None : _rcv_dic['owner2Country'] = submission["A1-secondadditionalreceivingsiteadditionalownerCountry11"]
+    if submission.get("A1-secondadditionalreceivingsiteadditionalownerPostalCode10") is not None : _rcv_dic['owner2PostalCode'] = submission["A1-secondadditionalreceivingsiteadditionalownerPostalCode10"]    
     if submission.get("phoneNumber5SecondAdditionalreceivingSite") is not None : _rcv_dic['owner2PhoneNumber'] = submission["phoneNumber5SecondAdditionalreceivingSite"]
     if submission.get("C1-Email7SecondAdditionalreceivingSite") is not None : _rcv_dic['owner2Email'] = submission["C1-Email7SecondAdditionalreceivingSite"]
 
@@ -835,6 +874,10 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C2-RSC-Company3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactCompany'] = submission["C2-RSC-Company3SecondAdditionalreceivingSite"]
     if submission.get("C2-RSC-Address3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactAddress'] = submission["C2-RSC-Address3SecondAdditionalreceivingSite"]
     if submission.get("C2-RSC-City3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactCity'] = submission["C2-RSC-City3SecondAdditionalreceivingSite"]
+    if submission.get("A1-secondadditionalreceivingsitecontactProvinceState12") is not None : _rcv_dic['contactProvince'] = submission["A1-firstadditionalreceivingsitecontactProvinceState9"]
+    if submission.get("A1-secondadditionalreceivingsitecontactrCountry12") is not None : _rcv_dic['contactCountry'] = submission["A1-secondadditionalreceivingsitecontactrCountry12"]
+    if submission.get("A1-secondadditionalreceivingsitecontactPostalCode11") is not None : _rcv_dic['contactPostalCode'] = submission["A1-secondadditionalreceivingsitecontactPostalCode11"]
+
     if submission.get("phoneNumber6SecondAdditionalreceivingSite") is not None : _rcv_dic['contactPhoneNumber'] = submission["phoneNumber6SecondAdditionalreceivingSite"]
     if submission.get("C2-RSC-Email3SecondAdditionalreceivingSite") is not None : _rcv_dic['contactEmail'] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
     if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
@@ -872,8 +915,10 @@ def map_rcv_3rd_rcver(submission):
     _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification4SecondAdditionalreceivingSite')
 
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
+    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
+    if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3"]
+    if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3"]
 
     _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
 
