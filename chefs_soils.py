@@ -7,10 +7,10 @@ import datetime
 import pytz
 from pytz import timezone
 
-#### to track the version of forms (Sept/22/2022)
+#### to track the version of forms (Sept/26/2022)
 # CHEFS generates new vresion of forms when changes of data fields, manages data by each version
-# 1.soil relocation form version: v8
-# 2.high volume submission version v6
+# 1.soil relocation form version: v9
+# 2.high volume submission version v7
 # 3.subscriber form version: v9
 
 config = helper.read_config()
@@ -187,6 +187,9 @@ SOURCE_SITE_HEADERS = [
   "owner2Company",
   "owner2Address",
   "owner2City",
+  "owner2Province",
+  "owner2Country",
+  "owner2PostalCode",
   "owner2PhoneNumber",
   "owner2Email",
   "additionalOwners",
@@ -195,11 +198,15 @@ SOURCE_SITE_HEADERS = [
   "contactCompany",
   "contactAddress",
   "contactCity",
+  "contactProvince",
+  "contactCountry",
+  "contactPostalCode",
   "contactPhoneNumber",
   "contactEmail",
   "SID",
   "latitude",
   "longitude",
+  "regionalDistrict",
   "landOwnership",
   "legallyTitledSiteAddress",
   "legallyTitledSiteCity",
@@ -556,6 +563,9 @@ def map_source_site(submission):
     _src_dic['owner2Company'] = submission.get("A1-additionalownerCompany1")
     _src_dic['owner2Address'] = submission.get("A1-additionalownerAddress1")
     _src_dic['owner2City'] = submission.get("A1-additionalownerCity1")
+    _src_dic['owner2Province'] = submission.get("A1-additionalownerProvinceState2")
+    _src_dic['owner2Country'] = submission.get("A1-additionalownerCountry2")
+    _src_dic['owner2PostalCode'] = submission.get("A1-additionalownerPostalZipCode1")
     _src_dic['owner2PhoneNumber'] = submission.get("A1-additionalownerPhone1")
     _src_dic['owner2Email'] = submission.get("A1-additionalownerEmail1")
     _src_dic['additionalOwners'] = submission.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow")
@@ -564,6 +574,9 @@ def map_source_site(submission):
     _src_dic['contactCompany'] = submission.get("A2-SourceSiteContactCompany")
     _src_dic['contactAddress'] = submission.get("A2-SourceSiteContactAddress")
     _src_dic['contactCity'] = submission.get("A2-SourceSiteContactCity")
+    _src_dic['contactProvince'] = submission.get("A1-sourcesitecontactProvinceState3")
+    _src_dic['contactCountry'] = submission.get("A1-sourcesitecontactpersonCountry3")
+    _src_dic['contactPostalCode'] = submission.get("A1-sourcesitecontactpersonPostalZipCode2")
     _src_dic['contactPhoneNumber'] = submission.get("SourceSiteContactphoneNumber")
     _src_dic['contactEmail'] = submission.get("A2-SourceSiteContactEmail")
     _src_dic['SID'] = submission.get("A3-SourcesiteIdentificationNumberSiteIdIfAvailable")
@@ -572,6 +585,7 @@ def map_source_site(submission):
       submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
 
+    _src_dic['regionalDistrict'] = create_regional_district(submission, 'SourceSiteregionalDistrict')
     _src_dic['landOwnership'] = create_land_ownership(submission, 'SourcelandOwnership-checkbox')
     _src_dic['legallyTitledSiteAddress'] = submission.get("A-LegallyTitled-AddressSource")
     _src_dic['legallyTitledSiteCity'] = submission.get("A-LegallyTitled-CitySource")
