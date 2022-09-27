@@ -604,17 +604,17 @@ def map_source_site(submission):
 
     if submission.get("dataGrid") is not None and len(submission["dataGrid"]) > 0: 
       _dg = submission["dataGrid"][0] # could be more than one, but take only one
-      if _dg.get("A-LegallyTitled-PID") is not None: _src_dic['PID'] = _dg["A-LegallyTitled-PID"]
-      if _dg.get("legalLandDescriptionSource") is not None: _src_dic['legalLandDescription'] = _dg["legalLandDescriptionSource"]
+      _src_dic['PID'] = _dg.get("A-LegallyTitled-PID")
+      _src_dic['legalLandDescription'] = _dg.get("legalLandDescriptionSource")
     if (submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 
         and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')): 
       _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
-      if _dg1.get("A-UntitledPINSource") is not None: _src_dic['PIN'] = _dg1["A-UntitledPINSource"]
-      if _dg1.get("legalLandDescriptionUntitledSource") is not None: _src_dic['legalLandDescription'] = _dg1["legalLandDescriptionUntitledSource"]
+      _src_dic['PIN'] = _dg1.get("A-UntitledPINSource")
+      _src_dic['legalLandDescription'] = _dg1.get("legalLandDescriptionUntitledSource")
     if (submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None 
         and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
         and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): 
-      _src_dic['legalLandDescription'] = submission["A-UntitledMunicipalLand-PIDColumnSource"]
+      _src_dic['legalLandDescription'] = submission.get("A-UntitledMunicipalLand-PIDColumnSource")
 
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
 
@@ -937,67 +937,62 @@ def map_hv_site(hvs):
   ):
     print("Mapping sourece site ...")
 
+    # initialize
     for hv_header in HV_SITE_HEADERS:
       _hv_dic[hv_header] = None
 
-    if hvs.get("Section1-FirstNameReceivingSiteOwner") is not None : _hv_dic['ownerFirstName'] = hvs["Section1-FirstNameReceivingSiteOwner"]
-    if hvs.get("Section1-LastNameReceivingSiteOwner") is not None : _hv_dic['ownerLastName'] = hvs["Section1-LastNameReceivingSiteOwner"]
-    if hvs.get("Section1-CompanyReceivingSiteOwner") is not None : _hv_dic['ownerCompany'] = hvs["Section1-CompanyReceivingSiteOwner"]
-    if hvs.get("Section1-AddressReceivingSiteOwner") is not None : _hv_dic['ownerAddress'] = hvs["Section1-AddressReceivingSiteOwner"]
-    if hvs.get("Section1-CityReceivingSiteOwner") is not None : _hv_dic['ownerCity'] = hvs["Section1-CityReceivingSiteOwner"]
-    if hvs.get("Section1-provinceStateReceivingSiteOwner") is not None : _hv_dic['ownerProvince'] = hvs["Section1-provinceStateReceivingSiteOwner"]
-    if hvs.get("Section1-countryReceivingSiteOwner") is not None : _hv_dic['ownerCountry'] = hvs["Section1-countryReceivingSiteOwner"]
-    if hvs.get("Section1-postalZipCodeReceivingSiteOwner") is not None : _hv_dic['ownerPostalCode'] = hvs["Section1-postalZipCodeReceivingSiteOwner"]
-    if hvs.get("Section1-PhoneReceivingSiteOwner") is not None : _hv_dic['ownerPhoneNumber'] = hvs["Section1-PhoneReceivingSiteOwner"]
-    if hvs.get("Section1-EmailReceivingSiteOwner") is not None : _hv_dic['ownerEmail'] = hvs["Section1-EmailReceivingSiteOwner"]
+    _hv_dic['ownerFirstName'] = hvs.get("Section1-FirstNameReceivingSiteOwner")
+    _hv_dic['ownerLastName'] = hvs.get("Section1-LastNameReceivingSiteOwner")
+    _hv_dic['ownerCompany'] = hvs.get("Section1-CompanyReceivingSiteOwner")
+    _hv_dic['ownerAddress'] = hvs.get("Section1-AddressReceivingSiteOwner")
+    _hv_dic['ownerCity'] = hvs.get("Section1-CityReceivingSiteOwner")
+    _hv_dic['ownerProvince'] = hvs.get("Section1-provinceStateReceivingSiteOwner")
+    _hv_dic['ownerCountry'] = hvs.get("Section1-countryReceivingSiteOwner")
+    _hv_dic['ownerPostalCode'] = hvs.get("Section1-postalZipCodeReceivingSiteOwner")
+    _hv_dic['ownerPhoneNumber'] = hvs.get("Section1-PhoneReceivingSiteOwner")
+    _hv_dic['ownerEmail'] = hvs.get("Section1-EmailReceivingSiteOwner")
+    _hv_dic['owner2FirstName'] = hvs.get("Section1a-FirstNameAdditionalOwner")
+    _hv_dic['owner2LastName'] = hvs.get("Section1A-LastNameAdditionalOwner")
+    _hv_dic['owner2Company'] = hvs.get("Section1A-CompanyAdditionalOwner")
+    _hv_dic['owner2Address'] = hvs.get("Section1A-AddressAdditionalOwner")
+    _hv_dic['owner2City'] = hvs.get("Section1A-CityAdditionalOwner")
+    _hv_dic['owner2Province'] = hvs.get("Section1A-ProvinceStateAdditionalOwner")
+    _hv_dic['owner2Country'] = hvs.get("Section1A-CountryAdditionalOwner")
+    _hv_dic['owner2PostalCode'] = hvs.get("Section1A-PostalZipCodeAdditionalOwner")
+    _hv_dic['owner2PhoneNumber'] = hvs.get("Section1A-PhoneAdditionalOwner")
+    _hv_dic['owner2Email'] = hvs.get("Section1A-EmailAdditionalOwner")
+    _hv_dic['additionalOwners'] = hvs.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow")
+    _hv_dic['contactFirstName'] = hvs.get("Section2-firstNameRSC")
+    _hv_dic['contactLastName'] = hvs.get("Section2-lastNameRSC")
+    _hv_dic['contactCompany'] = hvs.get("Section2-organizationRSC")
+    _hv_dic['contactAddress'] = hvs.get("Section2-streetAddressRSC")
+    _hv_dic['contactCity'] = hvs.get("Section2-cityRSC")
+    _hv_dic['contactProvince'] = hvs.get("Section2-provinceStateRSC")
+    _hv_dic['contactCountry'] = hvs.get("Section2-countryRSC")
+    _hv_dic['contactPostalCode'] = hvs.get("Section2-postalZipCodeRSC")
+    _hv_dic['contactPhoneNumber'] = hvs.get("section2phoneNumberRSC")
+    _hv_dic['contactEmail'] = hvs.get("Section2-simpleemailRSC")
+    _hv_dic['SID'] = hvs.get("Section3-siteIdIncludeAllRelatedNumbers")
 
-    if hvs.get("Section1a-FirstNameAdditionalOwner") is not None : _hv_dic['owner2FirstName'] = hvs["Section1a-FirstNameAdditionalOwner"]
-    if hvs.get("Section1A-LastNameAdditionalOwner") is not None : _hv_dic['owner2LastName'] = hvs["Section1A-LastNameAdditionalOwner"]
-    if hvs.get("Section1A-CompanyAdditionalOwner") is not None : _hv_dic['owner2Company'] = hvs["Section1A-CompanyAdditionalOwner"]
-    if hvs.get("Section1A-AddressAdditionalOwner") is not None : _hv_dic['owner2Address'] = hvs["Section1A-AddressAdditionalOwner"]
-    if hvs.get("Section1A-CityAdditionalOwner") is not None : _hv_dic['owner2City'] = hvs["Section1A-CityAdditionalOwner"]
-    if hvs.get("Section1A-ProvinceStateAdditionalOwner") is not None : _hv_dic['owner2Province'] = hvs["Section1A-ProvinceStateAdditionalOwner"]
-    if hvs.get("Section1A-CountryAdditionalOwner") is not None : _hv_dic['owner2Country'] = hvs["Section1A-CountryAdditionalOwner"]
-    if hvs.get("Section1A-PostalZipCodeAdditionalOwner") is not None : _hv_dic['owner2PostalCode'] = hvs["Section1A-PostalZipCodeAdditionalOwner"]
-    if hvs.get("Section1A-PhoneAdditionalOwner") is not None : _hv_dic['owner2PhoneNumber'] = hvs["Section1A-PhoneAdditionalOwner"]
-    if hvs.get("Section1A-EmailAdditionalOwner") is not None : _hv_dic['owner2Email'] = hvs["Section1A-EmailAdditionalOwner"]
-
-    if hvs.get("areThereMoreThanTwoOwnersIncludeTheirInformationBelow") is not None : _hv_dic['additionalOwners'] = hvs["areThereMoreThanTwoOwnersIncludeTheirInformationBelow"]
-    if hvs.get("Section2-firstNameRSC") is not None : _hv_dic['contactFirstName'] = hvs["Section2-firstNameRSC"]
-    if hvs.get("Section2-lastNameRSC") is not None : _hv_dic['contactLastName'] = hvs["Section2-lastNameRSC"]
-    if hvs.get("Section2-organizationRSC") is not None : _hv_dic['contactCompany'] = hvs["Section2-organizationRSC"]
-    if hvs.get("Section2-streetAddressRSC") is not None : _hv_dic['contactAddress'] = hvs["Section2-streetAddressRSC"]
-    if hvs.get("Section2-cityRSC") is not None : _hv_dic['contactCity'] = hvs["Section2-cityRSC"]
-    if hvs.get("Section2-provinceStateRSC") is not None : _hv_dic['contactProvince'] = hvs["Section2-provinceStateRSC"]
-    if hvs.get("Section2-countryRSC") is not None : _hv_dic['contactCountry'] = hvs["Section2-countryRSC"]
-    if hvs.get("Section2-postalZipCodeRSC") is not None : _hv_dic['contactPostalCode'] = hvs["Section2-postalZipCodeRSC"]
-    if hvs.get("section2phoneNumberRSC") is not None : _hv_dic['contactPhoneNumber'] = hvs["section2phoneNumberRSC"]
-    if hvs.get("Section2-simpleemailRSC") is not None : _hv_dic['contactEmail'] = hvs["Section2-simpleemailRSC"]
-
-    if hvs.get("Section3-siteIdIncludeAllRelatedNumbers") is not None : _hv_dic['SID'] = hvs["Section3-siteIdIncludeAllRelatedNumbers"]
-
-    _hv_lat, _hv_lon = helper.convert_deciaml_lat_long(
+    _hv_dic['latitude'], _hv_dic['longitude'] = helper.convert_deciaml_lat_long(
       hvs["Section3-Latitude-Degrees"], hvs["Section3-Latitude-Minutes"], hvs["Section3-Latitude-Seconds"], 
       hvs["Section3-Longitude-Degrees"], hvs["Section3-Longitude-Minutes"], hvs["Section3-Longitude-Seconds"])
-    _hv_dic['latitude'] = _hv_lat
-    _hv_dic['longitude'] = _hv_lon
 
     _hv_dic['regionalDistrict'] = create_regional_district(hvs, 'ReceivingSiteregionalDistrict')
     _hv_dic['landOwnership'] = create_land_ownership(hvs, 'landOwnership-checkbox')
-
-    if hvs.get("Section3-LegallyTitled-Address") is not None : _hv_dic['legallyTitledSiteAddress'] = hvs["Section3-LegallyTitled-Address"]
-    if hvs.get("Section3-LegallyTitled-City") is not None : _hv_dic['legallyTitledSiteCity'] = hvs["Section3-LegallyTitled-City"]
-    if hvs.get("Section3-LegallyTitled-PostalZipCode") is not None : _hv_dic['legallyTitledSitePostalCode'] = hvs["Section3-LegallyTitled-PostalZipCode"]
+    _hv_dic['legallyTitledSiteAddress'] = hvs.get("Section3-LegallyTitled-Address")
+    _hv_dic['legallyTitledSiteCity'] = hvs.get("Section3-LegallyTitled-City")
+    _hv_dic['legallyTitledSitePostalCode'] = hvs.get("Section3-LegallyTitled-PostalZipCode")
 
     if hvs.get("dataGrid") is not None and len(hvs["dataGrid"]) > 0: 
       _dg = hvs["dataGrid"][0] # could be more than one, but take only one
-      if _dg.get("A-LegallyTitled-PID") is not None: _hv_dic['PID'] = _dg["A-LegallyTitled-PID"]
-      if _dg.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg["legalLandDescription"]
+      _hv_dic['PID'] = _dg.get("A-LegallyTitled-PID")
+      _hv_dic['legalLandDescription'] = _dg.get("legalLandDescription")
     if (hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 
         and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')):
       _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
-      if _dg1.get("A-LegallyTitled-PID") is not None: _hv_dic['PIN'] = _dg1["A-LegallyTitled-PID"]
-      if _dg1.get("legalLandDescription") is not None: _hv_dic['legalLandDescription'] = _dg1["legalLandDescription"]
+      _hv_dic['PIN'] = _dg1.get("A-LegallyTitled-PID")
+      _hv_dic['legalLandDescription'] = _dg1.get("legalLandDescription")
     if (hvs.get("legalLandDescription") is not None 
         and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
         and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): 
@@ -1005,27 +1000,25 @@ def map_hv_site(hvs):
 
     _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(hvs, 'A-UntitledCrownLand-FileNumberColumn')
     _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, 'primarylanduse')
-
-    if hvs.get("highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime") is not None : _hv_dic['hvsConfirmation'] = hvs["highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime"]
-    if hvs.get("dateSiteBecameHighVolume") is not None : _hv_dic['dateSiteBecameHighVolume'] = helper.convert_simple_datetime_format_in_str(hvs["dateSiteBecameHighVolume"])
-    if hvs.get("howrelocatedsoilwillbeused") is not None : _hv_dic['howRelocatedSoilWillBeUsed'] = hvs["howrelocatedsoilwillbeused"]
-    if hvs.get("soilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _hv_dic['soilDepositIsALR'] = hvs["soilDepositIsInTheAgriculturalLandReserveAlr1"]
-    if hvs.get("receivingSiteIsOnReserveLands1") is not None : _hv_dic['soilDepositIsReserveLands'] = hvs["receivingSiteIsOnReserveLands1"]
-    if hvs.get("Section5-FirstNameQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalFirstName'] = hvs["Section5-FirstNameQualifiedProfessional"]
-    if hvs.get("Section5-LastName1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalLastName'] = hvs["Section5-LastName1QualifiedProfessional"]
-    if hvs.get("Section5-TypeofQP") is not None : _hv_dic['qualifiedProfessionalType'] = hvs["Section5-TypeofQP"]
-    if hvs.get("Section5-organizationQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalOrganization'] = hvs["Section5-organizationQualifiedProfessional"]
-    if hvs.get("Section5-professionalLicenseRegistrationEGPEngRpBio") is not None : _hv_dic['professionalLicenceRegistration'] = hvs["Section5-professionalLicenseRegistrationEGPEngRpBio"]
-    if hvs.get("Section5-streetAddressQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalAddress'] = hvs["Section5-streetAddressQualifiedProfessional"]
-    if hvs.get("Section5-cityQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalCity'] = hvs["Section5-cityQualifiedProfessional"]
-    if hvs.get("Section5-provinceStateQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalProvince'] = hvs["Section5-provinceStateQualifiedProfessional"]
-    if hvs.get("Section5-countryQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalCountry'] = hvs["Section5-countryQualifiedProfessional"]
-    if hvs.get("Section5-postalZipCodeQualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalPostalCode'] = hvs["Section5-postalZipCodeQualifiedProfessional"]
-    if hvs.get("simplephonenumber1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalPhoneNumber'] = hvs["simplephonenumber1QualifiedProfessional"]
-    if hvs.get("simpleemail1QualifiedProfessional") is not None : _hv_dic['qualifiedProfessionalEmail'] = hvs["simpleemail1QualifiedProfessional"]
-    if hvs.get("firstAndLastNameQualifiedProfessional") is not None : _hv_dic['signaturerFirstAndLastName'] = hvs["firstAndLastNameQualifiedProfessional"]
-    if hvs.get("simpledatetime") is not None : _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs["simpledatetime"])
-
+    _hv_dic['hvsConfirmation'] = hvs.get("highVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime")
+    _hv_dic['dateSiteBecameHighVolume'] = helper.convert_simple_datetime_format_in_str(hvs["dateSiteBecameHighVolume"])
+    _hv_dic['howRelocatedSoilWillBeUsed'] = hvs.get("howrelocatedsoilwillbeused")
+    _hv_dic['soilDepositIsALR'] = hvs.get("soilDepositIsInTheAgriculturalLandReserveAlr1")
+    _hv_dic['soilDepositIsReserveLands'] = hvs.get("receivingSiteIsOnReserveLands1")
+    _hv_dic['qualifiedProfessionalFirstName'] = hvs.get("Section5-FirstNameQualifiedProfessional")
+    _hv_dic['qualifiedProfessionalLastName'] = hvs.get("Section5-LastName1QualifiedProfessional")
+    _hv_dic['qualifiedProfessionalType'] = hvs.get("Section5-TypeofQP")
+    _hv_dic['qualifiedProfessionalOrganization'] = hvs.get("Section5-organizationQualifiedProfessional")
+    _hv_dic['professionalLicenceRegistration'] = hvs.get("Section5-professionalLicenseRegistrationEGPEngRpBio")
+    _hv_dic['qualifiedProfessionalAddress'] = hvs.get("Section5-streetAddressQualifiedProfessional")
+    _hv_dic['qualifiedProfessionalCity'] = hvs.get("Section5-cityQualifiedProfessional")
+    _hv_dic['qualifiedProfessionalProvince'] = hvs.get("Section5-provinceStateQualifiedProfessional")
+    _hv_dic['qualifiedProfessionalCountry'] = hvs.get("Section5-countryQualifiedProfessional")
+    _hv_dic['qualifiedProfessionalPostalCode'] = hvs.get("Section5-postalZipCodeQualifiedProfessional")
+    _hv_dic['qualifiedProfessionalPhoneNumber'] = hvs.get("simplephonenumber1QualifiedProfessional")
+    _hv_dic['qualifiedProfessionalEmail'] = hvs.get("simpleemail1QualifiedProfessional")
+    _hv_dic['signaturerFirstAndLastName'] = hvs.get("firstAndLastNameQualifiedProfessional")
+    _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs["simpledatetime"])
     _hv_dic['createAt'], _hv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(hvs)
 
   return _hv_dic

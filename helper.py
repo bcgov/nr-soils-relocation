@@ -129,7 +129,7 @@ def get_create_date_and_confirm_id(cefs_dic):
 def convert_simple_datetime_format_in_str(str_date):
     _result = None
     try:
-        if str_date is not None:
+        if str_date is not None and str_date != '':
             _datetime_in_str = str_date.split('T')
             if len(_datetime_in_str) > 1:
                 _result = datetime.datetime.strptime(_datetime_in_str[0], '%Y-%m-%d').strftime('%m/%d/%Y')
