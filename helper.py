@@ -53,7 +53,7 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
 
     return _lat_dd, _lon_dd
 
-def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
+def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec, confirmation_id, form_name):
     _lat_dd, _lon_dd = convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec)
 
     if (_lat_dd is not None and _lat_dd != 0 and
@@ -61,6 +61,7 @@ def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
         _lon_dd >=-139.06 and _lon_dd <= -114.02):
         return True
+    print("Invalidate site coordinates Latitude:",_lat_dd, ",Longitude:",_lon_dd,",Confirmation ID:",confirmation_id,", Form:",form_name)    
     return False
 
 # check if boolen type is
@@ -112,17 +113,21 @@ def get_difference_datetimes_in_hour(datetime1, datetime2):
         #print('difference datetimes in hour:',_diff)
     return _diff
 
-def get_create_date_and_confirm_id(cefs_dic):
+def get_create_date(cefs_dic):
   _created_at = None
-  _confirmation_id = None
   if cefs_dic.get('form') is not None : 
     _created_at = cefs_dic.get('form').get('createdAt')
-    _confirmation_id = cefs_dic.get('form').get('confirmationId')
     if _created_at is not None:
       #print('the supported timezones by the pytz module:', pytz.all_timezones, '\n')
       _created_at = datetime.datetime.strptime(_created_at, '%Y-%m-%dT%H:%M:%S.%f%z') #convert string to datetime with timezone(UTC)
       _created_at = _created_at.astimezone(timezone('Canada/Pacific'))  #convert to PST
-  return _created_at, _confirmation_id
+  return _created_at
+
+def get_confirm_id(cefs_dic):
+  _confirmation_id = None
+  if cefs_dic.get('form') is not None : 
+    _confirmation_id = cefs_dic.get('form').get('confirmationId')
+  return _confirmation_id  
 
 # str_date: '2022-09-22T00:00:00-07:00' or '09/02/2022' format
 # return: 'MM/DD/YYYY' string format
