@@ -977,7 +977,7 @@ def map_hv_site(hvs):
     _hv_dic['longitude'] = _hv_lon
 
     _hv_dic['regionalDistrict'] = create_regional_district(hvs, 'ReceivingSiteregionalDistrict')
-    _hv_dic['landOwnership'] = create_land_ownership(submission, 'landOwnership-checkbox')
+    _hv_dic['landOwnership'] = create_land_ownership(hvs, 'landOwnership-checkbox')
 
     if hvs.get("Section3-LegallyTitled-Address") is not None : _hv_dic['legallyTitledSiteAddress'] = hvs["Section3-LegallyTitled-Address"]
     if hvs.get("Section3-LegallyTitled-City") is not None : _hv_dic['legallyTitledSiteCity'] = hvs["Section3-LegallyTitled-City"]
