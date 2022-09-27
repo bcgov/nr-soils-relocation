@@ -630,7 +630,13 @@ def map_source_site(submission):
 
     if submission.get("dataGrid9") is not None and len(submission["dataGrid9"]) > 0: 
       _dg9 = submission["dataGrid9"][0] # could be more than one, but take only one
-      if _dg9.get("B1-soilVolumeToBeRelocationedInCubicMetresM3Source") is not None: _src_dic['soilVolume'] = _dg9["B1-soilVolumeToBeRelocationedInCubicMetresM3Source"]
+      if _dg9.get("B1-soilVolumeToBeRelocationedInCubicMetresM3Source") is not None: 
+        # Soil Volume field is double data type, but on the source site CHEFS form,
+        # it could be entried string value(e.g xxx) as there is no validation on the form
+        _soil_volume = _dg9["B1-soilVolumeToBeRelocationedInCubicMetresM3Source"]
+        if not helper.isfloat(_soil_volume):
+          _soil_volume = helper.extract_floating_from_string(_soil_volume)
+        _src_dic['soilVolume'] = _soil_volume
       if _dg9.get("B1-soilClassificationSource") is not None and len(_dg9.get("B1-soilClassificationSource")) > 0 : 
         for _k, _v in _dg9.get("B1-soilClassificationSource").items():
           if _v == True:

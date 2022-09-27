@@ -136,3 +136,23 @@ def convert_simple_datetime_format_in_str(str_date):
     except ValueError as ve:
         print('ValueError Raised:', ve)
     return _result if _result is not None else str_date
+
+def isfloat(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def extract_floating_from_string(value):
+    _result = 0
+    try:
+        EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
+        # Convert to DD in mapLatitude and mapLongitude
+        if (value is not None and value != ''):
+            # extract floating number from text
+            _result = re.findall(EXP_EXTRACT_FLOATING, value)
+    except ValueError as ve:
+        print('ValueError Raised:', ve)
+
+    return _result
