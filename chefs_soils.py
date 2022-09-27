@@ -823,8 +823,8 @@ def map_rcv_2nd_rcver(submission):
       if _dg6.get("A-UntitledCrown-PINFirstAdditionalReceivingSite") is not None: _rcv_dic['PIN'] = _dg6["A-UntitledCrown-PINFirstAdditionalReceivingSite"]
       if _dg6.get("legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg6["legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite"]
     if (submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn2"]) > 0 
-        and _rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''
-        and _rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == ''):
+        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
+        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')):
       _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn2"][0]
       if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite") is not None:
         _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite"]
@@ -1098,12 +1098,12 @@ sourceSites = []
 receivingSites = []
 rcvRegDistDic = {}
 for submission in submissionsJson:
-  print('Mapping submission data to the source site...')
+  #print('Mapping submission data to the source site...')
   _srcDic = map_source_site(submission)
   if _srcDic:
     sourceSites.append(_srcDic)
 
-  print('Mapping submission data to the receiving site...')  
+  #print('Mapping submission data to the receiving site...')  
   _1rcvDic = map_rcv_1st_rcver(submission)
   if _1rcvDic:
     receivingSites.append(_1rcvDic)
@@ -1123,8 +1123,7 @@ print('Creating high volume site records records...')
 hvSites = []
 hvRegDistDic = {}
 for hvs in hvsJson:
-  print('Mapping hv data to the hv site...')  
-
+  #print('Mapping hv data to the hv site...')  
   _hvDic = map_hv_site(hvs)
   if _hvDic:
     hvSites.append(_hvDic)
