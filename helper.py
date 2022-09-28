@@ -61,7 +61,7 @@ def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec, confi
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
         _lon_dd >=-139.06 and _lon_dd <= -114.02):
         return True
-    print("Invalidate site coordinates Latitude:",_lat_dd, ",Longitude:",_lon_dd,",Confirmation ID:",confirmation_id,", Form:",form_name)    
+    print("Invalidate site coordinates Latitude(deg/min/sec):",_lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",_lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirmation ID:",confirmation_id,", Form:",form_name)    
     return False
 
 # check if boolen type is

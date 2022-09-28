@@ -296,6 +296,7 @@ RECEIVING_SITE_HEADERS = [
   "highVolumeSite",
   "soilDepositIsALR",
   "soilDepositIsReserveLands",
+  "dateSigned",
   "createAt",
   "confirmationId"
 ]  
@@ -811,6 +812,7 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
     if submission.get("D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1"]
     if submission.get("D2-receivingsitesoilDepositIsInTheReserveLands1") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-receivingsitesoilDepositIsInTheReserveLands1"]
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))    
     _rcv_dic['createAt'] = helper.get_create_date(submission)
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
@@ -900,6 +902,7 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2"]
     if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2"]
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
     _rcv_dic['createAt'] = helper.get_create_date(submission)
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
@@ -990,6 +993,7 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
     if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3"]
     if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3"]
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
     _rcv_dic['createAt'] = helper.get_create_date(submission)
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
@@ -1270,7 +1274,7 @@ else:
 
 
 
-"""
+
 print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
@@ -1431,6 +1435,6 @@ print('Sending Notification of high volume site registration in selected Regiona
 for _k, _v in notifyHVSSubscriberDic.items():
   _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
   print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _subscriberEmail)
-"""
+
 
 print('Completed Soils data publishing')
