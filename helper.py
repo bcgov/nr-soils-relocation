@@ -61,7 +61,7 @@ def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec, confi
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
         _lon_dd >=-139.06 and _lon_dd <= -114.02):
         return True
-    print("Invalidate site coordinates Latitude(deg/min/sec):",_lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",_lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirmation ID:",confirmation_id,", Form:",form_name)    
+    print("Can't publish data to AGOL due to Invalidate site coordinates - Latitude(deg/min/sec):",_lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",_lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirm ID:",confirmation_id,", Form:",form_name)    
     return False
 
 # check if boolen type is
@@ -153,10 +153,12 @@ def extract_floating_from_string(value):
     _result = 0
     try:
         EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
-        # Convert to DD in mapLatitude and mapLongitude
         if (value is not None and value != ''):
-            # extract floating number from text
-            _result = re.findall(EXP_EXTRACT_FLOATING, value)
+          # extract floating number from text
+          _exp_result = re.findall(EXP_EXTRACT_FLOATING, value)
+          if type(_exp_result) == list and len(_exp_result) > 0:
+            _result = _exp_result[0]
+
     except ValueError as ve:
         print('ValueError Raised:', ve)
 
