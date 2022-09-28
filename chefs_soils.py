@@ -1429,12 +1429,14 @@ for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.it
 print('Sending Notification of soil relocation in selected Regional District(s) ...')
 for _k, _v in notifySoilRelocSubscriberDic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
   _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
-  print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
+  if _ches_response is not None and _ches_response.status_code is not None:
+    print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
 print('Sending Notification of high volume site registration in selected Regional District(s) ...')
 for _k, _v in notifyHVSSubscriberDic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
   _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
-  print("CHEFS response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
+  if _ches_response is not None and _ches_response.status_code is not None:
+    print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
 
 print('Completed Soils data publishing')
