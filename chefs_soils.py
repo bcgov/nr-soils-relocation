@@ -296,6 +296,7 @@ RECEIVING_SITE_HEADERS = [
   "highVolumeSite",
   "soilDepositIsALR",
   "soilDepositIsReserveLands",
+  "dateSigned",
   "createAt",
   "confirmationId"
 ]  
@@ -371,67 +372,6 @@ HV_SITE_HEADERS = [
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
 
 
-
-
-def create_site_relocation_email_msg(regional_district, popup_links):
-  msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
-  msg += '<p>This email is to notify you that soil is being relocated in the Regional District: <span style=font-weight:bold;color:red;>' 
-  msg += regional_district
-  msg += '</span></p>'
-
-  if popup_links != "" and popup_links is not None:
-    msg += '<p>The following new submission(s) were received.<p/>\
-            <p font-style:italic>'
-    msg += popup_links
-    msg += '</p><br/>'
-    msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
-            <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
-            <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-            Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
-            <ul>\
-            <li>click on the small arrow on the left of the screen  to open search options</li>\
-            <li>Filter by site address, regional district, high volume sites, and more.</li>\
-            <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>\
-            <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
-            </ul>\
-            <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
-    msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
-    msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-    msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
-    msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-  return msg
-
-def create_hv_site_email_msg(regional_district, popup_links):
-  msg = '<p>High Volume Receiving Site Registrations are received by the ministry under section 55.1 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
-  msg += '<p>This email is to notify you that a registration for a high volume site has been received in Regional District: <span style=font-weight:bold;color:red;>'
-  msg += regional_district
-  msg += '</span></p>'
-
-
-  if popup_links != "" and popup_links is not None:  
-    msg += '<p>The following new high volume receiving site registration(s) were received.<p/>\
-            <p font-style:italic>'
-    msg += popup_links
-    msg += '</p><br/>'
-
-
-  msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
-            <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
-            <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
-            Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
-            <ul>\
-            <li>click on the small arrow on the left of the screen to open search options</li>\
-            <li>Filter by site address, regional district, high volume sites, and more.</li>\
-            <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement</li>\
-            <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
-            </ul>\
-            <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
-  msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
-  msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
-  msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
-
-  return msg
 
 def convert_regional_district_to_name(id):
   name = REGIONAL_DISTRICT_NAME_DIC.get(id)
@@ -546,13 +486,140 @@ def create_land_ownership(cefs_dic, field):
     _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
   return _land_ownership
 
+def create_site_relocation_email_msg(regional_district, popup_links):
+  msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
+  msg += '<p>This email is to notify you that soil is being relocated in the Regional District: <span style=font-weight:bold;color:red;>' 
+  msg += regional_district
+  msg += '</span></p>'
+
+  if popup_links != "" and popup_links is not None:
+    msg += '<p>The following new submission(s) were received.<p/>\
+            <p font-style:italic>'
+    msg += popup_links
+    msg += '</p><br/>'
+    msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
+            <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
+            <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
+            Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
+            <ul>\
+            <li>click on the small arrow on the left of the screen  to open search options</li>\
+            <li>Filter by site address, regional district, high volume sites, and more.</li>\
+            <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>\
+            <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
+            </ul>\
+            <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+    msg += '<hr style=height:1px;border:none;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/><br/>'
+    msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+    msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
+    msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+  return msg
+
+def create_hv_site_email_msg(regional_district, popup_links):
+  msg = '<p>High Volume Receiving Site Registrations are received by the ministry under section 55.1 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
+  msg += '<p>This email is to notify you that a registration for a high volume site has been received in Regional District: <span style=font-weight:bold;color:red;>'
+  msg += regional_district
+  msg += '</span></p>'
+
+
+  if popup_links != "" and popup_links is not None:  
+    msg += '<p>The following new high volume receiving site registration(s) were received.<p/>\
+            <p font-style:italic>'
+    msg += popup_links
+    msg += '</p><br/>'
+
+
+  msg += '<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>\
+            <p><b>To search the <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>Soil Relocation Information System</a> (SRIS):</b></p>\
+            <p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>\
+            Click &#8216;view&#8217; under the <b>Soil Relocation Dashboard</b> and follow the search instructions below:\
+            <ul>\
+            <li>click on the small arrow on the left of the screen to open search options</li>\
+            <li>Filter by site address, regional district, high volume sites, and more.</li>\
+            <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement</li>\
+            <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>\
+            </ul>\
+            <p>You can also search for information on the <b>Soil Relocation Site Map</b> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.'
+  msg += '<hr style=border-top:dotted;/></p><br/><br/><br/>'
+  msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+  msg += '<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC. If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=https://chefs.nrs.gov.bc.ca/app/form/submit?f=' + CHEFS_MAIL_FORM_ID + '>form</a></span>.<br/>'
+  msg += '<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>'
+
+  return msg
+
+def create_pid_and_desc(chefs_dic, data_grid_field, pid_field, desc_field):
+  _pid = None
+  _desc = None
+  if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
+    _pids = []
+    _descs= []
+    for _dg in chefs_dic[data_grid_field]:
+      if _dg.get(pid_field) is not None and _dg.get(pid_field) != '':
+        _pids.append(_dg.get(pid_field))
+        if _dg.get(desc_field) is not None and _dg.get(desc_field).strip() != '':
+          if len(chefs_dic[data_grid_field]) > 1:
+            _descs.append(_dg.get(pid_field) + ':' + _dg.get(desc_field))
+          else:
+            _descs.append(_dg.get(desc_field))
+    if len(_pids) > 1: 
+      _pid = "\"" + ",".join(_pids) + "\""
+    elif len(_pids) == 1:
+      _pid = _pids[0]
+
+    if len(_descs) > 1:
+      _desc = "\"" + ",".join(_descs) + "\""
+    elif len(_descs) == 1:
+      _desc = _descs[0]
+  return _pid, _desc
+
+def create_pin_and_desc(chefs_dic, data_grid_field, pin_field, desc_field):
+  _pin = None
+  _desc = None
+  if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
+    _pins = []
+    _descs= []
+    for _dg in chefs_dic[data_grid_field]:
+      if _dg.get(pin_field) is not None and _dg.get(pin_field) != '':
+        _pins.append(_dg.get(pin_field))
+        if _dg.get(desc_field) is not None and _dg.get(desc_field).strip() != '':
+          if len(chefs_dic[data_grid_field]) > 1:
+            _descs.append(_dg.get(pin_field) + ':' + _dg.get(desc_field))
+          else:
+            _descs.append(_dg.get(desc_field))
+    if len(_pins) > 1: 
+      _pin = "\"" + ",".join(_pins) + "\""
+    elif len(_pins) == 1:
+      _pin = _pins[0]
+
+    if len(_descs) > 1:
+      _desc = "\"" + ",".join(_descs) + "\""
+    elif len(_descs) == 1:
+      _desc = _descs[0]
+  return _pin, _desc
+
+def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
+  _desc = None
+  if chefs_dic.get(parent_field) is not None and len(chefs_dic.get(parent_field)) > 0: 
+    _descs= []
+    for _uml in chefs_dic[parent_field]:
+      if _uml.get(desc_field) is not None and _uml.get(desc_field).strip() != '':
+        _descs.append(_uml.get(desc_field))
+
+    if len(_descs) > 1:
+      _desc = "\"" + ",".join(_descs) + "\""
+    elif len(_descs) == 1:
+      _desc = _descs[0]
+
+  return _desc
+
 
 def map_source_site(submission):
   _src_dic = {}
+  _confirmation_id = helper.get_confirm_id(submission)
   if (helper.validate_lat_lon(submission.get("A3-SourceSiteLatitude-Degrees"), submission.get("A3-SourceSiteLatitude-Minutes"), submission.get("A3-SourceSiteLatitude-Seconds"), 
-                      submission.get("A3-SourceSiteLongitude-Degrees"), submission.get("A3-SourceSiteLongitude-Minutes"), submission.get("A3-SourceSiteLongitude-Seconds"))
+                              submission.get("A3-SourceSiteLongitude-Degrees"), submission.get("A3-SourceSiteLongitude-Minutes"), submission.get("A3-SourceSiteLongitude-Seconds"),
+                              _confirmation_id, 'Soil Relocation Notification Form-Source Site')
   ):  
-    print("Mapping sourece site ...")
+    #print("Mapping sourece site ...")
 
     #initialize
     for src_header in SOURCE_SITE_HEADERS:
@@ -596,27 +663,19 @@ def map_source_site(submission):
       submission["A3-SourceSiteLatitude-Degrees"], submission["A3-SourceSiteLatitude-Minutes"], submission["A3-SourceSiteLatitude-Seconds"], 
       submission["A3-SourceSiteLongitude-Degrees"], submission["A3-SourceSiteLongitude-Minutes"], submission["A3-SourceSiteLongitude-Seconds"])
 
-    _src_dic['regionalDistrict'] = create_regional_district(submission, 'SourceSiteregionalDistrict')
     _src_dic['landOwnership'] = create_land_ownership(submission, 'SourcelandOwnership-checkbox')
+    _src_dic['regionalDistrict'] = create_regional_district(submission, 'SourceSiteregionalDistrict')
     _src_dic['legallyTitledSiteAddress'] = submission.get("A-LegallyTitled-AddressSource")
     _src_dic['legallyTitledSiteCity'] = submission.get("A-LegallyTitled-CitySource")
     _src_dic['legallyTitledSitePostalCode'] = submission.get("A-LegallyTitled-PostalZipCodeSource")
-
-    if submission.get("dataGrid") is not None and len(submission["dataGrid"]) > 0: 
-      _dg = submission["dataGrid"][0] # could be more than one, but take only one
-      _src_dic['PID'] = _dg.get("A-LegallyTitled-PID")
-      _src_dic['legalLandDescription'] = _dg.get("legalLandDescriptionSource")
-    if (submission.get("dataGrid1") is not None and len(submission["dataGrid1"]) > 0 
-        and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')): 
-      _dg1 = submission["dataGrid1"][0] # could be more than one, but take only one
-      _src_dic['PIN'] = _dg1.get("A-UntitledPINSource")
-      _src_dic['legalLandDescription'] = _dg1.get("legalLandDescriptionUntitledSource")
-    if (submission.get("A-UntitledMunicipalLand-PIDColumnSource") is not None 
-        and (_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
-        and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): 
-      _src_dic['legalLandDescription'] = submission.get("A-UntitledMunicipalLand-PIDColumnSource")
-
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
+    #PIN, PIN, description
+    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_and_desc(submission, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescriptionSource')  #PID
+    if (_src_dic['PID'] is None or _src_dic['PID'].strip() == ''): #PIN
+      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pin_and_desc(submission, 'dataGrid1', 'A-UntitledPINSource', 'legalLandDescriptionUntitledSource')
+    if ((_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
+        and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
+      _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumnSource', 'legalLandDescriptionUntitledMunicipalSource')
 
     if submission.get("A4-schedule2ReferenceSourceSite") is not None and len(submission.get("A4-schedule2ReferenceSourceSite")) > 0 : 
       _source_site_land_uses = []
@@ -664,16 +723,19 @@ def map_source_site(submission):
     _src_dic['qualifiedProfessionalEmail'] = submission.get("EmailAddressQualifiedProfessional")
     _src_dic['signaturerFirstAndLastName'] = submission.get("sig-firstAndLastNameQualifiedProfessional")
     _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))
-    _src_dic['createAt'], _src_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
+    _src_dic['createAt'] = helper.get_create_date(submission)
+    _src_dic['confirmationId'] = _confirmation_id
 
   return _src_dic
 
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
+  _confirmation_id = helper.get_confirm_id(submission)
   if (helper.validate_lat_lon(submission.get("C2-Latitude-DegreesReceivingSite"), submission.get("C2-Latitude-MinutesReceivingSite"), submission.get("Section2-Latitude-Seconds1ReceivingSite"), 
-                      submission.get("C2-Longitude-DegreesReceivingSite"), submission.get("C2-Longitude-MinutesReceivingSite"), submission.get("C2-Longitude-SecondsReceivingSite"))
+                              submission.get("C2-Longitude-DegreesReceivingSite"), submission.get("C2-Longitude-MinutesReceivingSite"), submission.get("C2-Longitude-SecondsReceivingSite"),
+                              _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
   ):  
-    print("Mapping 1st receiver ...")
+    #print("Mapping 1st receiver ...")
 
     for rcv_header in RECEIVING_SITE_HEADERS:
       _rcv_dic[rcv_header] = None
@@ -750,17 +812,20 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
     if submission.get("D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1"]
     if submission.get("D2-receivingsitesoilDepositIsInTheReserveLands1") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-receivingsitesoilDepositIsInTheReserveLands1"]
-
-    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
-
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))    
+    _rcv_dic['createAt'] = helper.get_create_date(submission)
+    _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
-  if (helper.validate_lat_lon(submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite"), submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite"), 
-                      submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite"))
+  _confirmation_id = helper.get_confirm_id(submission)
+  if (submission.get('additionalReceivingSites').get('firstAdditionalReceivingSiteInformation') == True and
+      helper.validate_lat_lon(submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite"), submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite"), 
+                              submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite"),
+                              _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
   ):  
-    print("Mapping 2nd receiver ...")
+    #print("Mapping 2nd receiver ...")
 
     for rcv_header in RECEIVING_SITE_HEADERS:
       _rcv_dic[rcv_header] = None
@@ -837,17 +902,20 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1"]
     if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2"]
     if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2"]
-
-    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
-
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
+    _rcv_dic['createAt'] = helper.get_create_date(submission)
+    _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
-  if (helper.validate_lat_lon(submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite"), submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite"), 
-                      submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite"))
+  _confirmation_id = helper.get_confirm_id(submission)
+  if (submission.get('secondadditionalReceivingSites1').get('secondAdditionalReceivingSiteInformation') == True and
+      helper.validate_lat_lon(submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite"), submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite"), 
+                              submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite"),
+                              _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
   ):  
-    print("Mapping 3rd receiver ...")
+    #print("Mapping 3rd receiver ...")
 
     for rcv_header in RECEIVING_SITE_HEADERS:
       _rcv_dic[rcv_header] = None
@@ -925,17 +993,19 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
     if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3"]
     if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3"]
-
-    _rcv_dic['createAt'], _rcv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(submission)
-
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
+    _rcv_dic['createAt'] = helper.get_create_date(submission)
+    _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_hv_site(hvs):
   _hv_dic = {}
+  _confirmation_id = helper.get_confirm_id(hvs)
   if (helper.validate_lat_lon(hvs.get("Section3-Latitude-Degrees"), hvs.get("Section3-Latitude-Minutes"), hvs.get("Section3-Latitude-Seconds"), 
-                      hvs.get("Section3-Longitude-Degrees"), hvs.get("Section3-Longitude-Minutes"), hvs.get("Section3-Longitude-Seconds"))
+                              hvs.get("Section3-Longitude-Degrees"), hvs.get("Section3-Longitude-Minutes"), hvs.get("Section3-Longitude-Seconds"),
+                              _confirmation_id, 'High Volume Receiving Site Form')
   ):
-    print("Mapping sourece site ...")
+    #print("Mapping high volume site ...")
 
     # initialize
     for hv_header in HV_SITE_HEADERS:
@@ -983,20 +1053,13 @@ def map_hv_site(hvs):
     _hv_dic['legallyTitledSiteAddress'] = hvs.get("Section3-LegallyTitled-Address")
     _hv_dic['legallyTitledSiteCity'] = hvs.get("Section3-LegallyTitled-City")
     _hv_dic['legallyTitledSitePostalCode'] = hvs.get("Section3-LegallyTitled-PostalZipCode")
-
-    if hvs.get("dataGrid") is not None and len(hvs["dataGrid"]) > 0: 
-      _dg = hvs["dataGrid"][0] # could be more than one, but take only one
-      _hv_dic['PID'] = _dg.get("A-LegallyTitled-PID")
-      _hv_dic['legalLandDescription'] = _dg.get("legalLandDescription")
-    if (hvs.get("dataGrid1") is not None and len(hvs["dataGrid1"]) > 0 
-        and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')):
-      _dg1 = hvs["dataGrid1"][0] # could be more than one, but take only one
-      _hv_dic['PIN'] = _dg1.get("A-LegallyTitled-PID")
-      _hv_dic['legalLandDescription'] = _dg1.get("legalLandDescription")
-    if (hvs.get("legalLandDescription") is not None 
-        and (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
-        and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): 
-      _hv_dic['legalLandDescription'] = hvs["legalLandDescription"]
+    #PIN, PIN, description
+    _hv_dic['PID'], _hv_dic['legalLandDescription'] = create_pid_and_desc(hvs, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescription') #PID
+    if (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == ''): #PIN
+      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = create_pin_and_desc(hvs, 'dataGrid1', 'A-LegallyTitled-PID', 'legalLandDescription')      
+    if ((_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
+        and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
+      _hv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(hvs, 'A-UntitledMunicipalLand-PIDColumn', 'legalLandDescription')
 
     _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(hvs, 'A-UntitledCrownLand-FileNumberColumn')
     _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, 'primarylanduse')
@@ -1019,8 +1082,8 @@ def map_hv_site(hvs):
     _hv_dic['qualifiedProfessionalEmail'] = hvs.get("simpleemail1QualifiedProfessional")
     _hv_dic['signaturerFirstAndLastName'] = hvs.get("firstAndLastNameQualifiedProfessional")
     _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs["simpledatetime"])
-    _hv_dic['createAt'], _hv_dic['confirmationId'] = helper.get_create_date_and_confirm_id(hvs)
-
+    _hv_dic['createAt'] = helper.get_create_date(hvs)
+    _hv_dic['confirmationId'] = _confirmation_id
   return _hv_dic
 
 # add Regional Districts in site forms to dictionary - key:regional district string / value:site data dictionary
@@ -1152,7 +1215,6 @@ with open(HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
 
 
 
-
 print('Connecting to AGOL GIS...')
 # connect to GIS
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
@@ -1173,6 +1235,7 @@ else:
     _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
     _srcLyrOverwriteResult = _srcFlc.manager.overwrite(SOURCE_CSV_FILE)
     print('Updated Soil Relocation Source Site Feature Layer sucessfully: ' + json.dumps(_srcLyrOverwriteResult))
+
 
 print('Updating Soil Relocation Receiving Site CSV...')
 _rcvCsvItem = _gis.content.get(RCV_CSV_ID)
@@ -1255,7 +1318,8 @@ for _subscriber in subscribersJson:
       if helper.is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
         _notifySoilReloc = _noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
 
-  _subscription_created_at, _subscription_confirm_id = helper.get_create_date_and_confirm_id(_subscriber)
+  _subscription_created_at = helper.get_create_date(_subscriber)
+  _subscription_confirm_id = helper.get_confirm_id(_subscriber)  
 
   if (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
       _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and
