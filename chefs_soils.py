@@ -1119,18 +1119,6 @@ CHEFS_MAIL_API_KEY = os.getenv('CHEFS_MAIL_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
 
-"""
-print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
-print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
-print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
-print(f"Value of env variable key='CHEFS_HV_API_KEY': {CHEFS_HV_API_KEY}")
-print(f"Value of env variable key='CHEFS_MAIL_FORM_ID': {CHEFS_MAIL_FORM_ID}")
-print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
-
-print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
-print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
-"""
-
 
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
