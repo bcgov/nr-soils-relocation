@@ -8,7 +8,7 @@ import datetime
 from pytz import timezone
 
 CHES_API_KEY = os.getenv('CHES_API_KEY')
-print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
+#print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
 
 def read_config():
     config = configparser.ConfigParser()
@@ -61,7 +61,7 @@ def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec, confi
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
         _lon_dd >=-139.06 and _lon_dd <= -114.02):
         return True
-    print("Can't publish data to AGOL due to Invalidate site coordinates - Latitude(deg/min/sec):",_lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",_lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirm ID:",confirmation_id,", Form:",form_name)    
+    print("[INFO] Can't publish data to AGOL due to Invalidate site coordinates - Latitude(deg/min/sec):",_lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",_lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirm ID:",confirmation_id,", Form:",form_name)    
     return False
 
 # check if boolen type is
@@ -72,23 +72,30 @@ def is_boolean(_v):
   return _result
 
 def send_mail(to_email, subject, message):
-  auth_pay_load = 'grant_type=client_credentials'
-  auth_haders = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Authorization': 'Basic ' + CHES_API_KEY
-  }
-  auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
-  auth_response_json = json.loads(auth_response.content)
-  access_token = auth_response_json['access_token']
+  ches_response = None
+  try:
+    auth_pay_load = 'grant_type=client_credentials'
+    auth_haders = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + CHES_API_KEY
+    }
+    auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
+    auth_response_json = json.loads(auth_response.content)
+    if auth_response_json.get('access_token'):
+      access_token = auth_response_json['access_token']
 
-  from_email = "noreply@gov.bc.ca"
-  ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
-  ches_headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer ' + access_token
-  }
-  ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
-  #_ches_content = json.loads(ches_response.content)
+      from_email = "noreply@gov.bc.ca"
+      ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
+      ches_headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + access_token
+      }
+      ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
+      #_ches_content = json.loads(ches_response.content)
+    else:
+      raise KeyError(auth_response_json.get('error_description') + ", " + auth_response_json.get('error') + ", status code:" + str(auth_response.status_code) + ", reason:"+ auth_response.reason)
+  except KeyError as ke:
+      print("[ERROR] The email could not be sent due to an authorization issue. (" , ke , ")")
   return ches_response
 
 def site_list(form_id, form_key):
