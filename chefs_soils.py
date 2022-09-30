@@ -469,16 +469,10 @@ def create_receiving_site_lan_uses(cefs_dic, field):
   return _land_uses
 
 def create_regional_district(cefs_dic, field):
-  _regional_districts = []
-
-  if cefs_dic.get(field) is not None and len(cefs_dic[field]) > 0 : 
-    for _item in cefs_dic[field]:
-      _regional_districts.append(convert_regional_district_to_name(_item))
-    
-    if len(_regional_districts) > 0:
-      _regional_districts = "\"" + ",".join(_regional_districts) + "\"" 
-
-  return _regional_districts if len(_regional_districts)  > 0  else None
+  _regional_district = None
+  if cefs_dic.get(field) is not None and len(cefs_dic[field]) > 0: 
+    _regional_district = convert_regional_district_to_name(cefs_dic[field][0])
+  return _regional_district
 
 def create_land_ownership(cefs_dic, field):
   _land_ownership = None
