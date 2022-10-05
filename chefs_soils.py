@@ -544,25 +544,10 @@ def create_pid_and_desc(chefs_dic, data_grid_field, pid_field, desc_field):
   _pid = None
   _desc = None
   if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
-    _pids = []
-    _descs= []
-    for _dg in chefs_dic[data_grid_field]:
-      if _dg.get(pid_field) is not None and _dg.get(pid_field) != '':
-        _pids.append(_dg.get(pid_field))
-        if _dg.get(desc_field) is not None and _dg.get(desc_field).strip() != '':
-          if len(chefs_dic[data_grid_field]) > 1:
-            _descs.append(_dg.get(pid_field) + ':' + _dg.get(desc_field))
-          else:
-            _descs.append(_dg.get(desc_field))
-    if len(_pids) > 1: 
-      _pid = "\"" + ",".join(_pids) + "\""
-    elif len(_pids) == 1:
-      _pid = _pids[0]
-
-    if len(_descs) > 1:
-      _desc = "\"" + ",".join(_descs) + "\""
-    elif len(_descs) == 1:
-      _desc = _descs[0]
+    if chefs_dic.get(data_grid_field)[0].get(pid_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_field).strip() != '':
+      _pid = chefs_dic.get(data_grid_field)[0].get(pid_field)
+      if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
+        _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
   return _pid, _desc
 
 def create_pin_and_desc(chefs_dic, data_grid_field, pin_field, desc_field):
