@@ -553,18 +553,9 @@ def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_fiel
 def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
   _desc = None
   if chefs_dic.get(parent_field) is not None and len(chefs_dic.get(parent_field)) > 0: 
-    _descs= []
-    for _uml in chefs_dic[parent_field]:
-      if _uml.get(desc_field) is not None and _uml.get(desc_field).strip() != '':
-        _descs.append(_uml.get(desc_field))
-
-    if len(_descs) > 1:
-      _desc = "\"" + ",".join(_descs) + "\""
-    elif len(_descs) == 1:
-      _desc = _descs[0]
-
+    if chefs_dic[parent_field][0].get(desc_field) is not None and chefs_dic[parent_field][0].get(desc_field).strip() != '':
+      _desc = chefs_dic[parent_field][0].get(desc_field).strip()
   return _desc
-
 
 def map_source_site(submission):
   _src_dic = {}
