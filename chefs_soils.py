@@ -26,6 +26,8 @@ RCV_LAYER_ID = config['AGOL_ITEMS']['RCV_LAYER_ID']
 HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
 HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
 WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
+EMAIL_SUBJECT_SOIL_RELOCATION = config['EMAIL_TITLE']['EMAIL_SUBJECT_SOIL_RELOCATION']
+EMAIL_SUBJECT_HIGH_VOLUME = config['EMAIL_TITLE']['EMAIL_SUBJECT_HIGH_VOLUME']
 
 
 REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
@@ -219,8 +221,15 @@ SOURCE_SITE_HEADERS = [
   "highVolumeSite",
   "soilRelocationPurpose",
   "soilStorageType",
-  "soilVolume",
-  "soilQuality",
+  "industrialLandUseSoilVolume",
+  "commercialLandUseSoilVolume",
+  "residentialLandUseHighDensitySoilVolume",
+  "residentialLandUseLowDensitySoilVolume",
+  "urbanParkLandUseSoilVolume",
+  "agriculturalLandUseSoilVolume",
+  "wildlandsNaturalLandUseSoilVolume",
+  "wildlandsRevertedLandUseSoilVolume",
+  "totalSoilVolme",
   "soilCharacterMethod",
   "vapourExemption",
   "vapourExemptionDesc",
@@ -469,22 +478,55 @@ def create_receiving_site_lan_uses(cefs_dic, field):
   return _land_uses
 
 def create_regional_district(cefs_dic, field):
-  _regional_districts = []
-
-  if cefs_dic.get(field) is not None and len(cefs_dic[field]) > 0 : 
-    for _item in cefs_dic[field]:
-      _regional_districts.append(convert_regional_district_to_name(_item))
-    
-    if len(_regional_districts) > 0:
-      _regional_districts = "\"" + ",".join(_regional_districts) + "\"" 
-
-  return _regional_districts if len(_regional_districts)  > 0  else None
+  _regional_district = None
+  if cefs_dic.get(field) is not None and len(cefs_dic[field]) > 0: 
+    _regional_district = convert_regional_district_to_name(cefs_dic[field][0])
+  return _regional_district
 
 def create_land_ownership(cefs_dic, field):
   _land_ownership = None
   if cefs_dic.get(field) is not None : 
     _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
   return _land_ownership
+
+def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_dic):
+  _total_soil_volume = 0
+  _soil_volume = 0
+  if chefs_dic.get(data_grid) is not None and len(chefs_dic[data_grid]) > 0: 
+    for _dg9 in chefs_dic[data_grid]:
+      if (_dg9.get(volume_field) is not None 
+          and _dg9.get(claz_field) is not None and len(_dg9.get(claz_field)) > 0): 
+        _soil_volume = _dg9[volume_field]
+        if not helper.isfloat(_soil_volume):
+          _soil_volume = helper.extract_floating_from_string(_soil_volume)
+        _soil_volume = helper.str_to_double(_soil_volume)
+        _soil_claz = _dg9.get("B1-soilClassificationSource")
+        if _soil_claz.get("urbanParkLandUsePl") is not None and _soil_claz.get("urbanParkLandUsePl") == True:
+          working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif _soil_claz.get("commercialLandUseCl") is not None and _soil_claz.get("commercialLandUseCl") == True:
+          working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("industrialLandUseIl") is not None and _soil_claz.get("industrialLandUseIl") == True:
+          working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("agriculturalLandUseAl") is not None and _soil_claz.get("agriculturalLandUseAl") == True:
+          working_dic['agriculturalLandUseSoilVolume'] = _soil_volume + working_dic['agriculturalLandUseSoilVolume'] if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("wildlandsNaturalLandUseWln") is not None and _soil_claz.get("wildlandsNaturalLandUseWln") == True:
+          working_dic['wildlandsNaturalLandUseSoilVolume'] = _soil_volume + working_dic['wildlandsNaturalLandUseSoilVolume'] if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("wildlandsRevertedLandUseWlr") is not None and _soil_claz.get("wildlandsRevertedLandUseWlr") == True:
+          working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif _soil_claz.get("residentialLandUseLowDensityRlld") is not None and _soil_claz.get("residentialLandUseLowDensityRlld") == True:
+          working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif _soil_claz.get("residentialLandUseHighDensityRlhd") is not None and _soil_claz.get("residentialLandUseHighDensityRlhd") == True:
+          working_dic['residentialLandUseHighDensitySoilVolume'] = _soil_volume + working_dic['residentialLandUseHighDensitySoilVolume'] if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+    if _total_soil_volume != 0:
+      working_dic['totalSoilVolme'] = _total_soil_volume
 
 def create_site_relocation_email_msg(regional_district, popup_links):
   msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
@@ -546,71 +588,22 @@ def create_hv_site_email_msg(regional_district, popup_links):
 
   return msg
 
-def create_pid_and_desc(chefs_dic, data_grid_field, pid_field, desc_field):
+def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_field):
   _pid = None
   _desc = None
   if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
-    _pids = []
-    _descs= []
-    for _dg in chefs_dic[data_grid_field]:
-      if _dg.get(pid_field) is not None and _dg.get(pid_field) != '':
-        _pids.append(_dg.get(pid_field))
-        if _dg.get(desc_field) is not None and _dg.get(desc_field).strip() != '':
-          if len(chefs_dic[data_grid_field]) > 1:
-            _descs.append(_dg.get(pid_field) + ':' + _dg.get(desc_field))
-          else:
-            _descs.append(_dg.get(desc_field))
-    if len(_pids) > 1: 
-      _pid = "\"" + ",".join(_pids) + "\""
-    elif len(_pids) == 1:
-      _pid = _pids[0]
-
-    if len(_descs) > 1:
-      _desc = "\"" + ",".join(_descs) + "\""
-    elif len(_descs) == 1:
-      _desc = _descs[0]
+    if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
+      _pid = chefs_dic.get(data_grid_field)[0].get(pid_pin_field)
+      if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
+        _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
   return _pid, _desc
-
-def create_pin_and_desc(chefs_dic, data_grid_field, pin_field, desc_field):
-  _pin = None
-  _desc = None
-  if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
-    _pins = []
-    _descs= []
-    for _dg in chefs_dic[data_grid_field]:
-      if _dg.get(pin_field) is not None and _dg.get(pin_field) != '':
-        _pins.append(_dg.get(pin_field))
-        if _dg.get(desc_field) is not None and _dg.get(desc_field).strip() != '':
-          if len(chefs_dic[data_grid_field]) > 1:
-            _descs.append(_dg.get(pin_field) + ':' + _dg.get(desc_field))
-          else:
-            _descs.append(_dg.get(desc_field))
-    if len(_pins) > 1: 
-      _pin = "\"" + ",".join(_pins) + "\""
-    elif len(_pins) == 1:
-      _pin = _pins[0]
-
-    if len(_descs) > 1:
-      _desc = "\"" + ",".join(_descs) + "\""
-    elif len(_descs) == 1:
-      _desc = _descs[0]
-  return _pin, _desc
 
 def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
   _desc = None
   if chefs_dic.get(parent_field) is not None and len(chefs_dic.get(parent_field)) > 0: 
-    _descs= []
-    for _uml in chefs_dic[parent_field]:
-      if _uml.get(desc_field) is not None and _uml.get(desc_field).strip() != '':
-        _descs.append(_uml.get(desc_field))
-
-    if len(_descs) > 1:
-      _desc = "\"" + ",".join(_descs) + "\""
-    elif len(_descs) == 1:
-      _desc = _descs[0]
-
+    if chefs_dic[parent_field][0].get(desc_field) is not None and chefs_dic[parent_field][0].get(desc_field).strip() != '':
+      _desc = chefs_dic[parent_field][0].get(desc_field).strip()
   return _desc
-
 
 def map_source_site(submission):
   _src_dic = {}
@@ -669,10 +662,11 @@ def map_source_site(submission):
     _src_dic['legallyTitledSiteCity'] = submission.get("A-LegallyTitled-CitySource")
     _src_dic['legallyTitledSitePostalCode'] = submission.get("A-LegallyTitled-PostalZipCodeSource")
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
+
     #PIN, PIN, description
-    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_and_desc(submission, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescriptionSource')  #PID
+    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescriptionSource')  #PID
     if (_src_dic['PID'] is None or _src_dic['PID'].strip() == ''): #PIN
-      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pin_and_desc(submission, 'dataGrid1', 'A-UntitledPINSource', 'legalLandDescriptionUntitledSource')
+      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid1', 'A-UntitledPINSource', 'legalLandDescriptionUntitledSource')
     if ((_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
         and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
       _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumnSource', 'legalLandDescriptionUntitledMunicipalSource')
@@ -687,20 +681,8 @@ def map_source_site(submission):
     _src_dic['soilRelocationPurpose'] = submission.get("A5-PurposeOfSoilExcavationSource")
     _src_dic['soilStorageType'] = submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source")
 
-    if submission.get("dataGrid9") is not None and len(submission["dataGrid9"]) > 0: 
-      _dg9 = submission["dataGrid9"][0] # could be more than one, but take only one
-      if _dg9.get("B1-soilVolumeToBeRelocationedInCubicMetresM3Source") is not None: 
-        # Soil Volume field is double data type, but on the source site CHEFS form,
-        # it could be entried string value(e.g xxx) as there is no validation on the form
-        _soil_volume = _dg9["B1-soilVolumeToBeRelocationedInCubicMetresM3Source"]
-        if not helper.isfloat(_soil_volume):
-          _soil_volume = helper.extract_floating_from_string(_soil_volume)
-        _src_dic['soilVolume'] = _soil_volume
-      if _dg9.get("B1-soilClassificationSource") is not None and len(_dg9.get("B1-soilClassificationSource")) > 0 : 
-        for _k, _v in _dg9.get("B1-soilClassificationSource").items():
-          if _v == True:
-              _src_dic['soilQuality'] = convert_soil_quality_to_name(_k)
-              break
+    # Soil Volume
+    create_soil_volumes(submission, 'dataGrid9', 'B1-soilVolumeToBeRelocationedInCubicMetresM3Source', 'B1-soilClassificationSource', _src_dic)
 
     _src_dic['soilCharacterMethod'] = submission.get("B2-describeSoilCharacterizationMethod1")
     _src_dic['vapourExemption'] = submission.get("B3-yesOrNoVapourexemptionsource")
@@ -788,21 +770,13 @@ def map_rcv_1st_rcver(submission):
     if submission.get("C2-LegallyTitled-CityReceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-CityReceivingSite"]
     if submission.get("C2-LegallyTitled-PostalReceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalReceivingSite"]
 
-    if submission.get("dataGrid2") is not None and len(submission["dataGrid2"]) > 0: 
-      _dg2 = submission["dataGrid2"][0] # could be more than one, but take only one
-      if _dg2.get("A-LegallyTitled-PIDReceivingSite") is not None: _rcv_dic['PID'] = _dg2["A-LegallyTitled-PIDReceivingSite"]
-      if _dg2.get("legalLandDescriptionReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg2["legalLandDescriptionReceivingSite"]
-    if (submission.get("dataGrid5") is not None and len(submission["dataGrid5"]) > 0 
-        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')): 
-      _dg5 = submission["dataGrid5"][0] # could be more than one, but take only one
-      if _dg5.get("A-LegallyTitled-PID") is not None: _rcv_dic['PIN'] = _dg5["A-LegallyTitled-PID"]
-      if _dg5.get("legalLandDescriptionUntitledCrownLandReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg5["legalLandDescriptionUntitledCrownLandReceivingSite"]
-    if (submission.get("A-UntitledMunicipalLand-PIDColumn1") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn1"]) > 0 
-        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '') 
-        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')):
-      _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn1"][0]
-      if _untitled_municipal_land.get("legalLandDescription") is not None:
-        _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescription"]
+    #PIN, PIN, description
+    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid2', 'A-LegallyTitled-PIDReceivingSite', 'legalLandDescriptionReceivingSite')  #PID
+    if (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''): #PIN
+      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid5', 'A-LegallyTitled-PID', 'legalLandDescriptionUntitledCrownLandReceivingSite')
+    if ((_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
+        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
+      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumn1', 'legalLandDescription')
 
     _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn1')
     _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification1ReceivingSite')
@@ -878,21 +852,13 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("C2-LegallyTitled-City1FirstAdditionalReceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City1FirstAdditionalReceivingSite"]
     if submission.get("C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite"]
 
-    if submission.get("dataGrid3") is not None and len(submission["dataGrid3"]) > 0: 
-      _dg3 = submission["dataGrid3"][0] # could be more than one, but take only one
-      if _dg3.get("A-LegallyTitled-PIDFirstAdditionalReceivingSite") is not None: _rcv_dic['PID'] = _dg3["A-LegallyTitled-PIDFirstAdditionalReceivingSite"]
-      if _dg3.get("legalLandDescriptionFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg3["legalLandDescriptionFirstAdditionalReceivingSite"]
-    if (submission.get("dataGrid6") is not None and len(submission["dataGrid6"]) > 0 
-        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')): 
-      _dg6 = submission["dataGrid6"][0] # could be more than one, but take only one
-      if _dg6.get("A-UntitledCrown-PINFirstAdditionalReceivingSite") is not None: _rcv_dic['PIN'] = _dg6["A-UntitledCrown-PINFirstAdditionalReceivingSite"]
-      if _dg6.get("legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg6["legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite"]
-    if (submission.get("A-UntitledMunicipalLand-PIDColumn2") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn2"]) > 0 
-        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
-        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')):
-      _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn2"][0]
-      if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite") is not None:
-        _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite"]
+    #PIN, PIN, description
+    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid3', 'A-LegallyTitled-PIDFirstAdditionalReceivingSite', 'legalLandDescriptionFirstAdditionalReceivingSite')  #PID
+    if (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''): #PIN
+      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid6', 'A-UntitledCrown-PINFirstAdditionalReceivingSite', 'legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite')
+    if ((_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
+        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
+      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumn2', 'legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite')
 
     _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn2')
     _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification2FirstAdditionalReceivingSite')
@@ -969,21 +935,13 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("C2-LegallyTitled-City3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City3SecondAdditionalreceivingSite"]
     if submission.get("C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite"]
 
-    if submission.get("dataGrid4") is not None and len(submission["dataGrid4"]) > 0: 
-      _dg4 = submission["dataGrid4"][0] # could be more than one, but take only one
-      if _dg4.get("A-LegallyTitled-PIDSecondAdditionalreceivingSite") is not None: _rcv_dic['PID'] = _dg4["A-LegallyTitled-PIDSecondAdditionalreceivingSite"]
-      if _dg4.get("legalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg4["legalLandDescriptionSecondAdditionalreceivingSite"]
-    if (submission.get("dataGrid7") is not None and len(submission["dataGrid7"]) > 0 
-        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')):
-      _dg7 = submission["dataGrid7"][0] # could be more than one, but take only one
-      if _dg7.get("A-UntitledCrownLand-PINSecondAdditionalreceivingSite") is not None: _rcv_dic['PIN'] = _dg7["A-UntitledCrownLand-PINSecondAdditionalreceivingSite"]
-      if _dg7.get("UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite") is not None: _rcv_dic['legalLandDescription'] = _dg7["UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite"]
-    if (submission.get("A-UntitledMunicipalLand-PIDColumn3") is not None and len(submission["A-UntitledMunicipalLand-PIDColumn3"]) > 0 
-        and (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
-        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')):
-      _untitled_municipal_land = submission["A-UntitledMunicipalLand-PIDColumn3"][0]
-      if _untitled_municipal_land.get("legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite") is not None:
-        _rcv_dic['legalLandDescription'] = _untitled_municipal_land["legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite"]
+    #PIN, PIN, description
+    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid4', 'A-LegallyTitled-PIDSecondAdditionalreceivingSite', 'legalLandDescriptionSecondAdditionalreceivingSite')  #PID
+    if (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''): #PIN
+      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid7', 'A-UntitledCrownLand-PINSecondAdditionalreceivingSite', 'UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite')
+    if ((_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
+        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
+      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumn3', 'legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite')
 
     _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn2')        
     _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification4SecondAdditionalreceivingSite')
@@ -1054,9 +1012,9 @@ def map_hv_site(hvs):
     _hv_dic['legallyTitledSiteCity'] = hvs.get("Section3-LegallyTitled-City")
     _hv_dic['legallyTitledSitePostalCode'] = hvs.get("Section3-LegallyTitled-PostalZipCode")
     #PIN, PIN, description
-    _hv_dic['PID'], _hv_dic['legalLandDescription'] = create_pid_and_desc(hvs, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescription') #PID
+    _hv_dic['PID'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescription') #PID
     if (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == ''): #PIN
-      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = create_pin_and_desc(hvs, 'dataGrid1', 'A-LegallyTitled-PID', 'legalLandDescription')      
+      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, 'dataGrid1', 'A-LegallyTitled-PID', 'legalLandDescription')      
     if ((_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
         and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
       _hv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(hvs, 'A-UntitledMunicipalLand-PIDColumn', 'legalLandDescription')
@@ -1105,8 +1063,160 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
           else:
             reg_dist_dic[_rd_key[0]] = [_dic_copy]
 
+# iterate through the submissions and send an email
+# only send emails for sites that are new (don't resend for old sites)
+def send_email_subscribers(today):
+  notify_soil_reloc_subscriber_dic = {}
+  notify_hvs_subscriber_dic = {}
+  unsubscribers_dic = {}
+
+  for _subscriber in subscribersJson:
+    #print(_subscriber)
+    _subscriber_email = None
+    _subscriber_regional_district = []
+    _unsubscribe = False
+    _notify_hvs = None
+    _notify_soil_reloc = None
+    _subscription_created_at = None
+    _subscription_confirm_id = None
+
+    if _subscriber.get("emailAddress") is not None : _subscriber_email = _subscriber["emailAddress"]
+    if _subscriber.get("regionalDistrict") is not None : _subscriber_regional_district = _subscriber["regionalDistrict"] 
+    if _subscriber.get("unsubscribe") is not None :
+      if (_subscriber["unsubscribe"]).get("unsubscribe") is not None :
+        if helper.is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
+            _unsubscribe = _subscriber["unsubscribe"]["unsubscribe"]
+
+    if _subscriber.get("notificationSelection") is not None : 
+      _notice_selection = _subscriber["notificationSelection"]
+      if _notice_selection.get('notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict') is not None:
+        if helper.is_boolean(_notice_selection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
+          _notify_hvs = _notice_selection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']
+      if _notice_selection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
+        if helper.is_boolean(_notice_selection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
+          _notify_soil_reloc = _notice_selection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
+
+    _subscription_created_at = helper.get_create_date(_subscriber)
+    _subscription_confirm_id = helper.get_confirm_id(_subscriber)  
+
+    if (_subscriber_email is not None and _subscriber_email.strip() != '' and
+        _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and
+        _unsubscribe == False and 
+        (
+          _notify_hvs == True or
+          _notify_soil_reloc == True
+        )):
+
+      # Notification of soil relocation in selected Regional District(s)  =========================================================
+      if _notify_soil_reloc == True:
+        for _srd in _subscriber_regional_district:
+
+          # finding if subscriber's regional district in receiving site registration
+          _rcv_sites_in_rd = rcvRegDistDic.get(_srd)
+
+          if _rcv_sites_in_rd is not None:
+            for _receiving_site_dic in _rcv_sites_in_rd:
+
+              #print('today:',today,',created at:',_receivingSiteDic['createAt'],'confirm Id:',_receivingSiteDic['confirmationId'])
+              # comparing the submission create date against the current script runtime. 
+              _diff = helper.get_difference_datetimes_in_hour(today, _receiving_site_dic['createAt'])
+              if (_diff is not None and _diff <= 24):  #within the last 24 hours.
+                _rcv_popup_links = create_popup_links(_rcv_sites_in_rd, 'SR')
+                _reg_dis_name = convert_regional_district_to_name(_srd)
+                _email_msg = create_site_relocation_email_msg(_reg_dis_name, _rcv_popup_links)
+
+                # create soil relocation notification substriber dictionary
+                # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
+                if (_subscriber_email,_srd) not in notify_soil_reloc_subscriber_dic:
+                  notify_soil_reloc_subscriber_dic[(_subscriber_email,_srd)] = (_email_msg, _subscription_created_at, _subscription_confirm_id)
+                  #print("notifySoilRelocSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+                else:
+                  _subscrb_created = notify_soil_reloc_subscriber_dic.get((_subscriber_email,_srd))[1]
+                  if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                    notify_soil_reloc_subscriber_dic.update({(_subscriber_email,_srd):(_email_msg, _subscription_created_at, _subscription_confirm_id)})
+                    #print("notifySoilRelocSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                    #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+
+      # Notification of high volume site registration in selected Regional District(s) ============================================
+      if _notify_hvs == True:
+        for _srd in _subscriber_regional_district:
+
+          # finding if subscriber's regional district in high volume receiving site registration
+          _hv_sites_in_rd = hvRegDistDic.get(_srd)
+
+          if _hv_sites_in_rd is not None:
+            for _hv_site_dic in _hv_sites_in_rd:
+
+              #print('today:',today,',created at:',_hvSiteDic['createAt'],'confirm Id:',_hvSiteDic['confirmationId'])
+              # comparing the submission create date against the current script runtime.             
+              _diff = helper.get_difference_datetimes_in_hour(today, _hv_site_dic['createAt'])
+              if (_diff is not None and _diff <= 24):  #within the last 24 hours.
+                _hv_popup_links = create_popup_links(_hv_sites_in_rd, 'HV')
+                _hv_reg_dis = convert_regional_district_to_name(_srd)
+                _hv_email_msg = create_hv_site_email_msg(_hv_reg_dis, _hv_popup_links)
+
+                # create high volume relocation notification substriber dictionary
+                # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
+                if (_subscriber_email,_srd) not in notify_hvs_subscriber_dic:
+                  notify_hvs_subscriber_dic[(_subscriber_email,_srd)] = (_hv_email_msg, _subscription_created_at, _subscription_confirm_id)
+                  #print("notifyHVSSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+                else:
+                  _subscrb_created = notify_hvs_subscriber_dic.get((_subscriber_email,_srd))[1]
+                  if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                    notify_hvs_subscriber_dic.update({(_subscriber_email,_srd):(_hv_email_msg, _subscription_created_at, _subscription_confirm_id)})
+                    #print("notifyHVSSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                    #    + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+
+    elif (_subscriber_email is not None and _subscriber_email.strip() != '' and
+          _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and  
+          _unsubscribe == True):
+      # create unSubscriber list
+      for _srd in _subscriber_regional_district:
+        if (_subscriber_email,_srd) not in unsubscribers_dic:
+          unsubscribers_dic[(_subscriber_email,_srd)] = _subscription_created_at
+          #print("unSubscribersDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+          #      + str(_subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
+        else:  
+          _unsubscrb_created = unsubscribers_dic.get((_subscriber_email,_srd))
+          if (_subscription_created_at is not None and _subscription_created_at > _unsubscrb_created):
+            unsubscribers_dic.update({(_subscriber_email,_srd):_subscription_created_at})
+            #print("unSubscribersDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+            #    + str( _subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
+
+  print('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
+  # Processing of data subscribed and unsubscribed by the same email in the same region -
+  # This is processed based on the most recent submission date.
+  for (_k1_subscriber_email,_k2_srd), _unsubscribe_create_at in unsubscribers_dic.items():
+    if (_k1_subscriber_email,_k2_srd) in notify_soil_reloc_subscriber_dic:
+      _subscribe_create_at = notify_soil_reloc_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[1]
+      _subscribe_confirm_id = notify_soil_reloc_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[2]    
+      if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
+        notify_soil_reloc_subscriber_dic.pop(_k1_subscriber_email,_k2_srd)
+        #print("remove subscription from notifySoilRelocSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
+        #      + _k2_srd + ', confirm id:' +str( _subscription_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
+
+    if (_k1_subscriber_email,_k2_srd) in notify_hvs_subscriber_dic:
+      _subscribe_create_at = notify_hvs_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[1]
+      _subscribe_confirm_id = notify_hvs_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[2]        
+      if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
+        notify_hvs_subscriber_dic.pop((_k1_subscriber_email,_k2_srd))
+        #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
+        #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
 
 
+  print('Sending Notification of soil relocation in selected Regional District(s) ...')
+  for _k, _v in notify_soil_reloc_subscriber_dic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
+    _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+    if _ches_response is not None and _ches_response.status_code is not None:
+      print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
+
+  print('Sending Notification of high volume site registration in selected Regional District(s) ...')
+  for _k, _v in notify_hvs_subscriber_dic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
+    _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
+    if _ches_response is not None and _ches_response.status_code is not None:
+      print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
 
 
@@ -1118,18 +1228,6 @@ CHEFS_MAIL_FORM_ID = os.getenv('CHEFS_MAIL_FORM_ID')
 CHEFS_MAIL_API_KEY = os.getenv('CHEFS_MAIL_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
-
-"""
-print(f"Value of env variable key='CHEFS_SOILS_FORM_ID': {CHEFS_SOILS_FORM_ID}")
-print(f"Value of env variable key='CHEFS_SOILS_API_KEY': {CHEFS_SOILS_API_KEY}")
-print(f"Value of env variable key='CHEFS_HV_FORM_ID': {CHEFS_HV_FORM_ID}")
-print(f"Value of env variable key='CHEFS_HV_API_KEY': {CHEFS_HV_API_KEY}")
-print(f"Value of env variable key='CHEFS_MAIL_FORM_ID': {CHEFS_MAIL_FORM_ID}")
-print(f"Value of env variable key='CHEFS_MAIL_API_KEY': {CHEFS_MAIL_API_KEY}")
-
-print(f"Value of env variable key='MAPHUB_USER': {MAPHUB_USER}")
-print(f"Value of env variable key='MAPHUB_PASS': {MAPHUB_PASS}")
-"""
 
 
 # Fetch all submissions from chefs API
@@ -1273,170 +1371,9 @@ else:
     print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
 
 
-
-
 print('Sending subscriber emails...')
-# iterate through the submissions and send an email
-# Only send emails for sites that are new (don't resend for old sites)
-# For new/old submissions, you'll have to compare the submission create date against the current script runtime. 
-# This may require finding a way to store a "last run time" for the script, or running the script once per day, 
-# and only sending submissions for where a create-date is within the last 24 hours.
-
-EMAIL_SUBJECT_SOIL_RELOCATION = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
-EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
-
 today = datetime.datetime.now(tz=pytz.timezone('Canada/Pacific'))
-# print(today)
-
-notifySoilRelocSubscriberDic = {}
-notifyHVSSubscriberDic = {}
-unSubscribersDic = {}
-
-for _subscriber in subscribersJson:
-  #print(_subscriber)
-  _subscriberEmail = None
-  _subscriberRegionalDistrict = [] # could be more than one
-  _unsubscribe = False
-  _notifyHVS = None
-  _notifySoilReloc = None
-  _subscription_created_at = None
-  _subscription_confirm_id = None
-
-  if _subscriber.get("emailAddress") is not None : _subscriberEmail = _subscriber["emailAddress"]
-  if _subscriber.get("regionalDistrict") is not None : _subscriberRegionalDistrict = _subscriber["regionalDistrict"] 
-  if _subscriber.get("unsubscribe") is not None :
-    if (_subscriber["unsubscribe"]).get("unsubscribe") is not None :
-       if helper.is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
-          _unsubscribe = _subscriber["unsubscribe"]["unsubscribe"]
-
-  if _subscriber.get("notificationSelection") is not None : 
-    _noticeSelection = _subscriber["notificationSelection"]
-    if _noticeSelection.get('notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict') is not None:
-      if helper.is_boolean(_noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
-        _notifyHVS = _noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']
-    if _noticeSelection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
-      if helper.is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
-        _notifySoilReloc = _noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
-
-  _subscription_created_at = helper.get_create_date(_subscriber)
-  _subscription_confirm_id = helper.get_confirm_id(_subscriber)  
-
-  if (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
-      _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and
-      _unsubscribe == False and 
-      (
-        _notifyHVS == True or
-        _notifySoilReloc == True
-      )):
-
-    # Notification of soil relocation in selected Regional District(s)  =========================================================
-    if _notifySoilReloc == True:
-      for _srd in _subscriberRegionalDistrict:
-
-        # finding if subscriber's regional district in receiving site registration
-        _rcvSitesInRD = rcvRegDistDic.get(_srd)
-
-        if _rcvSitesInRD is not None:
-          for _receivingSiteDic in _rcvSitesInRD:
-
-            #print('today:',today,',created at:',_receivingSiteDic['createAt'],'confirm Id:',_receivingSiteDic['confirmationId'])
-            _diff = helper.get_difference_datetimes_in_hour(today, _receivingSiteDic['createAt'])
-            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
-              _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
-              _regDisName = convert_regional_district_to_name(_srd)
-              _emailMsg = create_site_relocation_email_msg(_regDisName, _rcvPopupLinks)
-
-              # create soil relocation notification substriber dictionary
-              # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
-              if (_subscriberEmail,_srd) not in notifySoilRelocSubscriberDic:
-                notifySoilRelocSubscriberDic[(_subscriberEmail,_srd)] = (_emailMsg, _subscription_created_at, _subscription_confirm_id)
-                #print("notifySoilRelocSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-              else:
-                _subscrb_created = notifySoilRelocSubscriberDic.get((_subscriberEmail,_srd))[1]
-                if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
-                  notifySoilRelocSubscriberDic.update({(_subscriberEmail,_srd):(_emailMsg, _subscription_created_at, _subscription_confirm_id)})
-                  #print("notifySoilRelocSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-
-    # Notification of high volume site registration in selected Regional District(s) ============================================
-    if _notifyHVS == True:
-      for _srd in _subscriberRegionalDistrict:
-
-        # finding if subscriber's regional district in high volume receiving site registration
-        _hvSitesInRD = hvRegDistDic.get(_srd)
-
-        if _hvSitesInRD is not None:
-          for _hvSiteDic in _hvSitesInRD:
-
-            #print('today:',today,',created at:',_hvSiteDic['createAt'],'confirm Id:',_hvSiteDic['confirmationId'])
-            _diff = helper.get_difference_datetimes_in_hour(today, _hvSiteDic['createAt'])
-            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
-              _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
-              _hvRegDis = convert_regional_district_to_name(_srd)
-              _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
-
-              # create high volume relocation notification substriber dictionary
-              # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
-              if (_subscriberEmail,_srd) not in notifyHVSSubscriberDic:
-                notifyHVSSubscriberDic[(_subscriberEmail,_srd)] = (_hvEmailMsg, _subscription_created_at, _subscription_confirm_id)
-                #print("notifyHVSSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-              else:
-                _subscrb_created = notifyHVSSubscriberDic.get((_subscriberEmail,_srd))[1]
-                if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
-                  notifyHVSSubscriberDic.update({(_subscriberEmail,_srd):(_hvEmailMsg, _subscription_created_at, _subscription_confirm_id)})
-                  #print("notifyHVSSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                  #    + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-
-  elif (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
-        _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and  
-        _unsubscribe == True):
-    # create unSubscriber list
-    for _srd in _subscriberRegionalDistrict:
-      if (_subscriberEmail,_srd) not in unSubscribersDic:
-        unSubscribersDic[(_subscriberEmail,_srd)] = _subscription_created_at
-        #print("unSubscribersDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-        #      + str(_subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
-      else:  
-        _unsubscrb_created = unSubscribersDic.get((_subscriberEmail,_srd))
-        if (_subscription_created_at is not None and _subscription_created_at > _unsubscrb_created):
-          unSubscribersDic.update({(_subscriberEmail,_srd):_subscription_created_at})
-          #print("unSubscribersDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-          #    + str( _subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
-
-print('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
-# Processing of data subscribed and unsubscribed by the same email in the same region -
-# This is processed based on the most recent submission date.
-for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.items():
-  if (_k1_subscriberEmail,_k2_srd) in notifySoilRelocSubscriberDic:
-    _subscribe_create_at = notifySoilRelocSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[1]
-    _subscribe_confirm_id = notifySoilRelocSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[2]    
-    if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
-      notifySoilRelocSubscriberDic.pop(_k1_subscriberEmail,_k2_srd)
-      #print("remove subscription from notifySoilRelocSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
-      #      + _k2_srd + ', confirm id:' +str( _subscription_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
-
-  if (_k1_subscriberEmail,_k2_srd) in notifyHVSSubscriberDic:
-    _subscribe_create_at = notifyHVSSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[1]
-    _subscribe_confirm_id = notifyHVSSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[2]        
-    if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
-      notifyHVSSubscriberDic.pop((_k1_subscriberEmail,_k2_srd))
-      #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
-      #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
-
-
-print('Sending Notification of soil relocation in selected Regional District(s) ...')
-for _k, _v in notifySoilRelocSubscriberDic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
-  _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
-  if _ches_response is not None and _ches_response.status_code is not None:
-    print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
-
-print('Sending Notification of high volume site registration in selected Regional District(s) ...')
-for _k, _v in notifyHVSSubscriberDic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
-  _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
-  if _ches_response is not None and _ches_response.status_code is not None:
-    print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
+send_email_subscribers(today)
 
 
 print('Completed Soils data publishing')

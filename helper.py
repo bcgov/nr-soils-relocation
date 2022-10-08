@@ -170,3 +170,6 @@ def extract_floating_from_string(value):
         print('ValueError Raised:', ve)
 
     return _result
+def str_to_double(value):
+  if type(value) == str: return float(value)
+  else: return value
