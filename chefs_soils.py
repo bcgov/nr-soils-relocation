@@ -26,6 +26,8 @@ RCV_LAYER_ID = config['AGOL_ITEMS']['RCV_LAYER_ID']
 HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
 HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
 WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
+EMAIL_SUBJECT_SOIL_RELOCATION = config['EMAIL_TITLE']['EMAIL_SUBJECT_SOIL_RELOCATION']
+EMAIL_SUBJECT_HIGH_VOLUME = config['EMAIL_TITLE']['EMAIL_SUBJECT_HIGH_VOLUME']
 
 
 REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
@@ -1061,8 +1063,160 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
           else:
             reg_dist_dic[_rd_key[0]] = [_dic_copy]
 
+# iterate through the submissions and send an email
+# only send emails for sites that are new (don't resend for old sites)
+def send_email_subscribers(today):
+  notify_soil_reloc_subscriber_dic = {}
+  notify_hvs_subscriber_dic = {}
+  unsubscribers_dic = {}
+
+  for _subscriber in subscribersJson:
+    #print(_subscriber)
+    _subscriber_email = None
+    _subscriber_regional_district = []
+    _unsubscribe = False
+    _notify_hvs = None
+    _notify_soil_reloc = None
+    _subscription_created_at = None
+    _subscription_confirm_id = None
+
+    if _subscriber.get("emailAddress") is not None : _subscriber_email = _subscriber["emailAddress"]
+    if _subscriber.get("regionalDistrict") is not None : _subscriber_regional_district = _subscriber["regionalDistrict"] 
+    if _subscriber.get("unsubscribe") is not None :
+      if (_subscriber["unsubscribe"]).get("unsubscribe") is not None :
+        if helper.is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
+            _unsubscribe = _subscriber["unsubscribe"]["unsubscribe"]
+
+    if _subscriber.get("notificationSelection") is not None : 
+      _notice_selection = _subscriber["notificationSelection"]
+      if _notice_selection.get('notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict') is not None:
+        if helper.is_boolean(_notice_selection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
+          _notify_hvs = _notice_selection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']
+      if _notice_selection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
+        if helper.is_boolean(_notice_selection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
+          _notify_soil_reloc = _notice_selection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
+
+    _subscription_created_at = helper.get_create_date(_subscriber)
+    _subscription_confirm_id = helper.get_confirm_id(_subscriber)  
+
+    if (_subscriber_email is not None and _subscriber_email.strip() != '' and
+        _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and
+        _unsubscribe == False and 
+        (
+          _notify_hvs == True or
+          _notify_soil_reloc == True
+        )):
+
+      # Notification of soil relocation in selected Regional District(s)  =========================================================
+      if _notify_soil_reloc == True:
+        for _srd in _subscriber_regional_district:
+
+          # finding if subscriber's regional district in receiving site registration
+          _rcv_sites_in_rd = rcvRegDistDic.get(_srd)
+
+          if _rcv_sites_in_rd is not None:
+            for _receiving_site_dic in _rcv_sites_in_rd:
+
+              #print('today:',today,',created at:',_receivingSiteDic['createAt'],'confirm Id:',_receivingSiteDic['confirmationId'])
+              # comparing the submission create date against the current script runtime. 
+              _diff = helper.get_difference_datetimes_in_hour(today, _receiving_site_dic['createAt'])
+              if (_diff is not None and _diff <= 24):  #within the last 24 hours.
+                _rcv_popup_links = create_popup_links(_rcv_sites_in_rd, 'SR')
+                _reg_dis_name = convert_regional_district_to_name(_srd)
+                _email_msg = create_site_relocation_email_msg(_reg_dis_name, _rcv_popup_links)
+
+                # create soil relocation notification substriber dictionary
+                # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
+                if (_subscriber_email,_srd) not in notify_soil_reloc_subscriber_dic:
+                  notify_soil_reloc_subscriber_dic[(_subscriber_email,_srd)] = (_email_msg, _subscription_created_at, _subscription_confirm_id)
+                  #print("notifySoilRelocSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+                else:
+                  _subscrb_created = notify_soil_reloc_subscriber_dic.get((_subscriber_email,_srd))[1]
+                  if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                    notify_soil_reloc_subscriber_dic.update({(_subscriber_email,_srd):(_email_msg, _subscription_created_at, _subscription_confirm_id)})
+                    #print("notifySoilRelocSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                    #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+
+      # Notification of high volume site registration in selected Regional District(s) ============================================
+      if _notify_hvs == True:
+        for _srd in _subscriber_regional_district:
+
+          # finding if subscriber's regional district in high volume receiving site registration
+          _hv_sites_in_rd = hvRegDistDic.get(_srd)
+
+          if _hv_sites_in_rd is not None:
+            for _hv_site_dic in _hv_sites_in_rd:
+
+              #print('today:',today,',created at:',_hvSiteDic['createAt'],'confirm Id:',_hvSiteDic['confirmationId'])
+              # comparing the submission create date against the current script runtime.             
+              _diff = helper.get_difference_datetimes_in_hour(today, _hv_site_dic['createAt'])
+              if (_diff is not None and _diff <= 24):  #within the last 24 hours.
+                _hv_popup_links = create_popup_links(_hv_sites_in_rd, 'HV')
+                _hv_reg_dis = convert_regional_district_to_name(_srd)
+                _hv_email_msg = create_hv_site_email_msg(_hv_reg_dis, _hv_popup_links)
+
+                # create high volume relocation notification substriber dictionary
+                # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
+                if (_subscriber_email,_srd) not in notify_hvs_subscriber_dic:
+                  notify_hvs_subscriber_dic[(_subscriber_email,_srd)] = (_hv_email_msg, _subscription_created_at, _subscription_confirm_id)
+                  #print("notifyHVSSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+                else:
+                  _subscrb_created = notify_hvs_subscriber_dic.get((_subscriber_email,_srd))[1]
+                  if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                    notify_hvs_subscriber_dic.update({(_subscriber_email,_srd):(_hv_email_msg, _subscription_created_at, _subscription_confirm_id)})
+                    #print("notifyHVSSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+                    #    + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
+
+    elif (_subscriber_email is not None and _subscriber_email.strip() != '' and
+          _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and  
+          _unsubscribe == True):
+      # create unSubscriber list
+      for _srd in _subscriber_regional_district:
+        if (_subscriber_email,_srd) not in unsubscribers_dic:
+          unsubscribers_dic[(_subscriber_email,_srd)] = _subscription_created_at
+          #print("unSubscribersDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+          #      + str(_subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
+        else:  
+          _unsubscrb_created = unsubscribers_dic.get((_subscriber_email,_srd))
+          if (_subscription_created_at is not None and _subscription_created_at > _unsubscrb_created):
+            unsubscribers_dic.update({(_subscriber_email,_srd):_subscription_created_at})
+            #print("unSubscribersDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
+            #    + str( _subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
+
+  print('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
+  # Processing of data subscribed and unsubscribed by the same email in the same region -
+  # This is processed based on the most recent submission date.
+  for (_k1_subscriber_email,_k2_srd), _unsubscribe_create_at in unsubscribers_dic.items():
+    if (_k1_subscriber_email,_k2_srd) in notify_soil_reloc_subscriber_dic:
+      _subscribe_create_at = notify_soil_reloc_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[1]
+      _subscribe_confirm_id = notify_soil_reloc_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[2]    
+      if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
+        notify_soil_reloc_subscriber_dic.pop(_k1_subscriber_email,_k2_srd)
+        #print("remove subscription from notifySoilRelocSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
+        #      + _k2_srd + ', confirm id:' +str( _subscription_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
+
+    if (_k1_subscriber_email,_k2_srd) in notify_hvs_subscriber_dic:
+      _subscribe_create_at = notify_hvs_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[1]
+      _subscribe_confirm_id = notify_hvs_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[2]        
+      if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
+        notify_hvs_subscriber_dic.pop((_k1_subscriber_email,_k2_srd))
+        #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
+        #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
 
 
+  print('Sending Notification of soil relocation in selected Regional District(s) ...')
+  for _k, _v in notify_soil_reloc_subscriber_dic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
+    _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+    if _ches_response is not None and _ches_response.status_code is not None:
+      print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
+
+  print('Sending Notification of high volume site registration in selected Regional District(s) ...')
+  for _k, _v in notify_hvs_subscriber_dic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
+    _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
+    if _ches_response is not None and _ches_response.status_code is not None:
+      print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
 
 
@@ -1217,168 +1371,9 @@ else:
     print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
 
 
-
 print('Sending subscriber emails...')
-# iterate through the submissions and send an email
-# Only send emails for sites that are new (don't resend for old sites)
-
-EMAIL_SUBJECT_SOIL_RELOCATION = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
-EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
-
 today = datetime.datetime.now(tz=pytz.timezone('Canada/Pacific'))
-# print(today)
-
-notifySoilRelocSubscriberDic = {}
-notifyHVSSubscriberDic = {}
-unSubscribersDic = {}
-
-for _subscriber in subscribersJson:
-  #print(_subscriber)
-  _subscriberEmail = None
-  _subscriberRegionalDistrict = [] # could be more than one
-  _unsubscribe = False
-  _notifyHVS = None
-  _notifySoilReloc = None
-  _subscription_created_at = None
-  _subscription_confirm_id = None
-
-  if _subscriber.get("emailAddress") is not None : _subscriberEmail = _subscriber["emailAddress"]
-  if _subscriber.get("regionalDistrict") is not None : _subscriberRegionalDistrict = _subscriber["regionalDistrict"] 
-  if _subscriber.get("unsubscribe") is not None :
-    if (_subscriber["unsubscribe"]).get("unsubscribe") is not None :
-       if helper.is_boolean(_subscriber["unsubscribe"]["unsubscribe"]):
-          _unsubscribe = _subscriber["unsubscribe"]["unsubscribe"]
-
-  if _subscriber.get("notificationSelection") is not None : 
-    _noticeSelection = _subscriber["notificationSelection"]
-    if _noticeSelection.get('notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict') is not None:
-      if helper.is_boolean(_noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']):
-        _notifyHVS = _noticeSelection['notifyOnHighVolumeSiteRegistrationsInSelectedRegionalDistrict']
-    if _noticeSelection.get('notifyOnSoilRelocationsInSelectedRegionalDistrict') is not None:
-      if helper.is_boolean(_noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
-        _notifySoilReloc = _noticeSelection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
-
-  _subscription_created_at = helper.get_create_date(_subscriber)
-  _subscription_confirm_id = helper.get_confirm_id(_subscriber)  
-
-  if (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
-      _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and
-      _unsubscribe == False and 
-      (
-        _notifyHVS == True or
-        _notifySoilReloc == True
-      )):
-
-    # Notification of soil relocation in selected Regional District(s)  =========================================================
-    if _notifySoilReloc == True:
-      for _srd in _subscriberRegionalDistrict:
-
-        # finding if subscriber's regional district in receiving site registration
-        _rcvSitesInRD = rcvRegDistDic.get(_srd)
-
-        if _rcvSitesInRD is not None:
-          for _receivingSiteDic in _rcvSitesInRD:
-
-            #print('today:',today,',created at:',_receivingSiteDic['createAt'],'confirm Id:',_receivingSiteDic['confirmationId'])
-            # comparing the submission create date against the current script runtime. 
-            _diff = helper.get_difference_datetimes_in_hour(today, _receivingSiteDic['createAt'])
-            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
-              _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
-              _regDisName = convert_regional_district_to_name(_srd)
-              _emailMsg = create_site_relocation_email_msg(_regDisName, _rcvPopupLinks)
-
-              # create soil relocation notification substriber dictionary
-              # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
-              if (_subscriberEmail,_srd) not in notifySoilRelocSubscriberDic:
-                notifySoilRelocSubscriberDic[(_subscriberEmail,_srd)] = (_emailMsg, _subscription_created_at, _subscription_confirm_id)
-                #print("notifySoilRelocSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-              else:
-                _subscrb_created = notifySoilRelocSubscriberDic.get((_subscriberEmail,_srd))[1]
-                if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
-                  notifySoilRelocSubscriberDic.update({(_subscriberEmail,_srd):(_emailMsg, _subscription_created_at, _subscription_confirm_id)})
-                  #print("notifySoilRelocSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                  #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-
-    # Notification of high volume site registration in selected Regional District(s) ============================================
-    if _notifyHVS == True:
-      for _srd in _subscriberRegionalDistrict:
-
-        # finding if subscriber's regional district in high volume receiving site registration
-        _hvSitesInRD = hvRegDistDic.get(_srd)
-
-        if _hvSitesInRD is not None:
-          for _hvSiteDic in _hvSitesInRD:
-
-            #print('today:',today,',created at:',_hvSiteDic['createAt'],'confirm Id:',_hvSiteDic['confirmationId'])
-            # comparing the submission create date against the current script runtime.             
-            _diff = helper.get_difference_datetimes_in_hour(today, _hvSiteDic['createAt'])
-            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
-              _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
-              _hvRegDis = convert_regional_district_to_name(_srd)
-              _hvEmailMsg = create_hv_site_email_msg(_hvRegDis, _hvPopupLinks)
-
-              # create high volume relocation notification substriber dictionary
-              # key-Tuple of email address, RegionalDistrict Tuple, value=Tuple of email maessage, subscription create date, subscription confirm id
-              if (_subscriberEmail,_srd) not in notifyHVSSubscriberDic:
-                notifyHVSSubscriberDic[(_subscriberEmail,_srd)] = (_hvEmailMsg, _subscription_created_at, _subscription_confirm_id)
-                #print("notifyHVSSubscriberDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-              else:
-                _subscrb_created = notifyHVSSubscriberDic.get((_subscriberEmail,_srd))[1]
-                if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
-                  notifyHVSSubscriberDic.update({(_subscriberEmail,_srd):(_hvEmailMsg, _subscription_created_at, _subscription_confirm_id)})
-                  #print("notifyHVSSubscriberDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-                  #    + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
-
-  elif (_subscriberEmail is not None and _subscriberEmail.strip() != '' and
-        _subscriberRegionalDistrict is not None and len(_subscriberRegionalDistrict) > 0 and  
-        _unsubscribe == True):
-    # create unSubscriber list
-    for _srd in _subscriberRegionalDistrict:
-      if (_subscriberEmail,_srd) not in unSubscribersDic:
-        unSubscribersDic[(_subscriberEmail,_srd)] = _subscription_created_at
-        #print("unSubscribersDic added email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-        #      + str(_subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
-      else:  
-        _unsubscrb_created = unSubscribersDic.get((_subscriberEmail,_srd))
-        if (_subscription_created_at is not None and _subscription_created_at > _unsubscrb_created):
-          unSubscribersDic.update({(_subscriberEmail,_srd):_subscription_created_at})
-          #print("unSubscribersDic updated email:" + _subscriberEmail+ ', region:' + _srd + ', confirm id:' 
-          #    + str( _subscription_confirm_id) + ', unsubscription created at:' + str(_subscription_created_at))
-
-print('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
-# Processing of data subscribed and unsubscribed by the same email in the same region -
-# This is processed based on the most recent submission date.
-for (_k1_subscriberEmail,_k2_srd), _unsubscribe_create_at in unSubscribersDic.items():
-  if (_k1_subscriberEmail,_k2_srd) in notifySoilRelocSubscriberDic:
-    _subscribe_create_at = notifySoilRelocSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[1]
-    _subscribe_confirm_id = notifySoilRelocSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[2]    
-    if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
-      notifySoilRelocSubscriberDic.pop(_k1_subscriberEmail,_k2_srd)
-      #print("remove subscription from notifySoilRelocSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
-      #      + _k2_srd + ', confirm id:' +str( _subscription_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
-
-  if (_k1_subscriberEmail,_k2_srd) in notifyHVSSubscriberDic:
-    _subscribe_create_at = notifyHVSSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[1]
-    _subscribe_confirm_id = notifyHVSSubscriberDic.get((_k1_subscriberEmail,_k2_srd))[2]        
-    if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
-      notifyHVSSubscriberDic.pop((_k1_subscriberEmail,_k2_srd))
-      #print("remove subscription from notifyHVSSubscriberDic - email:" + _k1_subscriberEmail+ ', region:' 
-      #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ', unsubscription created at:' + str(_unsubscribe_create_at))
-
-
-print('Sending Notification of soil relocation in selected Regional District(s) ...')
-for _k, _v in notifySoilRelocSubscriberDic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
-  _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
-  if _ches_response is not None and _ches_response.status_code is not None:
-    print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
-
-print('Sending Notification of high volume site registration in selected Regional District(s) ...')
-for _k, _v in notifyHVSSubscriberDic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
-  _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
-  if _ches_response is not None and _ches_response.status_code is not None:
-    print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
+send_email_subscribers(today)
 
 
 print('Completed Soils data publishing')
