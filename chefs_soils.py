@@ -219,8 +219,15 @@ SOURCE_SITE_HEADERS = [
   "highVolumeSite",
   "soilRelocationPurpose",
   "soilStorageType",
-  "soilVolume",
-  "soilQuality",
+  "industrialLandUseSoilVolume",
+  "commercialLandUseSoilVolume",
+  "residentialLandUseHighDensitySoilVolume",
+  "residentialLandUseLowDensitySoilVolume",
+  "urbanParkLandUseSoilVolume",
+  "agriculturalLandUseSoilVolume",
+  "wildlandsNaturalLandUseSoilVolume",
+  "wildlandsRevertedLandUseSoilVolume",
+  "totalSoilVolme",
   "soilCharacterMethod",
   "vapourExemption",
   "vapourExemptionDesc",
@@ -480,6 +487,45 @@ def create_land_ownership(cefs_dic, field):
     _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
   return _land_ownership
 
+def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_dic):
+  _total_soil_volume = 0
+  _soil_volume = 0
+  if chefs_dic.get(data_grid) is not None and len(chefs_dic[data_grid]) > 0: 
+    for _dg9 in chefs_dic[data_grid]:
+      if (_dg9.get(volume_field) is not None 
+          and _dg9.get(claz_field) is not None and len(_dg9.get(claz_field)) > 0): 
+        _soil_volume = _dg9[volume_field]
+        if not helper.isfloat(_soil_volume):
+          _soil_volume = helper.extract_floating_from_string(_soil_volume)
+        _soil_volume = helper.str_to_double(_soil_volume)
+        _soil_claz = _dg9.get("B1-soilClassificationSource")
+        if _soil_claz.get("urbanParkLandUsePl") is not None and _soil_claz.get("urbanParkLandUsePl") == True:
+          working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif _soil_claz.get("commercialLandUseCl") is not None and _soil_claz.get("commercialLandUseCl") == True:
+          working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("industrialLandUseIl") is not None and _soil_claz.get("industrialLandUseIl") == True:
+          working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("agriculturalLandUseAl") is not None and _soil_claz.get("agriculturalLandUseAl") == True:
+          working_dic['agriculturalLandUseSoilVolume'] = _soil_volume + working_dic['agriculturalLandUseSoilVolume'] if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("wildlandsNaturalLandUseWln") is not None and _soil_claz.get("wildlandsNaturalLandUseWln") == True:
+          working_dic['wildlandsNaturalLandUseSoilVolume'] = _soil_volume + working_dic['wildlandsNaturalLandUseSoilVolume'] if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif _soil_claz.get("wildlandsRevertedLandUseWlr") is not None and _soil_claz.get("wildlandsRevertedLandUseWlr") == True:
+          working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif _soil_claz.get("residentialLandUseLowDensityRlld") is not None and _soil_claz.get("residentialLandUseLowDensityRlld") == True:
+          working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif _soil_claz.get("residentialLandUseHighDensityRlhd") is not None and _soil_claz.get("residentialLandUseHighDensityRlhd") == True:
+          working_dic['residentialLandUseHighDensitySoilVolume'] = _soil_volume + working_dic['residentialLandUseHighDensitySoilVolume'] if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+    if _total_soil_volume != 0:
+      working_dic['totalSoilVolme'] = _total_soil_volume
+
 def create_site_relocation_email_msg(regional_district, popup_links):
   msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
   msg += '<p>This email is to notify you that soil is being relocated in the Regional District: <span style=font-weight:bold;color:red;>' 
@@ -614,6 +660,7 @@ def map_source_site(submission):
     _src_dic['legallyTitledSiteCity'] = submission.get("A-LegallyTitled-CitySource")
     _src_dic['legallyTitledSitePostalCode'] = submission.get("A-LegallyTitled-PostalZipCodeSource")
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumnSource')
+
     #PIN, PIN, description
     _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescriptionSource')  #PID
     if (_src_dic['PID'] is None or _src_dic['PID'].strip() == ''): #PIN
@@ -632,20 +679,8 @@ def map_source_site(submission):
     _src_dic['soilRelocationPurpose'] = submission.get("A5-PurposeOfSoilExcavationSource")
     _src_dic['soilStorageType'] = submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source")
 
-    if submission.get("dataGrid9") is not None and len(submission["dataGrid9"]) > 0: 
-      _dg9 = submission["dataGrid9"][0] # could be more than one, but take only one
-      if _dg9.get("B1-soilVolumeToBeRelocationedInCubicMetresM3Source") is not None: 
-        # Soil Volume field is double data type, but on the source site CHEFS form,
-        # it could be entried string value(e.g xxx) as there is no validation on the form
-        _soil_volume = _dg9["B1-soilVolumeToBeRelocationedInCubicMetresM3Source"]
-        if not helper.isfloat(_soil_volume):
-          _soil_volume = helper.extract_floating_from_string(_soil_volume)
-        _src_dic['soilVolume'] = _soil_volume
-      if _dg9.get("B1-soilClassificationSource") is not None and len(_dg9.get("B1-soilClassificationSource")) > 0 : 
-        for _k, _v in _dg9.get("B1-soilClassificationSource").items():
-          if _v == True:
-              _src_dic['soilQuality'] = convert_soil_quality_to_name(_k)
-              break
+    # Soil Volume
+    create_soil_volumes(submission, 'dataGrid9', 'B1-soilVolumeToBeRelocationedInCubicMetresM3Source', 'B1-soilClassificationSource', _src_dic)
 
     _src_dic['soilCharacterMethod'] = submission.get("B2-describeSoilCharacterizationMethod1")
     _src_dic['vapourExemption'] = submission.get("B3-yesOrNoVapourexemptionsource")
