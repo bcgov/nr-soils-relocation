@@ -1218,13 +1218,9 @@ else:
 
 
 
-
 print('Sending subscriber emails...')
 # iterate through the submissions and send an email
 # Only send emails for sites that are new (don't resend for old sites)
-# For new/old submissions, you'll have to compare the submission create date against the current script runtime. 
-# This may require finding a way to store a "last run time" for the script, or running the script once per day, 
-# and only sending submissions for where a create-date is within the last 24 hours.
 
 EMAIL_SUBJECT_SOIL_RELOCATION = 'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
 EMAIL_SUBJECT_HIGH_VOLUME = 'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
@@ -1284,6 +1280,7 @@ for _subscriber in subscribersJson:
           for _receivingSiteDic in _rcvSitesInRD:
 
             #print('today:',today,',created at:',_receivingSiteDic['createAt'],'confirm Id:',_receivingSiteDic['confirmationId'])
+            # comparing the submission create date against the current script runtime. 
             _diff = helper.get_difference_datetimes_in_hour(today, _receivingSiteDic['createAt'])
             if (_diff is not None and _diff <= 24):  #within the last 24 hours.
               _rcvPopupLinks = create_popup_links(_rcvSitesInRD, 'SR')
@@ -1314,6 +1311,7 @@ for _subscriber in subscribersJson:
           for _hvSiteDic in _hvSitesInRD:
 
             #print('today:',today,',created at:',_hvSiteDic['createAt'],'confirm Id:',_hvSiteDic['confirmationId'])
+            # comparing the submission create date against the current script runtime.             
             _diff = helper.get_difference_datetimes_in_hour(today, _hvSiteDic['createAt'])
             if (_diff is not None and _diff <= 24):  #within the last 24 hours.
               _hvPopupLinks = create_popup_links(_hvSitesInRD, 'HV')
