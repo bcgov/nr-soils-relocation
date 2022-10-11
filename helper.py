@@ -159,10 +159,10 @@ def isfloat(value):
 def extract_floating_from_string(value):
     _result = 0
     try:
-        EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
+        exp_extract_floating = r'[-+]?\d*\.\d+|\d+'
         if (value is not None and value != ''):
           # extract floating number from text
-          _exp_result = re.findall(EXP_EXTRACT_FLOATING, value)
+          _exp_result = re.findall(exp_extract_floating, value)
           if type(_exp_result) == list and len(_exp_result) > 0:
             _result = _exp_result[0]
 
