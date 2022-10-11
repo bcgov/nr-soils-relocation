@@ -813,7 +813,7 @@ def send_email_subscribers(today):
 
     elif (_subscriber_email is not None and _subscriber_email.strip() != '' and
           _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and  
-          _unsubscribe == True):
+          _unsubscribe):
       # create unSubscriber list
       for _srd in _subscriber_regional_district:
         if (_subscriber_email,_srd) not in unsubscribers_dic:
