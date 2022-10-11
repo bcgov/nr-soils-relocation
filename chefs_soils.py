@@ -965,7 +965,7 @@ if _srcCsvItem is None:
   print('Error: Source Site CSV Item ID is invalid!')
 else:
   _srcCsvUpdateResult = _srcCsvItem.update({}, constant.SOURCE_CSV_FILE)
-  print('Updated Soil Relocation Source Site CSV sucessfully: ' + str(_srcCsvUpdateResult))
+  print('Updated Soil Relocation Source Site CSV successfully: ' + str(_srcCsvUpdateResult))
 
   print('Updating Soil Relocation Soruce Site Feature Layer...')
   _srcLyrItem = _gis.content.get(SRC_LAYER_ID)
@@ -974,7 +974,7 @@ else:
   else:
     _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
     _srcLyrOverwriteResult = _srcFlc.manager.overwrite(constant.SOURCE_CSV_FILE)
-    print('Updated Soil Relocation Source Site Feature Layer sucessfully: ' + json.dumps(_srcLyrOverwriteResult))
+    print('Updated Soil Relocation Source Site Feature Layer successfully: ' + json.dumps(_srcLyrOverwriteResult))
 
 
 print('Updating Soil Relocation Receiving Site CSV...')
@@ -983,7 +983,7 @@ if _rcvCsvItem is None:
   print('Error: Receiving Site CSV Item ID is invalid!')
 else:
   _rcvCsvUpdateResult = _rcvCsvItem.update({}, constant.RECEIVE_CSV_FILE)
-  print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(_rcvCsvUpdateResult))
+  print('Updated Soil Relocation Receiving Site CSV successfully: ' + str(_rcvCsvUpdateResult))
 
   print('Updating Soil Relocation Receiving Site Feature Layer...')
   _rcvLyrItem = _gis.content.get(RCV_LAYER_ID)
@@ -992,7 +992,7 @@ else:
   else:    
     _rcvFlc = FeatureLayerCollection.fromitem(_rcvLyrItem)
     _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(constant.RECEIVE_CSV_FILE)
-    print('Updated Soil Relocation Receiving Site Feature Layer sucessfully: ' + json.dumps(_rcvLyrOverwriteResult))
+    print('Updated Soil Relocation Receiving Site Feature Layer successfully: ' + json.dumps(_rcvLyrOverwriteResult))
 
 
 print('Updating High Volume Receiving Site CSV...')
@@ -1001,7 +1001,7 @@ if _hvCsvItem is None:
   print('Error: High Volume Receiving Site CSV Item ID is invalid!')
 else:
   _hvCsvUpdateResult = _hvCsvItem.update({}, constant.HIGH_VOLUME_CSV_FILE)
-  print('Updated High Volume Receiving Site CSV sucessfully: ' + str(_hvCsvUpdateResult))
+  print('Updated High Volume Receiving Site CSV successfully: ' + str(_hvCsvUpdateResult))
 
   print('Updating High Volume Receiving Site Feature Layer...')
   _hvLyrItem = _gis.content.get(HV_LAYER_ID)
@@ -1010,7 +1010,7 @@ else:
   else:      
     _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
     _hvLyrOverwriteResult = _hvFlc.manager.overwrite(constant.HIGH_VOLUME_CSV_FILE)
-    print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
+    print('Updated High Volume Receiving Site Feature Layer successfully: ' + json.dumps(_hvLyrOverwriteResult))
 
 
 print('Sending subscriber emails...')
