@@ -6,6 +6,7 @@ import helper
 import datetime
 import pytz
 from pytz import timezone
+import constant
 
 #### to track the version of forms (Sept/26/2022)
 # CHEFS generates new vresion of forms when changes of data fields, manages data by each version
@@ -16,9 +17,6 @@ from pytz import timezone
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
-SOURCE_CSV_FILE = config['CSV']['SOURCE_CSV_FILE']
-RECEIVE_CSV_FILE = config['CSV']['RECEIVE_CSV_FILE']
-HIGH_VOLUME_CSV_FILE = config['CSV']['HIGH_VOLUME_CSV_FILE']
 SRC_CSV_ID = config['AGOL_ITEMS']['SRC_CSV_ID']
 SRC_LAYER_ID = config['AGOL_ITEMS']['SRC_LAYER_ID']
 RCV_CSV_ID = config['AGOL_ITEMS']['RCV_CSV_ID']
@@ -26,8 +24,6 @@ RCV_LAYER_ID = config['AGOL_ITEMS']['RCV_LAYER_ID']
 HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
 HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
 WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
-EMAIL_SUBJECT_SOIL_RELOCATION = config['EMAIL_TITLE']['EMAIL_SUBJECT_SOIL_RELOCATION']
-EMAIL_SUBJECT_HIGH_VOLUME = config['EMAIL_TITLE']['EMAIL_SUBJECT_HIGH_VOLUME']
 
 
 REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional District of Bulkley-Nechako'
@@ -377,9 +373,6 @@ HV_SITE_HEADERS = [
   "createAt",
   "confirmationId"
 ]
-
-DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
-
 
 
 def convert_regional_district_to_name(id):
@@ -1208,13 +1201,13 @@ def send_email_subscribers(today):
 
   print('Sending Notification of soil relocation in selected Regional District(s) ...')
   for _k, _v in notify_soil_reloc_subscriber_dic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
-    _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+    _ches_response = helper.send_mail(_k[0], constant.EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
     if _ches_response is not None and _ches_response.status_code is not None:
       print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
   print('Sending Notification of high volume site registration in selected Regional District(s) ...')
   for _k, _v in notify_hvs_subscriber_dic.items(): #key:(subscriber email, regional district), value:email message, subscription create date, subscription confirm id)
-    _ches_response = helper.send_mail(_k[0], EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
+    _ches_response = helper.send_mail(_k[0], constant.EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
     if _ches_response is not None and _ches_response.status_code is not None:
       print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
@@ -1294,19 +1287,19 @@ for hvs in hvsJson:
 
 print('Creating soil source site CSV...')
 print('>> current directory:' + os.getcwd())
-with open(SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
+with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=SOURCE_SITE_HEADERS)
   writer.writeheader()
   writer.writerows(sourceSites)
 
 print('Creating soil receiving site CSV...')
-with open(RECEIVE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
+with open(constant.RECEIVE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=RECEIVING_SITE_HEADERS)
   writer.writeheader()
   writer.writerows(receivingSites)
 
 print('Creating soil high volume site CSV...')
-with open(HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
+with open(constant.HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=HV_SITE_HEADERS)
   writer.writeheader()
   writer.writerows(hvSites)
@@ -1322,7 +1315,7 @@ _srcCsvItem = _gis.content.get(SRC_CSV_ID)
 if _srcCsvItem is None:
   print('Error: Source Site CSV Item ID is invalid!')
 else:
-  _srcCsvUpdateResult = _srcCsvItem.update({}, SOURCE_CSV_FILE)
+  _srcCsvUpdateResult = _srcCsvItem.update({}, constant.SOURCE_CSV_FILE)
   print('Updated Soil Relocation Source Site CSV sucessfully: ' + str(_srcCsvUpdateResult))
 
   print('Updating Soil Relocation Soruce Site Feature Layer...')
@@ -1331,7 +1324,7 @@ else:
     print('Error: Source Site Layter Item ID is invalid!')
   else:
     _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
-    _srcLyrOverwriteResult = _srcFlc.manager.overwrite(SOURCE_CSV_FILE)
+    _srcLyrOverwriteResult = _srcFlc.manager.overwrite(constant.SOURCE_CSV_FILE)
     print('Updated Soil Relocation Source Site Feature Layer sucessfully: ' + json.dumps(_srcLyrOverwriteResult))
 
 
@@ -1340,7 +1333,7 @@ _rcvCsvItem = _gis.content.get(RCV_CSV_ID)
 if _rcvCsvItem is None:
   print('Error: Receiving Site CSV Item ID is invalid!')
 else:
-  _rcvCsvUpdateResult = _rcvCsvItem.update({}, RECEIVE_CSV_FILE)
+  _rcvCsvUpdateResult = _rcvCsvItem.update({}, constant.RECEIVE_CSV_FILE)
   print('Updated Soil Relocation Receiving Site CSV sucessfully: ' + str(_rcvCsvUpdateResult))
 
   print('Updating Soil Relocation Receiving Site Feature Layer...')
@@ -1349,7 +1342,7 @@ else:
     print('Error: Receiving Site Layer Item ID is invalid!')
   else:    
     _rcvFlc = FeatureLayerCollection.fromitem(_rcvLyrItem)
-    _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(RECEIVE_CSV_FILE)
+    _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(constant.RECEIVE_CSV_FILE)
     print('Updated Soil Relocation Receiving Site Feature Layer sucessfully: ' + json.dumps(_rcvLyrOverwriteResult))
 
 
@@ -1358,7 +1351,7 @@ _hvCsvItem = _gis.content.get(HV_CSV_ID)
 if _hvCsvItem is None:
   print('Error: High Volume Receiving Site CSV Item ID is invalid!')
 else:
-  _hvCsvUpdateResult = _hvCsvItem.update({}, HIGH_VOLUME_CSV_FILE)
+  _hvCsvUpdateResult = _hvCsvItem.update({}, constant.HIGH_VOLUME_CSV_FILE)
   print('Updated High Volume Receiving Site CSV sucessfully: ' + str(_hvCsvUpdateResult))
 
   print('Updating High Volume Receiving Site Feature Layer...')
@@ -1367,7 +1360,7 @@ else:
     print('Error: High Volume Receiving Site Layer Item ID is invalid!')
   else:      
     _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
-    _hvLyrOverwriteResult = _hvFlc.manager.overwrite(HIGH_VOLUME_CSV_FILE)
+    _hvLyrOverwriteResult = _hvFlc.manager.overwrite(constant.HIGH_VOLUME_CSV_FILE)
     print('Updated High Volume Receiving Site Feature Layer sucessfully: ' + json.dumps(_hvLyrOverwriteResult))
 
 

@@ -1,0 +1,7 @@
+EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
+VALUE_ERROR_EXCEPTION_RAISED = r'ValueError Raised:'
+EMAIL_SUBJECT_SOIL_RELOCATION = r'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
+EMAIL_SUBJECT_HIGH_VOLUME = r'SRIS Subscription Service - New Registration(s) Received (High Volume Receiving Site)'
+SOURCE_CSV_FILE = r'soil_relocation_source_sites.csv'
+RECEIVE_CSV_FILE = r'soil_relocation_receiving_sites.csv'
+HIGH_VOLUME_CSV_FILE = r'high_volume_receiving_sites.csv'

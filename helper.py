@@ -6,9 +6,9 @@ from requests.auth import HTTPBasicAuth
 import os
 import datetime
 from pytz import timezone
+import constant
 
 CHES_API_KEY = os.getenv('CHES_API_KEY')
-#print(f"Value of env variable key='CHES_API_KEY': {CHES_API_KEY}")
 
 def read_config():
     config = configparser.ConfigParser()
@@ -24,7 +24,6 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
     _lat_dd = 0
     _lon_dd = 0
     try:
-        EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
         # Convert to DD in mapLatitude and mapLongitude
         if (lat_deg is not None and lat_deg != '' and
             lat_min is not None and lat_min != '' and
@@ -34,12 +33,12 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
             lon_sec is not None and lon_sec != ''
         ):
             # extract floating number from text
-            _lat_deg = re.findall(EXP_EXTRACT_FLOATING, lat_deg)
-            _lat_min = re.findall(EXP_EXTRACT_FLOATING, lat_min)
-            _lat_sec = re.findall(EXP_EXTRACT_FLOATING, lat_sec)
-            _lon_deg = re.findall(EXP_EXTRACT_FLOATING, lon_deg)
-            _lon_min = re.findall(EXP_EXTRACT_FLOATING, lon_min)
-            _lon_sec = re.findall(EXP_EXTRACT_FLOATING, lon_sec)
+            _lat_deg = re.findall(constant.EXP_EXTRACT_FLOATING, lat_deg)
+            _lat_min = re.findall(constant.EXP_EXTRACT_FLOATING, lat_min)
+            _lat_sec = re.findall(constant.EXP_EXTRACT_FLOATING, lat_sec)
+            _lon_deg = re.findall(constant.EXP_EXTRACT_FLOATING, lon_deg)
+            _lon_min = re.findall(constant.EXP_EXTRACT_FLOATING, lon_min)
+            _lon_sec = re.findall(constant.EXP_EXTRACT_FLOATING, lon_sec)
 
             if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0 
                 and len(_lon_deg) > 0 and len(_lon_min) > 0 and len(_lon_sec) > 0):
@@ -49,7 +48,7 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
             if _lon_dd > 0: _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
 
     except ValueError as ve:
-        print('ValueError Raised:', ve)
+        print(constant.VALUE_ERROR_EXCEPTION_RAISED, ve)
 
     return _lat_dd, _lon_dd
 
@@ -91,7 +90,6 @@ def send_mail(to_email, subject, message):
       'Authorization': 'Bearer ' + access_token
       }
       ches_response = requests.request("POST", CHEFS_URL + '/api/v1/email', headers=ches_headers, data=ches_pay_load)
-      #_ches_content = json.loads(ches_response.content)
     else:
       raise KeyError(auth_response_json.get('error_description') + ", " + auth_response_json.get('error') + ", status code:" + str(auth_response.status_code) + ", reason:"+ auth_response.reason)
   except KeyError as ke:
@@ -146,7 +144,7 @@ def convert_simple_datetime_format_in_str(str_date):
             if len(_datetime_in_str) > 1:
                 _result = datetime.datetime.strptime(_datetime_in_str[0], '%Y-%m-%d').strftime('%m/%d/%Y')
     except ValueError as ve:
-        print('ValueError Raised:', ve)
+        print(constant.VALUE_ERROR_EXCEPTION_RAISED, ve)
     return _result if _result is not None else str_date
 
 def isfloat(value):
@@ -159,15 +157,14 @@ def isfloat(value):
 def extract_floating_from_string(value):
     _result = 0
     try:
-        exp_extract_floating = r'[-+]?\d*\.\d+|\d+'
         if (value is not None and value != ''):
           # extract floating number from text
-          _exp_result = re.findall(exp_extract_floating, value)
+          _exp_result = re.findall(constant.EXP_EXTRACT_FLOATING, value)
           if type(_exp_result) == list and len(_exp_result) > 0:
             _result = _exp_result[0]
 
     except ValueError as ve:
-        print('ValueError Raised:', ve)
+        print(constant.VALUE_ERROR_EXCEPTION_RAISED, ve)
 
     return _result
 def str_to_double(value):
