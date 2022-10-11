@@ -170,3 +170,9 @@ def extract_floating_from_string(value):
 def str_to_double(value):
   if type(value) == str: return float(value)
   else: return value
+
+def is_not_none_true(val):
+  if val is not None and is_boolean(val):
+    return val
+  else:
+    return False

@@ -113,7 +113,7 @@ def create_land_file_numbers(cefs_dic, field):
 def create_receiving_site_lan_uses(cefs_dic, field):
   _land_uses = []
   for _k, _v in cefs_dic[field].items():
-    if _v == True:
+    if helper.is_not_none_true(_v):
       _land_uses.append(convert_receiving_site_use_to_name(_k))
   if len(_land_uses) > 0:
     _land_uses = "\"" + ",".join(_land_uses) + "\""
@@ -143,29 +143,29 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
           _soil_volume = helper.extract_floating_from_string(_soil_volume)
         _soil_volume = helper.str_to_double(_soil_volume)
         _soil_claz = _dg9.get("B1-soilClassificationSource")
-        if _soil_claz.get("urbanParkLandUsePl") is not None and _soil_claz.get("urbanParkLandUsePl") == True:
+        if helper.is_not_none_true(_soil_claz.get("urbanParkLandUsePl")):
           working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume
-        elif _soil_claz.get("commercialLandUseCl") is not None and _soil_claz.get("commercialLandUseCl") == True:
+        elif helper.is_not_none_true(_soil_claz.get("commercialLandUseCl")):
           working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume            
-        elif _soil_claz.get("industrialLandUseIl") is not None and _soil_claz.get("industrialLandUseIl") == True:
+        elif helper.is_not_none_true(_soil_claz.get("industrialLandUseIl")):
           working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume            
-        elif _soil_claz.get("agriculturalLandUseAl") is not None and _soil_claz.get("agriculturalLandUseAl") == True:
-          working_dic['agriculturalLandUseSoilVolume'] = _soil_volume + working_dic['agriculturalLandUseSoilVolume'] if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
+        elif helper.is_not_none_true(_soil_claz.get("agriculturalLandUseAl")):
+          working_dic['agriculturalLandUseSoilVolume'] = working_dic['agriculturalLandUseSoilVolume'] + _soil_volume if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume            
-        elif _soil_claz.get("wildlandsNaturalLandUseWln") is not None and _soil_claz.get("wildlandsNaturalLandUseWln") == True:
-          working_dic['wildlandsNaturalLandUseSoilVolume'] = _soil_volume + working_dic['wildlandsNaturalLandUseSoilVolume'] if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
+        elif helper.is_not_none_true(_soil_claz.get("wildlandsNaturalLandUseWln")):
+          working_dic['wildlandsNaturalLandUseSoilVolume'] = working_dic['wildlandsNaturalLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume            
-        elif _soil_claz.get("wildlandsRevertedLandUseWlr") is not None and _soil_claz.get("wildlandsRevertedLandUseWlr") == True:
+        elif helper.is_not_none_true(_soil_claz.get("wildlandsRevertedLandUseWlr")):
           working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume
-        elif _soil_claz.get("residentialLandUseLowDensityRlld") is not None and _soil_claz.get("residentialLandUseLowDensityRlld") == True:
+        elif helper.is_not_none_true(_soil_claz.get("residentialLandUseLowDensityRlld")):
           working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume
-        elif _soil_claz.get("residentialLandUseHighDensityRlhd") is not None and _soil_claz.get("residentialLandUseHighDensityRlhd") == True:
-          working_dic['residentialLandUseHighDensitySoilVolume'] = _soil_volume + working_dic['residentialLandUseHighDensitySoilVolume'] if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
+        elif helper.is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
+          working_dic['residentialLandUseHighDensitySoilVolume'] = working_dic['residentialLandUseHighDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
           _total_soil_volume += _soil_volume
     if _total_soil_volume != 0:
       working_dic['totalSoilVolme'] = _total_soil_volume
@@ -436,11 +436,11 @@ def map_rcv_1st_rcver(submission):
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
   _confirmation_id = helper.get_confirm_id(submission)
-  if (submission.get('additionalReceivingSites').get('firstAdditionalReceivingSiteInformation') == True and
+  if (helper.is_not_none_true(submission.get('additionalReceivingSites').get('firstAdditionalReceivingSiteInformation')) and
       helper.validate_lat_lon(submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite"), submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite"), 
                               submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite"),
                               _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
-  ):  
+  ):
     #print("Mapping 2nd receiver ...")
 
     for rcv_header in constant.RECEIVING_SITE_HEADERS:
@@ -518,7 +518,7 @@ def map_rcv_2nd_rcver(submission):
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
   _confirmation_id = helper.get_confirm_id(submission)
-  if (submission.get('secondadditionalReceivingSites1').get('secondAdditionalReceivingSiteInformation') == True and
+  if (helper.is_not_none_true(submission.get('secondadditionalReceivingSites1').get('secondAdditionalReceivingSiteInformation')) and
       helper.validate_lat_lon(submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite"), submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite"), 
                               submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite"),
                               _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
@@ -717,8 +717,8 @@ def send_email_subscribers(today):
     _subscriber_email = None
     _subscriber_regional_district = []
     _unsubscribe = False
-    _notify_hvs = None
-    _notify_soil_reloc = None
+    _notify_hvs = False
+    _notify_soil_reloc = False
     _subscription_created_at = None
     _subscription_confirm_id = None
 
@@ -743,14 +743,14 @@ def send_email_subscribers(today):
 
     if (_subscriber_email is not None and _subscriber_email.strip() != '' and
         _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and
-        _unsubscribe == False and 
+        not _unsubscribe and 
         (
-          _notify_hvs == True or
-          _notify_soil_reloc == True
+          _notify_hvs or
+          _notify_soil_reloc
         )):
 
       # Notification of soil relocation in selected Regional District(s)  =========================================================
-      if _notify_soil_reloc == True:
+      if _notify_soil_reloc:
         for _srd in _subscriber_regional_district:
 
           # finding if subscriber's regional district in receiving site registration
@@ -781,7 +781,7 @@ def send_email_subscribers(today):
                     #      + str(_subscription_confirm_id) + ', subscription created at:' + str(_subscription_created_at))
 
       # Notification of high volume site registration in selected Regional District(s) ============================================
-      if _notify_hvs == True:
+      if _notify_hvs:
         for _srd in _subscriber_regional_district:
 
           # finding if subscriber's regional district in high volume receiving site registration
