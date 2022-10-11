@@ -74,11 +74,11 @@ def send_mail(to_email, subject, message):
   ches_response = None
   try:
     auth_pay_load = 'grant_type=client_credentials'
-    auth_haders = {
+    auth_headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': 'Basic ' + CHES_API_KEY
     }
-    auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_haders, data=auth_pay_load)
+    auth_response = requests.request("POST", AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token', headers=auth_headers, data=auth_pay_load)
     auth_response_json = json.loads(auth_response.content)
     if auth_response_json.get('access_token'):
       access_token = auth_response_json['access_token']
