@@ -12,7 +12,7 @@ env:
   CHES_API_KEY: ${{ secrets.CHES_API_KEY }}
   MAPHUB_USER: ${{ secrets.MAPHUB_USER }}
   MAPHUB_PASS: ${{ secrets.MAPHUB_PASS }}
-  APP_NAME: "SRIS"
+  APP_NAME: "sris"
 on:
   workflow_dispatch:
 
