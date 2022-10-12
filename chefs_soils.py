@@ -25,40 +25,40 @@ HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
 HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
 WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
 
-def convert_regional_district_to_name(id):
-  name = constant.REGIONAL_DISTRICT_NAME_DIC.get(id)
+def convert_regional_district_to_name(key):
+  name = constant.REGIONAL_DISTRICT_NAME_DIC.get(key)
   if name is not None:
     return name
   else:
-    return id
+    return key
 
-def convert_source_site_use_to_name(id):
-  name = constant.SOURCE_SITE_USE_NAME_DIC.get(id)
+def convert_source_site_use_to_name(key):
+  name = constant.SOURCE_SITE_USE_NAME_DIC.get(key)
   if name is not None:
     return name
   else:
-    return id
+    return key
 
-def convert_receiving_site_use_to_name(id):
-  name = constant.RECEIVING_SITE_USE_NAME_DIC.get(id)
+def convert_receiving_site_use_to_name(key):
+  name = constant.RECEIVING_SITE_USE_NAME_DIC.get(key)
   if name is not None:
     return name
   else:
-    return id
+    return key
 
-def convert_soil_quality_to_name(id):
-  name = constant.SOIL_QUALITY_NAME_DIC.get(id)
+def convert_soil_quality_to_name(key):
+  name = constant.SOIL_QUALITY_NAME_DIC.get(key)
   if name is not None:
     return name
   else:
-    return id
+    return key
 
-def convert_land_ownership_to_name(id):
-  name = constant.LAND_OWNERSHIP_NAME_DIC.get(id)
+def convert_land_ownership_to_name(key):
+  name = constant.LAND_OWNERSHIP_NAME_DIC.get(key)
   if name is not None:
     return name
   else:
-    return id
+    return key
 
 def create_popup_link_body(_site_dic):
   _link_body = ''
@@ -97,10 +97,10 @@ def create_popup_links(sites, site_type):
       _popup_links += _link
   return _popup_links
 
-def create_land_file_numbers(cefs_dic, field):
+def create_land_file_numbers(chefs_dic, field):
   _land_file_numbers = []
-  if cefs_dic.get(field) is not None : 
-    for _item in cefs_dic[field]:
+  if chefs_dic.get(field) is not None : 
+    for _item in chefs_dic[field]:
       for _v in _item.values():
         if _v != '':
           _land_file_numbers.append(_v)
@@ -110,25 +110,25 @@ def create_land_file_numbers(cefs_dic, field):
 
   return _land_file_numbers if len(_land_file_numbers) > 0 else None
 
-def create_receiving_site_lan_uses(cefs_dic, field):
+def create_receiving_site_lan_uses(chefs_dic, field):
   _land_uses = []
-  for _k, _v in cefs_dic[field].items():
+  for _k, _v in chefs_dic[field].items():
     if helper.is_not_none_true(_v):
       _land_uses.append(convert_receiving_site_use_to_name(_k))
   if len(_land_uses) > 0:
     _land_uses = "\"" + ",".join(_land_uses) + "\""
   return _land_uses
 
-def create_regional_district(cefs_dic, field):
+def create_regional_district(chefs_dic, field):
   _regional_district = None
-  if cefs_dic.get(field) is not None and len(cefs_dic[field]) > 0: 
-    _regional_district = convert_regional_district_to_name(cefs_dic[field][0])
+  if chefs_dic.get(field) is not None and len(chefs_dic[field]) > 0: 
+    _regional_district = convert_regional_district_to_name(chefs_dic[field][0])
   return _regional_district
 
-def create_land_ownership(cefs_dic, field):
+def create_land_ownership(chefs_dic, field):
   _land_ownership = None
-  if cefs_dic.get(field) is not None : 
-    _land_ownership = convert_land_ownership_to_name(cefs_dic[field])
+  if chefs_dic.get(field) is not None : 
+    _land_ownership = convert_land_ownership_to_name(chefs_dic[field])
   return _land_ownership
 
 def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_dic):
@@ -933,7 +933,7 @@ for hvs in hvsJson:
     add_regional_district_dic(_hvDic, hvRegDistDic)  
 
 
-
+"""
 print('Creating soil source site CSV...')
 print('>> current directory:' + os.getcwd())
 with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
@@ -1016,6 +1016,6 @@ else:
 print('Sending subscriber emails...')
 today = datetime.datetime.now(tz=pytz.timezone('Canada/Pacific'))
 send_email_subscribers(today)
-
+"""
 
 print('Completed Soils data publishing')
