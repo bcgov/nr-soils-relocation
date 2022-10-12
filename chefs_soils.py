@@ -256,9 +256,9 @@ def get_submission_src_name(key):
 
 def map_source_site(submission):
   _src_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission)
-  if (helper.validate_lat_lon(submission.get("A3-SourceSiteLatitude-Degrees"), submission.get("A3-SourceSiteLatitude-Minutes"), submission.get("A3-SourceSiteLatitude-Seconds"), 
-                              submission.get("A3-SourceSiteLongitude-Degrees"), submission.get("A3-SourceSiteLongitude-Minutes"), submission.get("A3-SourceSiteLongitude-Seconds"),
+  _confirmation_id = helper.get_confirm_id(submission, get_submission_src_name('form'), get_submission_src_name('confirmationId'))
+  if (helper.validate_lat_lon(submission.get(get_submission_src_name('latitudeDegrees')), submission.get(get_submission_src_name('latitudeMinutes')), submission.get(get_submission_src_name('latitudeSeconds')), 
+                              submission.get(get_submission_src_name('longitudeDegrees')), submission.get(get_submission_src_name('longitudeMinutes')), submission.get(get_submission_src_name('longitudeSeconds')),
                               _confirmation_id, 'Soil Relocation Notification Form-Source Site')
   ):  
     #print("Mapping sourece site ...")
@@ -313,25 +313,25 @@ def map_source_site(submission):
     _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, get_submission_src_name('crownLandFileNumbers'))
 
     #PIN, PIN, description
-    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid', 'A-LegallyTitled-PID', 'legalLandDescriptionSource')  #PID
+    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, get_submission_src_name('pidDataGrid'), get_submission_src_name('pid'), get_submission_src_name('pidDesc'))  #PID
     if (_src_dic['PID'] is None or _src_dic['PID'].strip() == ''): #PIN
-      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid1', 'A-UntitledPINSource', 'legalLandDescriptionUntitledSource')
+      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, get_submission_src_name('pinDataGrid'), get_submission_src_name('pin'), get_submission_src_name('pinDesc'))
     if ((_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
         and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumnSource', 'legalLandDescriptionUntitledMunicipalSource')
+      _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, get_submission_src_name('untitledMunicipalLand'), get_submission_src_name('untitledMunicipalLandDesc'))
 
-    if submission.get("A4-schedule2ReferenceSourceSite") is not None and len(submission.get("A4-schedule2ReferenceSourceSite")) > 0 : 
+    if submission.get(get_submission_src_name('sourceSiteLandUse')) is not None and len(submission.get(get_submission_src_name('sourceSiteLandUse'))) > 0 : 
       _source_site_land_uses = []
-      for _ref_source_site in submission.get("A4-schedule2ReferenceSourceSite"):
+      for _ref_source_site in submission.get(get_submission_src_name('sourceSiteLandUse')):
         _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
       _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-    _src_dic['highVolumeSite'] = submission.get("isTheSourceSiteHighRisk")
-    _src_dic['soilRelocationPurpose'] = submission.get("A5-PurposeOfSoilExcavationSource")
-    _src_dic['soilStorageType'] = submission.get("B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source")
+    _src_dic['highVolumeSite'] = submission.get(get_submission_src_name('highVolumeSite'))
+    _src_dic['soilRelocationPurpose'] = submission.get(get_submission_src_name('soilRelocationPurpose'))
+    _src_dic['soilStorageType'] = submission.get(get_submission_src_name('soilStorageType'))
 
     # Soil Volume
-    create_soil_volumes(submission, 'dataGrid9', 'B1-soilVolumeToBeRelocationedInCubicMetresM3Source', 'B1-soilClassificationSource', _src_dic)
+    create_soil_volumes(submission, get_submission_src_name('soilVolumeDataGrid'), get_submission_src_name('soilVolume'), get_submission_src_name('soilClassificationSource'), _src_dic)
 
     _src_dic['soilCharacterMethod'] = submission.get(get_submission_src_name('soilCharacterMethod'))
     _src_dic['vapourExemption'] = submission.get(get_submission_src_name('vapourExemption'))
@@ -354,14 +354,14 @@ def map_source_site(submission):
     _src_dic['qualifiedProfessionalEmail'] = submission.get(get_submission_src_name('qualifiedProfessionalEmail'))
     _src_dic['signaturerFirstAndLastName'] = submission.get(get_submission_src_name('signaturerFirstAndLastName'))
     _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get(get_submission_src_name('dateSigned')))
-    _src_dic['createAt'] = helper.get_create_date(submission)
+    _src_dic['createAt'] = helper.get_create_date(submission, get_submission_src_name('form'), get_submission_src_name('createdAt'))
     _src_dic['confirmationId'] = _confirmation_id
 
   return _src_dic
 
 def map_rcv_1st_rcver(submission):
   _rcv_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission)
+  _confirmation_id = helper.get_confirm_id(submission, 'form', 'confirmationId')
   if (helper.validate_lat_lon(submission.get("C2-Latitude-DegreesReceivingSite"), submission.get("C2-Latitude-MinutesReceivingSite"), submission.get("Section2-Latitude-Seconds1ReceivingSite"), 
                               submission.get("C2-Longitude-DegreesReceivingSite"), submission.get("C2-Longitude-MinutesReceivingSite"), submission.get("C2-Longitude-SecondsReceivingSite"),
                               _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
@@ -436,13 +436,13 @@ def map_rcv_1st_rcver(submission):
     if submission.get("D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1"]
     if submission.get("D2-receivingsitesoilDepositIsInTheReserveLands1") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-receivingsitesoilDepositIsInTheReserveLands1"]
     _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))    
-    _rcv_dic['createAt'] = helper.get_create_date(submission)
+    _rcv_dic['createAt'] = helper.get_create_date(submission, 'form', 'createdAt')
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_rcv_2nd_rcver(submission):
   _rcv_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission)
+  _confirmation_id = helper.get_confirm_id(submission, 'form', 'confirmationId')
   if (helper.is_not_none_true(submission.get('additionalReceivingSites').get('firstAdditionalReceivingSiteInformation')) and
       helper.validate_lat_lon(submission.get("C2-Latitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Latitude-Minutes1FirstAdditionalReceivingSite"), submission.get("Section2-Latitude-Seconds2FirstAdditionalReceivingSite"), 
                               submission.get("C2-Longitude-Degrees1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Minutes1FirstAdditionalReceivingSite"), submission.get("C2-Longitude-Seconds1FirstAdditionalReceivingSite"),
@@ -518,13 +518,13 @@ def map_rcv_2nd_rcver(submission):
     if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2"]
     if submission.get("D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2"]
     _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
-    _rcv_dic['createAt'] = helper.get_create_date(submission)
+    _rcv_dic['createAt'] = helper.get_create_date(submission, 'form', 'createdAt')
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_rcv_3rd_rcver(submission):
   _rcv_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission)
+  _confirmation_id = helper.get_confirm_id(submission, 'form', 'confirmationId')
   if (helper.is_not_none_true(submission.get('secondadditionalReceivingSites1').get('secondAdditionalReceivingSiteInformation')) and
       helper.validate_lat_lon(submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite"), submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite"), 
                               submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite"),
@@ -601,13 +601,13 @@ def map_rcv_3rd_rcver(submission):
     if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3"]
     if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3"]
     _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
-    _rcv_dic['createAt'] = helper.get_create_date(submission)
+    _rcv_dic['createAt'] = helper.get_create_date(submission, 'form', 'createdAt')
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_hv_site(hvs):
   _hv_dic = {}
-  _confirmation_id = helper.get_confirm_id(hvs)
+  _confirmation_id = helper.get_confirm_id(hvs, 'form', 'confirmationId')
   if (helper.validate_lat_lon(hvs.get("Section3-Latitude-Degrees"), hvs.get("Section3-Latitude-Minutes"), hvs.get("Section3-Latitude-Seconds"), 
                               hvs.get("Section3-Longitude-Degrees"), hvs.get("Section3-Longitude-Minutes"), hvs.get("Section3-Longitude-Seconds"),
                               _confirmation_id, 'High Volume Receiving Site Form')
@@ -689,7 +689,7 @@ def map_hv_site(hvs):
     _hv_dic['qualifiedProfessionalEmail'] = hvs.get("simpleemail1QualifiedProfessional")
     _hv_dic['signaturerFirstAndLastName'] = hvs.get("firstAndLastNameQualifiedProfessional")
     _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs["simpledatetime"])
-    _hv_dic['createAt'] = helper.get_create_date(hvs)
+    _hv_dic['createAt'] = helper.get_create_date(hvs, 'form', 'createdAt')
     _hv_dic['confirmationId'] = _confirmation_id
   return _hv_dic
 
@@ -745,8 +745,8 @@ def send_email_subscribers(today):
         if helper.is_boolean(_notice_selection['notifyOnSoilRelocationsInSelectedRegionalDistrict']):
           _notify_soil_reloc = _notice_selection['notifyOnSoilRelocationsInSelectedRegionalDistrict']
 
-    _subscription_created_at = helper.get_create_date(_subscriber)
-    _subscription_confirm_id = helper.get_confirm_id(_subscriber)  
+    _subscription_created_at = helper.get_create_date(_subscriber, 'form', 'createdAt')
+    _subscription_confirm_id = helper.get_confirm_id(_subscriber, 'form', 'confirmationId')  
 
     if (_subscriber_email is not None and _subscriber_email.strip() != '' and
         _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and
@@ -940,7 +940,7 @@ for hvs in hvsJson:
     add_regional_district_dic(_hvDic, hvRegDistDic)  
 
 
-"""
+
 print('Creating soil source site CSV...')
 print('>> current directory:' + os.getcwd())
 with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
@@ -961,7 +961,7 @@ with open(constant.HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer.writerows(hvSites)
 
 
-
+"""
 print('Connecting to AGOL GIS...')
 # connect to GIS
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)

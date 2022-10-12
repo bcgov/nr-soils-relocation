@@ -115,20 +115,20 @@ def get_difference_datetimes_in_hour(datetime1, datetime2):
         #print('difference datetimes in hour:',_diff)
     return _diff
 
-def get_create_date(cefs_dic):
+def get_create_date(cefs_dic, form_field, create_at_field):
   _created_at = None
-  if cefs_dic.get('form') is not None : 
-    _created_at = cefs_dic.get('form').get('createdAt')
+  if cefs_dic.get(form_field) is not None : 
+    _created_at = cefs_dic.get(form_field).get(create_at_field)
     if _created_at is not None:
       #print('the supported timezones by the pytz module:', pytz.all_timezones, '\n')
       _created_at = datetime.datetime.strptime(_created_at, '%Y-%m-%dT%H:%M:%S.%f%z') #convert string to datetime with timezone(UTC)
       _created_at = _created_at.astimezone(timezone('Canada/Pacific'))  #convert to PST
   return _created_at
 
-def get_confirm_id(cefs_dic):
+def get_confirm_id(cefs_dic, form_field, confirm_id_field):
   _confirmation_id = None
-  if cefs_dic.get('form') is not None : 
-    _confirmation_id = cefs_dic.get('form').get('confirmationId')
+  if cefs_dic.get(form_field) is not None : 
+    _confirmation_id = cefs_dic.get(form_field).get(confirm_id_field)
   return _confirmation_id  
 
 # str_date: '2022-09-22T00:00:00-07:00' or '09/02/2022' format
