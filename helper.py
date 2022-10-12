@@ -64,11 +64,8 @@ def validate_lat_lon(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec, confi
     return False
 
 # check if boolen type is
-def is_boolean(_v):
-  _result = False
-  if type(_v) == bool: 
-    _result = True
-  return _result
+def is_boolean(obj):
+  return True if isinstance(obj, bool) else False
 
 def send_mail(to_email, subject, message):
   ches_response = None
@@ -160,16 +157,15 @@ def extract_floating_from_string(value):
         if (value is not None and value != ''):
           # extract floating number from text
           _exp_result = re.findall(constant.EXP_EXTRACT_FLOATING, value)
-          if type(_exp_result) == list and len(_exp_result) > 0:
+          if isinstance(_exp_result, list) and len(_exp_result) > 0:
             _result = _exp_result[0]
 
     except ValueError as ve:
         print(constant.VALUE_ERROR_EXCEPTION_RAISED, ve)
 
     return _result
-def str_to_double(value):
-  if type(value) == str: return float(value)
-  else: return value
+def str_to_double(obj):
+  return float(obj) if isinstance(obj, str) else obj
 
 def is_not_none_true(val):
   if val is not None and is_boolean(val):
