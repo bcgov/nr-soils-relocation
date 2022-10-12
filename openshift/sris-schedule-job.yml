@@ -24,7 +24,7 @@ objects:
       schedule: "*/10 * * * *"
       concurrencyPolicy: "Replace"
       startingDeadlineSeconds: 200
-      suspend: true
+      suspend: false
       successfulJobsHistoryLimit: 5
       failedJobsHistoryLimit: 3
       jobTemplate:
