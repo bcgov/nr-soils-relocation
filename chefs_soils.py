@@ -8,12 +8,6 @@ import pytz
 from pytz import timezone
 import constant
 
-#### to track the version of forms (Sept/26/2022)
-# CHEFS generates new vresion of forms when changes of data fields, manages data by each version
-# 1.soil relocation form version: v9
-# 2.high volume submission version v7
-# 3.subscriber form version: v9
-
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
@@ -25,33 +19,6 @@ HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
 HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
 WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
 
-def convert_regional_district_to_name(key):
-  name = constant.REGIONAL_DISTRICT_NAME_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
-
-def convert_source_site_use_to_name(key):
-  name = constant.SOURCE_SITE_USE_NAME_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
-
-def convert_receiving_site_use_to_name(key):
-  name = constant.RECEIVING_SITE_USE_NAME_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
-
-def convert_soil_quality_to_name(key):
-  name = constant.SOIL_QUALITY_NAME_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
 
 def convert_land_ownership_to_name(key):
   name = constant.LAND_OWNERSHIP_NAME_DIC.get(key)
@@ -114,7 +81,7 @@ def create_receiving_site_lan_uses(chefs_dic, field):
   _land_uses = []
   for _k, _v in chefs_dic[field].items():
     if helper.is_not_none_true(_v):
-      _land_uses.append(convert_receiving_site_use_to_name(_k))
+      _land_uses.append(helper.convert_receiving_site_use_to_name(_k))
   if len(_land_uses) > 0:
     _land_uses = "\"" + ",".join(_land_uses) + "\""
   return _land_uses
@@ -122,7 +89,7 @@ def create_receiving_site_lan_uses(chefs_dic, field):
 def create_regional_district(chefs_dic, field):
   _regional_district = None
   if chefs_dic.get(field) is not None and len(chefs_dic[field]) > 0: 
-    _regional_district = convert_regional_district_to_name(chefs_dic[field][0])
+    _regional_district = helper.convert_regional_district_to_name(chefs_dic[field][0])
   return _regional_district
 
 def create_land_ownership(chefs_dic, field):
@@ -247,387 +214,269 @@ def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
       _desc = chefs_dic[parent_field][0].get(desc_field).strip()
   return _desc
 
-def chefs_src_param(key):
-  name = constant.CHEFS_SOURCE_PARAM_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
-
-def chefs_rcv_param(key, rcv_clz):
-  if rcv_clz == 1: # 1st receiver
-    name = constant.CHEFS_RCV1_PARAM_DIC.get(key)
-  elif rcv_clz == 2: # 2nd receiver
-    name = constant.CHEFS_RCV2_PARAM_DIC.get(key)
-  elif rcv_clz == 3: # 3rd receiver
-    name = constant.CHEFS_RCV3_PARAM_DIC.get(key)
-
-  if name is not None:
-    return name
-  else:
-    return key
-
-def chefs_hv_param(key):
-  name = constant.CHEFS_HV_PARAM_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
-
 def map_source_site(submission):
   _src_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission, chefs_src_param('form'), chefs_src_param('confirmationId'))
-  if (helper.validate_lat_lon(submission.get(chefs_src_param('latitudeDegrees')), submission.get(chefs_src_param('latitudeMinutes')), submission.get(chefs_src_param('latitudeSeconds')), 
-                              submission.get(chefs_src_param('longitudeDegrees')), submission.get(chefs_src_param('longitudeMinutes')), submission.get(chefs_src_param('longitudeSeconds')),
+  _confirmation_id = helper.get_confirm_id(submission, helper.chefs_src_param('form'), helper.chefs_src_param('confirmationId'))
+  if (helper.validate_lat_lon(submission.get(helper.chefs_src_param('latitudeDegrees')), submission.get(helper.chefs_src_param('latitudeMinutes')), submission.get(helper.chefs_src_param('latitudeSeconds')), 
+                              submission.get(helper.chefs_src_param('longitudeDegrees')), submission.get(helper.chefs_src_param('longitudeMinutes')), submission.get(helper.chefs_src_param('longitudeSeconds')),
                               _confirmation_id, 'Soil Relocation Notification Form-Source Site')
   ):  
     #print("Mapping sourece site ...")
-
-    #initialize
     for src_header in constant.SOURCE_SITE_HEADERS:
       _src_dic[src_header] = None
 
-    _src_dic['updateToPreviousForm'] = submission.get(chefs_src_param('updateToPreviousForm'))
-    _src_dic['ownerFirstName'] = submission.get(chefs_src_param('ownerFirstName'))
-    _src_dic['ownerLastName'] = submission.get(chefs_src_param('ownerLastName'))
-    _src_dic['ownerCompany'] = submission.get(chefs_src_param('ownerCompany'))
-    _src_dic['ownerAddress'] = submission.get(chefs_src_param('ownerAddress'))
-    _src_dic['ownerCity'] = submission.get(chefs_src_param('ownerCity'))
-    _src_dic['ownerProvince'] = submission.get(chefs_src_param('ownerProvince'))
-    _src_dic['ownerCountry'] = submission.get(chefs_src_param('ownerCountry'))
-    _src_dic['ownerPostalCode'] = submission.get(chefs_src_param('ownerPostalCode'))
-    _src_dic['ownerPhoneNumber'] = submission.get(chefs_src_param('ownerPhoneNumber'))
-    _src_dic['ownerEmail'] = submission.get(chefs_src_param('ownerEmail'))
-    _src_dic['owner2FirstName'] = submission.get(chefs_src_param('owner2FirstName'))
-    _src_dic['owner2LastName'] = submission.get(chefs_src_param('owner2LastName'))
-    _src_dic['owner2Company'] = submission.get(chefs_src_param('owner2Company'))
-    _src_dic['owner2Address'] = submission.get(chefs_src_param('owner2Address'))
-    _src_dic['owner2City'] = submission.get(chefs_src_param('owner2City'))
-    _src_dic['owner2Province'] = submission.get(chefs_src_param('owner2Province'))
-    _src_dic['owner2Country'] = submission.get(chefs_src_param('owner2Country'))
-    _src_dic['owner2PostalCode'] = submission.get(chefs_src_param('owner2PostalCode'))
-    _src_dic['owner2PhoneNumber'] = submission.get(chefs_src_param('owner2PhoneNumber'))
-    _src_dic['owner2Email'] = submission.get(chefs_src_param('owner2Email'))
-    _src_dic['additionalOwners'] = submission.get(chefs_src_param('additionalOwners'))
-    _src_dic['contactFirstName'] = submission.get(chefs_src_param('contactFirstName'))
-    _src_dic['contactLastName'] = submission.get(chefs_src_param('contactLastName'))
-    _src_dic['contactCompany'] = submission.get(chefs_src_param('contactCompany'))
-    _src_dic['contactAddress'] = submission.get(chefs_src_param('contactAddress'))
-    _src_dic['contactCity'] = submission.get(chefs_src_param('contactCity'))
-    _src_dic['contactProvince'] = submission.get(chefs_src_param('contactProvince'))
-    _src_dic['contactCountry'] = submission.get(chefs_src_param('contactCountry'))
-    _src_dic['contactPostalCode'] = submission.get(chefs_src_param('contactPostalCode'))
-    _src_dic['contactPhoneNumber'] = submission.get(chefs_src_param('contactPhoneNumber'))
-    _src_dic['contactEmail'] = submission.get(chefs_src_param('contactEmail'))
-    _src_dic['SID'] = submission.get(chefs_src_param('SID'))
+    _src_dic['updateToPreviousForm'] = submission.get(helper.chefs_src_param('updateToPreviousForm'))
+    _src_dic['ownerFirstName'] = submission.get(helper.chefs_src_param('ownerFirstName'))
+    _src_dic['ownerLastName'] = submission.get(helper.chefs_src_param('ownerLastName'))
+    _src_dic['ownerCompany'] = submission.get(helper.chefs_src_param('ownerCompany'))
+    _src_dic['ownerAddress'] = submission.get(helper.chefs_src_param('ownerAddress'))
+    _src_dic['ownerCity'] = submission.get(helper.chefs_src_param('ownerCity'))
+    _src_dic['ownerProvince'] = submission.get(helper.chefs_src_param('ownerProvince'))
+    _src_dic['ownerCountry'] = submission.get(helper.chefs_src_param('ownerCountry'))
+    _src_dic['ownerPostalCode'] = submission.get(helper.chefs_src_param('ownerPostalCode'))
+    _src_dic['ownerPhoneNumber'] = submission.get(helper.chefs_src_param('ownerPhoneNumber'))
+    _src_dic['ownerEmail'] = submission.get(helper.chefs_src_param('ownerEmail'))
+    _src_dic['owner2FirstName'] = submission.get(helper.chefs_src_param('owner2FirstName'))
+    _src_dic['owner2LastName'] = submission.get(helper.chefs_src_param('owner2LastName'))
+    _src_dic['owner2Company'] = submission.get(helper.chefs_src_param('owner2Company'))
+    _src_dic['owner2Address'] = submission.get(helper.chefs_src_param('owner2Address'))
+    _src_dic['owner2City'] = submission.get(helper.chefs_src_param('owner2City'))
+    _src_dic['owner2Province'] = submission.get(helper.chefs_src_param('owner2Province'))
+    _src_dic['owner2Country'] = submission.get(helper.chefs_src_param('owner2Country'))
+    _src_dic['owner2PostalCode'] = submission.get(helper.chefs_src_param('owner2PostalCode'))
+    _src_dic['owner2PhoneNumber'] = submission.get(helper.chefs_src_param('owner2PhoneNumber'))
+    _src_dic['owner2Email'] = submission.get(helper.chefs_src_param('owner2Email'))
+    _src_dic['additionalOwners'] = submission.get(helper.chefs_src_param('additionalOwners'))
+    _src_dic['contactFirstName'] = submission.get(helper.chefs_src_param('contactFirstName'))
+    _src_dic['contactLastName'] = submission.get(helper.chefs_src_param('contactLastName'))
+    _src_dic['contactCompany'] = submission.get(helper.chefs_src_param('contactCompany'))
+    _src_dic['contactAddress'] = submission.get(helper.chefs_src_param('contactAddress'))
+    _src_dic['contactCity'] = submission.get(helper.chefs_src_param('contactCity'))
+    _src_dic['contactProvince'] = submission.get(helper.chefs_src_param('contactProvince'))
+    _src_dic['contactCountry'] = submission.get(helper.chefs_src_param('contactCountry'))
+    _src_dic['contactPostalCode'] = submission.get(helper.chefs_src_param('contactPostalCode'))
+    _src_dic['contactPhoneNumber'] = submission.get(helper.chefs_src_param('contactPhoneNumber'))
+    _src_dic['contactEmail'] = submission.get(helper.chefs_src_param('contactEmail'))
+    _src_dic['SID'] = submission.get(helper.chefs_src_param('SID'))
 
     _src_dic['latitude'], _src_dic['longitude'] = helper.convert_deciaml_lat_long(
-      submission[chefs_src_param('latitudeDegrees')], submission[chefs_src_param('latitudeMinutes')], submission[chefs_src_param('latitudeSeconds')], 
-      submission[chefs_src_param('longitudeDegrees')], submission[chefs_src_param('longitudeMinutes')], submission[chefs_src_param('longitudeSeconds')])
+      submission[helper.chefs_src_param('latitudeDegrees')], submission[helper.chefs_src_param('latitudeMinutes')], submission[helper.chefs_src_param('latitudeSeconds')], 
+      submission[helper.chefs_src_param('longitudeDegrees')], submission[helper.chefs_src_param('longitudeMinutes')], submission[helper.chefs_src_param('longitudeSeconds')])
 
-    _src_dic['landOwnership'] = create_land_ownership(submission, chefs_src_param('landOwnership'))
-    _src_dic['regionalDistrict'] = create_regional_district(submission, chefs_src_param('regionalDistrict'))
-    _src_dic['legallyTitledSiteAddress'] = submission.get(chefs_src_param('legallyTitledSiteAddress'))
-    _src_dic['legallyTitledSiteCity'] = submission.get(chefs_src_param('legallyTitledSiteCity'))
-    _src_dic['legallyTitledSitePostalCode'] = submission.get(chefs_src_param('legallyTitledSitePostalCode'))
-    _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, chefs_src_param('crownLandFileNumbers'))
+    _src_dic['landOwnership'] = create_land_ownership(submission, helper.chefs_src_param('landOwnership'))
+    _src_dic['regionalDistrict'] = create_regional_district(submission, helper.chefs_src_param('regionalDistrict'))
+    _src_dic['legallyTitledSiteAddress'] = submission.get(helper.chefs_src_param('legallyTitledSiteAddress'))
+    _src_dic['legallyTitledSiteCity'] = submission.get(helper.chefs_src_param('legallyTitledSiteCity'))
+    _src_dic['legallyTitledSitePostalCode'] = submission.get(helper.chefs_src_param('legallyTitledSitePostalCode'))
+    _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, helper.chefs_src_param('crownLandFileNumbers'))
 
-    #PIN, PIN, description
-    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, chefs_src_param('pidDataGrid'), chefs_src_param('pid'), chefs_src_param('pidDesc'))  #PID
+    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_src_param('pidDataGrid'), helper.chefs_src_param('pid'), helper.chefs_src_param('pidDesc'))  #PID
     if (_src_dic['PID'] is None or _src_dic['PID'].strip() == ''): #PIN
-      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, chefs_src_param('pinDataGrid'), chefs_src_param('pin'), chefs_src_param('pinDesc'))
+      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_src_param('pinDataGrid'), helper.chefs_src_param('pin'), helper.chefs_src_param('pinDesc'))
     if ((_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
         and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, chefs_src_param('untitledMunicipalLand'), chefs_src_param('untitledMunicipalLandDesc'))
+      _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, helper.chefs_src_param('untitledMunicipalLand'), helper.chefs_src_param('untitledMunicipalLandDesc'))
 
-    if submission.get(chefs_src_param('sourceSiteLandUse')) is not None and len(submission.get(chefs_src_param('sourceSiteLandUse'))) > 0 : 
+    if submission.get(helper.chefs_src_param('sourceSiteLandUse')) is not None and len(submission.get(helper.chefs_src_param('sourceSiteLandUse'))) > 0 : 
       _source_site_land_uses = []
-      for _ref_source_site in submission.get(chefs_src_param('sourceSiteLandUse')):
-        _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
+      for _ref_source_site in submission.get(helper.chefs_src_param('sourceSiteLandUse')):
+        _source_site_land_uses.append(helper.convert_source_site_use_to_name(_ref_source_site))
       _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-    _src_dic['highVolumeSite'] = submission.get(chefs_src_param('highVolumeSite'))
-    _src_dic['soilRelocationPurpose'] = submission.get(chefs_src_param('soilRelocationPurpose'))
-    _src_dic['soilStorageType'] = submission.get(chefs_src_param('soilStorageType'))
+    _src_dic['highVolumeSite'] = submission.get(helper.chefs_src_param('highVolumeSite'))
+    _src_dic['soilRelocationPurpose'] = submission.get(helper.chefs_src_param('soilRelocationPurpose'))
+    _src_dic['soilStorageType'] = submission.get(helper.chefs_src_param('soilStorageType'))
 
-    # Soil Volume
-    create_soil_volumes(submission, chefs_src_param('soilVolumeDataGrid'), chefs_src_param('soilVolume'), chefs_src_param('soilClassificationSource'), _src_dic)
+    create_soil_volumes(submission, helper.chefs_src_param('soilVolumeDataGrid'), helper.chefs_src_param('soilVolume'), helper.chefs_src_param('soilClassificationSource'), _src_dic)
 
-    _src_dic['soilCharacterMethod'] = submission.get(chefs_src_param('soilCharacterMethod'))
-    _src_dic['vapourExemption'] = submission.get(chefs_src_param('vapourExemption'))
-    _src_dic['vapourExemptionDesc'] = submission.get(chefs_src_param('vapourExemptionDesc'))
-    _src_dic['vapourCharacterMethodDesc'] = submission.get(chefs_src_param('vapourCharacterMethodDesc'))
-    _src_dic['soilRelocationStartDate'] = helper.convert_simple_datetime_format_in_str(submission.get(chefs_src_param('soilRelocationStartDate')))
-    _src_dic['soilRelocationCompletionDate'] = helper.convert_simple_datetime_format_in_str(submission.get(chefs_src_param('soilRelocationCompletionDate')))
-    _src_dic['relocationMethod'] = submission.get(chefs_src_param('relocationMethod'))
-    _src_dic['qualifiedProfessionalFirstName'] = submission.get(chefs_src_param('qualifiedProfessionalFirstName'))
-    _src_dic['qualifiedProfessionalLastName'] = submission.get(chefs_src_param('qualifiedProfessionalLastName'))
-    _src_dic['qualifiedProfessionalType'] = submission.get(chefs_src_param('qualifiedProfessionalType'))
-    _src_dic['professionalLicenceRegistration'] = submission.get(chefs_src_param('professionalLicenceRegistration'))
-    _src_dic['qualifiedProfessionalOrganization'] = submission.get(chefs_src_param('qualifiedProfessionalOrganization'))
-    _src_dic['qualifiedProfessionalAddress'] = submission.get(chefs_src_param('qualifiedProfessionalAddress'))
-    _src_dic['qualifiedProfessionalCity'] = submission.get(chefs_src_param('qualifiedProfessionalCity'))
-    _src_dic['qualifiedProfessionalProvince'] = submission.get(chefs_src_param('qualifiedProfessionalProvince'))
-    _src_dic['qualifiedProfessionalCountry'] = submission.get(chefs_src_param('qualifiedProfessionalCountry'))
-    _src_dic['qualifiedProfessionalPostalCode'] = submission.get(chefs_src_param('qualifiedProfessionalPostalCode'))
-    _src_dic['qualifiedProfessionalPhoneNumber'] = submission.get(chefs_src_param('qualifiedProfessionalPhoneNumber'))
-    _src_dic['qualifiedProfessionalEmail'] = submission.get(chefs_src_param('qualifiedProfessionalEmail'))
-    _src_dic['signaturerFirstAndLastName'] = submission.get(chefs_src_param('signaturerFirstAndLastName'))
-    _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get(chefs_src_param('dateSigned')))
-    _src_dic['createAt'] = helper.get_create_date(submission, chefs_src_param('form'), chefs_src_param('createdAt'))
+    _src_dic['soilCharacterMethod'] = submission.get(helper.chefs_src_param('soilCharacterMethod'))
+    _src_dic['vapourExemption'] = submission.get(helper.chefs_src_param('vapourExemption'))
+    _src_dic['vapourExemptionDesc'] = submission.get(helper.chefs_src_param('vapourExemptionDesc'))
+    _src_dic['vapourCharacterMethodDesc'] = submission.get(helper.chefs_src_param('vapourCharacterMethodDesc'))
+    _src_dic['soilRelocationStartDate'] = helper.convert_simple_datetime_format_in_str(submission.get(helper.chefs_src_param('soilRelocationStartDate')))
+    _src_dic['soilRelocationCompletionDate'] = helper.convert_simple_datetime_format_in_str(submission.get(helper.chefs_src_param('soilRelocationCompletionDate')))
+    _src_dic['relocationMethod'] = submission.get(helper.chefs_src_param('relocationMethod'))
+    _src_dic['qualifiedProfessionalFirstName'] = submission.get(helper.chefs_src_param('qualifiedProfessionalFirstName'))
+    _src_dic['qualifiedProfessionalLastName'] = submission.get(helper.chefs_src_param('qualifiedProfessionalLastName'))
+    _src_dic['qualifiedProfessionalType'] = submission.get(helper.chefs_src_param('qualifiedProfessionalType'))
+    _src_dic['professionalLicenceRegistration'] = submission.get(helper.chefs_src_param('professionalLicenceRegistration'))
+    _src_dic['qualifiedProfessionalOrganization'] = submission.get(helper.chefs_src_param('qualifiedProfessionalOrganization'))
+    _src_dic['qualifiedProfessionalAddress'] = submission.get(helper.chefs_src_param('qualifiedProfessionalAddress'))
+    _src_dic['qualifiedProfessionalCity'] = submission.get(helper.chefs_src_param('qualifiedProfessionalCity'))
+    _src_dic['qualifiedProfessionalProvince'] = submission.get(helper.chefs_src_param('qualifiedProfessionalProvince'))
+    _src_dic['qualifiedProfessionalCountry'] = submission.get(helper.chefs_src_param('qualifiedProfessionalCountry'))
+    _src_dic['qualifiedProfessionalPostalCode'] = submission.get(helper.chefs_src_param('qualifiedProfessionalPostalCode'))
+    _src_dic['qualifiedProfessionalPhoneNumber'] = submission.get(helper.chefs_src_param('qualifiedProfessionalPhoneNumber'))
+    _src_dic['qualifiedProfessionalEmail'] = submission.get(helper.chefs_src_param('qualifiedProfessionalEmail'))
+    _src_dic['signaturerFirstAndLastName'] = submission.get(helper.chefs_src_param('signaturerFirstAndLastName'))
+    _src_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get(helper.chefs_src_param('dateSigned')))
+    _src_dic['createAt'] = helper.get_create_date(submission, helper.chefs_src_param('form'), helper.chefs_src_param('createdAt'))
     _src_dic['confirmationId'] = _confirmation_id
-
   return _src_dic
 
 def map_rcv_site(submission, rcv_clz):
   _rcv_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission, chefs_rcv_param('form', rcv_clz), chefs_rcv_param('confirmationId', rcv_clz))
-  if (helper.validate_lat_lon(submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)), submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)), submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)), 
-                              submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)), submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)), submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
+  _confirmation_id = helper.get_confirm_id(submission, helper.chefs_rcv_param('form', rcv_clz), helper.chefs_rcv_param('confirmationId', rcv_clz))
+  if (helper.validate_additional_rcv_site(submission, rcv_clz) and
+      helper.validate_lat_lon(submission.get(helper.chefs_rcv_param('latitudeDegrees', rcv_clz)), submission.get(helper.chefs_rcv_param('latitudeMinutes', rcv_clz)), submission.get(helper.chefs_rcv_param('latitudeSeconds', rcv_clz)), 
+                              submission.get(helper.chefs_rcv_param('longitudeDegrees', rcv_clz)), submission.get(helper.chefs_rcv_param('longitudeMinutes', rcv_clz)), submission.get(helper.chefs_rcv_param('longitudeSeconds', rcv_clz)),
                               _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
   ):
-    #print("Mapping 1st receiver ...")
 
     for rcv_header in constant.RECEIVING_SITE_HEADERS:
       _rcv_dic[rcv_header] = None
 
-    _rcv_dic['ownerFirstName'] = submission.get(chefs_rcv_param('ownerFirstName', rcv_clz))
-    _rcv_dic['ownerLastName'] = submission.get(chefs_rcv_param('ownerLastName', rcv_clz))
-    _rcv_dic['ownerCompany'] = submission.get(chefs_rcv_param('ownerCompany', rcv_clz))
-    _rcv_dic['ownerAddress'] = submission.get(chefs_rcv_param('ownerAddress', rcv_clz))
-    _rcv_dic['ownerCity'] = submission.get(chefs_rcv_param('ownerCity', rcv_clz))
-    _rcv_dic['ownerProvince'] = submission.get(chefs_rcv_param('ownerProvince', rcv_clz))
-    _rcv_dic['ownerCountry'] = submission.get(chefs_rcv_param('ownerCountry', rcv_clz))
-    _rcv_dic['ownerPostalCode'] = submission.get(chefs_rcv_param('ownerPostalCode', rcv_clz))
-    _rcv_dic['ownerPhoneNumber'] = submission.get(chefs_rcv_param('ownerPhoneNumber', rcv_clz))
-    _rcv_dic['ownerEmail'] = submission.get(chefs_rcv_param('ownerEmail', rcv_clz))
+    _rcv_dic['ownerFirstName'] = submission.get(helper.chefs_rcv_param('ownerFirstName', rcv_clz))
+    _rcv_dic['ownerLastName'] = submission.get(helper.chefs_rcv_param('ownerLastName', rcv_clz))
+    _rcv_dic['ownerCompany'] = submission.get(helper.chefs_rcv_param('ownerCompany', rcv_clz))
+    _rcv_dic['ownerAddress'] = submission.get(helper.chefs_rcv_param('ownerAddress', rcv_clz))
+    _rcv_dic['ownerCity'] = submission.get(helper.chefs_rcv_param('ownerCity', rcv_clz))
+    _rcv_dic['ownerProvince'] = submission.get(helper.chefs_rcv_param('ownerProvince', rcv_clz))
+    _rcv_dic['ownerCountry'] = submission.get(helper.chefs_rcv_param('ownerCountry', rcv_clz))
+    _rcv_dic['ownerPostalCode'] = submission.get(helper.chefs_rcv_param('ownerPostalCode', rcv_clz))
+    _rcv_dic['ownerPhoneNumber'] = submission.get(helper.chefs_rcv_param('ownerPhoneNumber', rcv_clz))
+    _rcv_dic['ownerEmail'] = submission.get(helper.chefs_rcv_param('ownerEmail', rcv_clz))
 
-    _rcv_dic['owner2FirstName'] = submission.get(chefs_rcv_param('owner2FirstName', rcv_clz))
-    _rcv_dic['owner2LastName'] = submission.get(chefs_rcv_param('owner2LastName', rcv_clz))
-    _rcv_dic['owner2Company'] = submission.get(chefs_rcv_param('owner2Company', rcv_clz))
-    _rcv_dic['owner2Address'] = submission.get(chefs_rcv_param('owner2Address', rcv_clz))
-    _rcv_dic['owner2City'] = submission.get(chefs_rcv_param('owner2City', rcv_clz))
-    _rcv_dic['owner2Province'] = submission.get(chefs_rcv_param('owner2Province', rcv_clz))
-    _rcv_dic['owner2Country'] = submission.get(chefs_rcv_param('owner2Country', rcv_clz))
-    _rcv_dic['owner2PostalCode'] = submission.get(chefs_rcv_param('owner2PostalCode', rcv_clz))
-    _rcv_dic['owner2PhoneNumber'] = submission.get(chefs_rcv_param('owner2PhoneNumber', rcv_clz))
-    _rcv_dic['owner2Email'] = submission.get(chefs_rcv_param('owner2Email', rcv_clz))
+    _rcv_dic['owner2FirstName'] = submission.get(helper.chefs_rcv_param('owner2FirstName', rcv_clz))
+    _rcv_dic['owner2LastName'] = submission.get(helper.chefs_rcv_param('owner2LastName', rcv_clz))
+    _rcv_dic['owner2Company'] = submission.get(helper.chefs_rcv_param('owner2Company', rcv_clz))
+    _rcv_dic['owner2Address'] = submission.get(helper.chefs_rcv_param('owner2Address', rcv_clz))
+    _rcv_dic['owner2City'] = submission.get(helper.chefs_rcv_param('owner2City', rcv_clz))
+    _rcv_dic['owner2Province'] = submission.get(helper.chefs_rcv_param('owner2Province', rcv_clz))
+    _rcv_dic['owner2Country'] = submission.get(helper.chefs_rcv_param('owner2Country', rcv_clz))
+    _rcv_dic['owner2PostalCode'] = submission.get(helper.chefs_rcv_param('owner2PostalCode', rcv_clz))
+    _rcv_dic['owner2PhoneNumber'] = submission.get(helper.chefs_rcv_param('owner2PhoneNumber', rcv_clz))
+    _rcv_dic['owner2Email'] = submission.get(helper.chefs_rcv_param('owner2Email', rcv_clz))
 
-    _rcv_dic['additionalOwners'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactFirstName'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactLastName'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactCompany'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactAddress'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactCity'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactProvince'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactCountry'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactPostalCode'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactPhoneNumber'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactEmail'] = submission.get(chefs_rcv_param('', rcv_clz))
-    _rcv_dic['SID'] = submission.get(chefs_rcv_param('', rcv_clz))
+    _rcv_dic['additionalOwners'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactFirstName'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactLastName'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactCompany'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactAddress'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactCity'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactProvince'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactCountry'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactPostalCode'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactPhoneNumber'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['contactEmail'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['SID'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
 
     _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
-      submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)), submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)), submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)), 
-      submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)), submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)), submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)))
+      submission.get(helper.chefs_rcv_param('latitudeDegrees', rcv_clz)), submission.get(helper.chefs_rcv_param('latitudeMinutes', rcv_clz)), submission.get(helper.chefs_rcv_param('latitudeSeconds', rcv_clz)), 
+      submission.get(helper.chefs_rcv_param('longitudeDegrees', rcv_clz)), submission.get(helper.chefs_rcv_param('longitudeMinutes', rcv_clz)), submission.get(helper.chefs_rcv_param('longitudeSeconds', rcv_clz)))
     _rcv_dic['latitude'] = _rcv_lat
     _rcv_dic['longitude'] = _rcv_lon
 
-    _rcv_dic['regionalDistrict'] = create_regional_district(submission, chefs_rcv_param('regionalDistrict', rcv_clz))
-    _rcv_dic['landOwnership'] = create_land_ownership(submission, chefs_rcv_param('landOwnership', rcv_clz))
+    _rcv_dic['regionalDistrict'] = create_regional_district(submission, helper.chefs_rcv_param('regionalDistrict', rcv_clz))
+    _rcv_dic['landOwnership'] = create_land_ownership(submission, helper.chefs_rcv_param('landOwnership', rcv_clz))
 
-    _rcv_dic['legallyTitledSiteAddress'] = submission.get(chefs_rcv_param('legallyTitledSiteAddress', rcv_clz))
-    _rcv_dic['legallyTitledSiteCity'] = submission.get(chefs_rcv_param('legallyTitledSiteCity', rcv_clz))
-    _rcv_dic['legallyTitledSitePostalCode'] = submission.get(chefs_rcv_param('legallyTitledSitePostalCode', rcv_clz))
+    _rcv_dic['legallyTitledSiteAddress'] = submission.get(helper.chefs_rcv_param('legallyTitledSiteAddress', rcv_clz))
+    _rcv_dic['legallyTitledSiteCity'] = submission.get(helper.chefs_rcv_param('legallyTitledSiteCity', rcv_clz))
+    _rcv_dic['legallyTitledSitePostalCode'] = submission.get(helper.chefs_rcv_param('legallyTitledSitePostalCode', rcv_clz))
 
-    #PIN, PIN, description
-    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, chefs_rcv_param('pidDataGrid', rcv_clz), chefs_rcv_param('pid', rcv_clz), chefs_rcv_param('pidDesc', rcv_clz))  #PID
+    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_rcv_param('pidDataGrid', rcv_clz), helper.chefs_rcv_param('pid', rcv_clz), helper.chefs_rcv_param('pidDesc', rcv_clz))  #PID
     if (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''): #PIN
-      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, chefs_rcv_param('pinDataGrid', rcv_clz), chefs_rcv_param('pin', rcv_clz), chefs_rcv_param('pinDesc', rcv_clz))
+      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_rcv_param('pinDataGrid', rcv_clz), helper.chefs_rcv_param('pin', rcv_clz), helper.chefs_rcv_param('pinDesc', rcv_clz))
     if ((_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
         and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, chefs_rcv_param('untitledMunicipalLand', rcv_clz), chefs_rcv_param('untitledMunicipalLandDesc', rcv_clz))
+      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, helper.chefs_rcv_param('untitledMunicipalLand', rcv_clz), helper.chefs_rcv_param('untitledMunicipalLandDesc', rcv_clz))
 
-    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, chefs_rcv_param('crownLandFileNumbers', rcv_clz))
-    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, chefs_rcv_param('receivingSiteLandUse', rcv_clz))
+    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, helper.chefs_rcv_param('crownLandFileNumbers', rcv_clz))
+    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, helper.chefs_rcv_param('receivingSiteLandUse', rcv_clz))
 
-    _rcv_dic['CSRFactors'] = submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
-    _rcv_dic['relocatedSoilUse'] = submission.get(chefs_rcv_param('relocatedSoilUse', rcv_clz))
-    _rcv_dic['highVolumeSite'] = submission.get(chefs_rcv_param('highVolumeSite', rcv_clz))
-    _rcv_dic['soilDepositIsALR'] = submission.get(chefs_rcv_param('soilDepositIsALR', rcv_clz))
-    _rcv_dic['soilDepositIsReserveLands'] = submission.get(chefs_rcv_param('soilDepositIsReserveLands', rcv_clz))
-    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get(chefs_rcv_param('dateSigned', rcv_clz)))    
-    _rcv_dic['createAt'] = helper.get_create_date(submission, chefs_rcv_param('form', rcv_clz), chefs_rcv_param('createdAt', rcv_clz))
-    _rcv_dic['confirmationId'] = _confirmation_id
-  return _rcv_dic
-
-def map_rcv_3rd_rcver(submission):
-  _rcv_dic = {}
-  _confirmation_id = helper.get_confirm_id(submission, 'form', 'confirmationId')
-  if (helper.is_not_none_true(submission.get('secondadditionalReceivingSites1').get('secondAdditionalReceivingSiteInformation')) and
-      helper.validate_lat_lon(submission.get("C2-Latitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Latitude-Minutes3SecondAdditionalreceivingSite"), submission.get("Section2-Latitude-Seconds4SecondAdditionalreceivingSite"), 
-                              submission.get("C2-Longitude-Degrees3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Minutes3SecondAdditionalreceivingSite"), submission.get("C2-Longitude-Seconds3SecondAdditionalreceivingSite"),
-                              _confirmation_id, 'Soil Relocation Notification Form-Receiving Site')
-  ):  
-    #print("Mapping 3rd receiver ...")
-
-    for rcv_header in constant.RECEIVING_SITE_HEADERS:
-      _rcv_dic[rcv_header] = None
-
-    _rcv_dic['ownerFirstName'] = submission["C1-FirstName6SecondAdditionalreceivingSite"]
-    _rcv_dic['ownerLastName'] = submission["C1-LastName6SecondAdditionalreceivingSite"]
-    _rcv_dic['ownerCompany'] = submission["C1-Company6SecondAdditionalreceivingSite"]
-    _rcv_dic['ownerAddress'] = submission["C1-Address6SecondAdditionalreceivingSite"]
-    _rcv_dic['ownerCity'] = submission["C1-City6SecondAdditionalreceivingSite"]
-    _rcv_dic['ownerProvince'] = submission["A1-secondadditionalreceivingsiteownerProvinceState10"]    
-    _rcv_dic['ownerCountry'] = submission["A1-secondadditionalreceivingsiteownerCountry10"]
-    _rcv_dic['ownerPostalCode'] = submission["A1-secondadditionalreceivingsiteownerPostalCode9"]
-    _rcv_dic['ownerPhoneNumber'] = submission["phoneNumber7SecondAdditionalreceivingSite"]
-    _rcv_dic['ownerEmail'] = submission["C1-Email6SecondAdditionalreceivingSite"]
-
-    _rcv_dic['owner2FirstName'] = submission["C1-FirstName7SecondAdditionalreceivingSite"]
-    _rcv_dic['owner2LastName'] = submission["C1-LastName7SecondAdditionalreceivingSite"]
-    _rcv_dic['owner2Company'] = submission["C1-Company7SecondAdditionalreceivingSite"]
-    _rcv_dic['owner2Address'] = submission["C1-Address7SecondAdditionalreceivingSite"]
-    _rcv_dic['owner2City'] = submission["C1-City7SecondAdditionalreceivingSite"]
-    _rcv_dic['owner2Province'] = submission["A1-secondadditionalreceivingsiteadditionalownerProvinceState11"]
-    _rcv_dic['owner2Country'] = submission["A1-secondadditionalreceivingsiteadditionalownerCountry11"]
-    _rcv_dic['owner2PostalCode'] = submission["A1-secondadditionalreceivingsiteadditionalownerPostalCode10"]    
-    _rcv_dic['owner2PhoneNumber'] = submission["phoneNumber5SecondAdditionalreceivingSite"]
-    _rcv_dic['owner2Email'] = submission["C1-Email7SecondAdditionalreceivingSite"]
-
-    _rcv_dic['additionalOwners'] = submission["C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow4SecondAdditionalreceivingSite"]
-    _rcv_dic['contactFirstName'] = submission["C2-RSC-FirstName3SecondAdditionalreceivingSite"]
-    _rcv_dic['contactLastName'] = submission["C2-RSC-LastName3SecondAdditionalreceivingSite"]
-    _rcv_dic['contactCompany'] = submission["C2-RSC-Company3SecondAdditionalreceivingSite"]
-    _rcv_dic['contactAddress'] = submission["C2-RSC-Address3SecondAdditionalreceivingSite"]
-    _rcv_dic['contactCity'] = submission["C2-RSC-City3SecondAdditionalreceivingSite"]
-    _rcv_dic['contactProvince'] = submission["A1-firstadditionalreceivingsitecontactProvinceState9"]
-    _rcv_dic['contactCountry'] = submission["A1-secondadditionalreceivingsitecontactrCountry12"]
-    _rcv_dic['contactPostalCode'] = submission["A1-secondadditionalreceivingsitecontactPostalCode11"]
-
-    _rcv_dic['contactPhoneNumber'] = submission["phoneNumber6SecondAdditionalreceivingSite"]
-    _rcv_dic['contactEmail'] = submission["C2-RSC-Email3SecondAdditionalreceivingSite"]
-    if submission.get("C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite") is not None : _rcv_dic['SID'] = submission["C2-siteIdentificationNumberSiteIdIfAvailable3SecondAdditionalreceivingSite"]
-
-    _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
-      submission["C2-Latitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Latitude-Minutes3SecondAdditionalreceivingSite"], submission["Section2-Latitude-Seconds4SecondAdditionalreceivingSite"], 
-      submission["C2-Longitude-Degrees3SecondAdditionalreceivingSite"], submission["C2-Longitude-Minutes3SecondAdditionalreceivingSite"], submission["C2-Longitude-Seconds3SecondAdditionalreceivingSite"])
-    _rcv_dic['latitude'] = _rcv_lat
-    _rcv_dic['longitude'] = _rcv_lon
-
-    _rcv_dic['regionalDistrict'] = create_regional_district(submission, 'SecondAdditionalReceivingSiteregionalDistrict')
-    _rcv_dic['landOwnership'] = create_land_ownership(submission, 'Secondadditionalreceiving-landOwnership-checkbox3')
-
-    if submission.get("C2-LegallyTitled-Address3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSiteAddress'] = submission["C2-LegallyTitled-Address3SecondAdditionalreceivingSite"]
-    if submission.get("C2-LegallyTitled-City3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSiteCity'] = submission["C2-LegallyTitled-City3SecondAdditionalreceivingSite"]
-    if submission.get("C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite") is not None : _rcv_dic['legallyTitledSitePostalCode'] = submission["C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite"]
-
-    #PIN, PIN, description
-    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid4', 'A-LegallyTitled-PIDSecondAdditionalreceivingSite', 'legalLandDescriptionSecondAdditionalreceivingSite')  #PID
-    if (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''): #PIN
-      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, 'dataGrid7', 'A-UntitledCrownLand-PINSecondAdditionalreceivingSite', 'UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite')
-    if ((_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
-        and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, 'A-UntitledMunicipalLand-PIDColumn3', 'legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite')
-
-    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, 'A-UntitledCrownLand-FileNumberColumn2')        
-    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, 'C3-soilClassification4SecondAdditionalreceivingSite')
-
-    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite") is not None : _rcv_dic['CSRFactors'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite"]
-    if submission.get("C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite") is not None : _rcv_dic['relocatedSoilUse'] = submission["C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite"]
-    if submission.get("C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3") is not None : _rcv_dic['highVolumeSite'] = submission["C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3"]
-    if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3") is not None : _rcv_dic['soilDepositIsALR'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3"]
-    if submission.get("D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3") is not None : _rcv_dic['soilDepositIsReserveLands'] = submission["D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3"]
-    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get("simpledatetime"))       
-    _rcv_dic['createAt'] = helper.get_create_date(submission, 'form', 'createdAt')
+    _rcv_dic['CSRFactors'] = submission.get(helper.chefs_rcv_param('CSRFactors', rcv_clz))
+    _rcv_dic['relocatedSoilUse'] = submission.get(helper.chefs_rcv_param('relocatedSoilUse', rcv_clz))
+    _rcv_dic['highVolumeSite'] = submission.get(helper.chefs_rcv_param('highVolumeSite', rcv_clz))
+    _rcv_dic['soilDepositIsALR'] = submission.get(helper.chefs_rcv_param('soilDepositIsALR', rcv_clz))
+    _rcv_dic['soilDepositIsReserveLands'] = submission.get(helper.chefs_rcv_param('soilDepositIsReserveLands', rcv_clz))
+    _rcv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(submission.get(helper.chefs_rcv_param('dateSigned', rcv_clz)))    
+    _rcv_dic['createAt'] = helper.get_create_date(submission, helper.chefs_rcv_param('form', rcv_clz), helper.chefs_rcv_param('createdAt', rcv_clz))
     _rcv_dic['confirmationId'] = _confirmation_id
   return _rcv_dic
 
 def map_hv_site(hvs):
   _hv_dic = {}
-  _confirmation_id = helper.get_confirm_id(hvs, chefs_hv_param('form'), chefs_hv_param('confirmationId'))
-  if (helper.validate_lat_lon(hvs.get(chefs_hv_param('latitudeDegrees')), hvs.get(chefs_hv_param('latitudeMinutes')), hvs.get(chefs_hv_param('latitudeSeconds')), 
-                              hvs.get(chefs_hv_param('longitudeDegrees')), hvs.get(chefs_hv_param('longitudeMinutes')), hvs.get(chefs_hv_param('longitudeSeconds')),
+  _confirmation_id = helper.get_confirm_id(hvs, helper.chefs_hv_param('form'), helper.chefs_hv_param('confirmationId'))
+  if (helper.validate_lat_lon(hvs.get(helper.chefs_hv_param('latitudeDegrees')), hvs.get(helper.chefs_hv_param('latitudeMinutes')), hvs.get(helper.chefs_hv_param('latitudeSeconds')), 
+                              hvs.get(helper.chefs_hv_param('longitudeDegrees')), hvs.get(helper.chefs_hv_param('longitudeMinutes')), hvs.get(helper.chefs_hv_param('longitudeSeconds')),
                               _confirmation_id, 'High Volume Receiving Site Form')
   ):
     #print("Mapping high volume site ...")
-
-    # initialize
     for hv_header in constant.HV_SITE_HEADERS:
       _hv_dic[hv_header] = None
 
-    _hv_dic['ownerFirstName'] = hvs.get(chefs_hv_param('ownerFirstName'))
-    _hv_dic['ownerLastName'] = hvs.get(chefs_hv_param('ownerLastName'))
-    _hv_dic['ownerCompany'] = hvs.get(chefs_hv_param('ownerCompany'))
-    _hv_dic['ownerAddress'] = hvs.get(chefs_hv_param('ownerAddress'))
-    _hv_dic['ownerCity'] = hvs.get(chefs_hv_param('ownerCity'))
-    _hv_dic['ownerProvince'] = hvs.get(chefs_hv_param('ownerProvince'))
-    _hv_dic['ownerCountry'] = hvs.get(chefs_hv_param('ownerCountry'))
-    _hv_dic['ownerPostalCode'] = hvs.get(chefs_hv_param('ownerPostalCode'))
-    _hv_dic['ownerPhoneNumber'] = hvs.get(chefs_hv_param('ownerPhoneNumber'))
-    _hv_dic['ownerEmail'] = hvs.get(chefs_hv_param('ownerEmail'))
-    _hv_dic['owner2FirstName'] = hvs.get(chefs_hv_param('owner2FirstName'))
-    _hv_dic['owner2LastName'] = hvs.get(chefs_hv_param('owner2LastName'))
-    _hv_dic['owner2Company'] = hvs.get(chefs_hv_param('owner2Company'))
-    _hv_dic['owner2Address'] = hvs.get(chefs_hv_param('owner2Address'))
-    _hv_dic['owner2City'] = hvs.get(chefs_hv_param('owner2City'))
-    _hv_dic['owner2Province'] = hvs.get(chefs_hv_param('owner2Province'))
-    _hv_dic['owner2Country'] = hvs.get(chefs_hv_param('owner2Country'))
-    _hv_dic['owner2PostalCode'] = hvs.get(chefs_hv_param('owner2PostalCode'))
-    _hv_dic['owner2PhoneNumber'] = hvs.get(chefs_hv_param('owner2PhoneNumber'))
-    _hv_dic['owner2Email'] = hvs.get(chefs_hv_param('owner2Email'))
-    _hv_dic['additionalOwners'] = hvs.get(chefs_hv_param('additionalOwners'))
-    _hv_dic['contactFirstName'] = hvs.get(chefs_hv_param('contactFirstName'))
-    _hv_dic['contactLastName'] = hvs.get(chefs_hv_param('contactLastName'))
-    _hv_dic['contactCompany'] = hvs.get(chefs_hv_param('contactCompany'))
-    _hv_dic['contactAddress'] = hvs.get(chefs_hv_param('contactAddress'))
-    _hv_dic['contactCity'] = hvs.get(chefs_hv_param('contactCity'))
-    _hv_dic['contactProvince'] = hvs.get(chefs_hv_param('contactProvince'))
-    _hv_dic['contactCountry'] = hvs.get(chefs_hv_param('contactCountry'))
-    _hv_dic['contactPostalCode'] = hvs.get(chefs_hv_param('contactPostalCode'))
-    _hv_dic['contactPhoneNumber'] = hvs.get(chefs_hv_param('contactPhoneNumber'))
-    _hv_dic['contactEmail'] = hvs.get(chefs_hv_param('contactEmail'))
-    _hv_dic['SID'] = hvs.get(chefs_hv_param('SID'))
+    _hv_dic['ownerFirstName'] = hvs.get(helper.chefs_hv_param('ownerFirstName'))
+    _hv_dic['ownerLastName'] = hvs.get(helper.chefs_hv_param('ownerLastName'))
+    _hv_dic['ownerCompany'] = hvs.get(helper.chefs_hv_param('ownerCompany'))
+    _hv_dic['ownerAddress'] = hvs.get(helper.chefs_hv_param('ownerAddress'))
+    _hv_dic['ownerCity'] = hvs.get(helper.chefs_hv_param('ownerCity'))
+    _hv_dic['ownerProvince'] = hvs.get(helper.chefs_hv_param('ownerProvince'))
+    _hv_dic['ownerCountry'] = hvs.get(helper.chefs_hv_param('ownerCountry'))
+    _hv_dic['ownerPostalCode'] = hvs.get(helper.chefs_hv_param('ownerPostalCode'))
+    _hv_dic['ownerPhoneNumber'] = hvs.get(helper.chefs_hv_param('ownerPhoneNumber'))
+    _hv_dic['ownerEmail'] = hvs.get(helper.chefs_hv_param('ownerEmail'))
+    _hv_dic['owner2FirstName'] = hvs.get(helper.chefs_hv_param('owner2FirstName'))
+    _hv_dic['owner2LastName'] = hvs.get(helper.chefs_hv_param('owner2LastName'))
+    _hv_dic['owner2Company'] = hvs.get(helper.chefs_hv_param('owner2Company'))
+    _hv_dic['owner2Address'] = hvs.get(helper.chefs_hv_param('owner2Address'))
+    _hv_dic['owner2City'] = hvs.get(helper.chefs_hv_param('owner2City'))
+    _hv_dic['owner2Province'] = hvs.get(helper.chefs_hv_param('owner2Province'))
+    _hv_dic['owner2Country'] = hvs.get(helper.chefs_hv_param('owner2Country'))
+    _hv_dic['owner2PostalCode'] = hvs.get(helper.chefs_hv_param('owner2PostalCode'))
+    _hv_dic['owner2PhoneNumber'] = hvs.get(helper.chefs_hv_param('owner2PhoneNumber'))
+    _hv_dic['owner2Email'] = hvs.get(helper.chefs_hv_param('owner2Email'))
+    _hv_dic['additionalOwners'] = hvs.get(helper.chefs_hv_param('additionalOwners'))
+    _hv_dic['contactFirstName'] = hvs.get(helper.chefs_hv_param('contactFirstName'))
+    _hv_dic['contactLastName'] = hvs.get(helper.chefs_hv_param('contactLastName'))
+    _hv_dic['contactCompany'] = hvs.get(helper.chefs_hv_param('contactCompany'))
+    _hv_dic['contactAddress'] = hvs.get(helper.chefs_hv_param('contactAddress'))
+    _hv_dic['contactCity'] = hvs.get(helper.chefs_hv_param('contactCity'))
+    _hv_dic['contactProvince'] = hvs.get(helper.chefs_hv_param('contactProvince'))
+    _hv_dic['contactCountry'] = hvs.get(helper.chefs_hv_param('contactCountry'))
+    _hv_dic['contactPostalCode'] = hvs.get(helper.chefs_hv_param('contactPostalCode'))
+    _hv_dic['contactPhoneNumber'] = hvs.get(helper.chefs_hv_param('contactPhoneNumber'))
+    _hv_dic['contactEmail'] = hvs.get(helper.chefs_hv_param('contactEmail'))
+    _hv_dic['SID'] = hvs.get(helper.chefs_hv_param('SID'))
 
     _hv_dic['latitude'], _hv_dic['longitude'] = helper.convert_deciaml_lat_long(
-      hvs[chefs_hv_param('latitudeDegrees')], hvs[chefs_hv_param('latitudeMinutes')], hvs[chefs_hv_param('latitudeSeconds')], 
-      hvs[chefs_hv_param('longitudeDegrees')], hvs[chefs_hv_param('longitudeMinutes')], hvs[chefs_hv_param('longitudeSeconds')])
+      hvs[helper.chefs_hv_param('latitudeDegrees')], hvs[helper.chefs_hv_param('latitudeMinutes')], hvs[helper.chefs_hv_param('latitudeSeconds')], 
+      hvs[helper.chefs_hv_param('longitudeDegrees')], hvs[helper.chefs_hv_param('longitudeMinutes')], hvs[helper.chefs_hv_param('longitudeSeconds')])
 
-    _hv_dic['regionalDistrict'] = create_regional_district(hvs, chefs_hv_param('regionalDistrict'))
-    _hv_dic['landOwnership'] = create_land_ownership(hvs, chefs_hv_param('landOwnership'))
-    _hv_dic['legallyTitledSiteAddress'] = hvs.get(chefs_hv_param('legallyTitledSiteAddress'))
-    _hv_dic['legallyTitledSiteCity'] = hvs.get(chefs_hv_param('legallyTitledSiteCity'))
-    _hv_dic['legallyTitledSitePostalCode'] = hvs.get(chefs_hv_param('legallyTitledSitePostalCode'))
-    #PIN, PIN, description
-    _hv_dic['PID'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, chefs_hv_param('pidDataGrid'), chefs_hv_param('pid'), chefs_hv_param('pidDesc')) #PID
+    _hv_dic['regionalDistrict'] = create_regional_district(hvs, helper.chefs_hv_param('regionalDistrict'))
+    _hv_dic['landOwnership'] = create_land_ownership(hvs, helper.chefs_hv_param('landOwnership'))
+    _hv_dic['legallyTitledSiteAddress'] = hvs.get(helper.chefs_hv_param('legallyTitledSiteAddress'))
+    _hv_dic['legallyTitledSiteCity'] = hvs.get(helper.chefs_hv_param('legallyTitledSiteCity'))
+    _hv_dic['legallyTitledSitePostalCode'] = hvs.get(helper.chefs_hv_param('legallyTitledSitePostalCode'))
+
+    _hv_dic['PID'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, helper.chefs_hv_param('pidDataGrid'), helper.chefs_hv_param('pid'), helper.chefs_hv_param('pidDesc')) #PID
     if (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == ''): #PIN
-      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, chefs_hv_param('pinDataGrid'), chefs_hv_param('pin'), chefs_hv_param('pinDesc'))
+      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, helper.chefs_hv_param('pinDataGrid'), helper.chefs_hv_param('pin'), helper.chefs_hv_param('pinDesc'))
     if ((_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
         and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _hv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(hvs, chefs_hv_param('untitledMunicipalLand'), chefs_hv_param('untitledMunicipalLandDesc'))
+      _hv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(hvs, helper.chefs_hv_param('untitledMunicipalLand'), helper.chefs_hv_param('untitledMunicipalLandDesc'))
 
-    _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(hvs, chefs_hv_param('crownLandFileNumbers'))
-    _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, chefs_hv_param('receivingSiteLandUse'))
-    _hv_dic['hvsConfirmation'] = hvs.get(chefs_hv_param('hvsConfirmation'))
-    _hv_dic['dateSiteBecameHighVolume'] = helper.convert_simple_datetime_format_in_str(hvs.get(chefs_hv_param('dateSiteBecameHighVolume')))
-    _hv_dic['howRelocatedSoilWillBeUsed'] = hvs.get(chefs_hv_param('howRelocatedSoilWillBeUsed'))
-    _hv_dic['soilDepositIsALR'] = hvs.get(chefs_hv_param('soilDepositIsALR'))
-    _hv_dic['soilDepositIsReserveLands'] = hvs.get(chefs_hv_param('soilDepositIsReserveLands'))
-    _hv_dic['qualifiedProfessionalFirstName'] = hvs.get(chefs_hv_param('qualifiedProfessionalFirstName'))
-    _hv_dic['qualifiedProfessionalLastName'] = hvs.get(chefs_hv_param('qualifiedProfessionalLastName'))
-    _hv_dic['qualifiedProfessionalType'] = hvs.get(chefs_hv_param('qualifiedProfessionalType'))
-    _hv_dic['qualifiedProfessionalOrganization'] = hvs.get(chefs_hv_param('qualifiedProfessionalOrganization'))
-    _hv_dic['professionalLicenceRegistration'] = hvs.get(chefs_hv_param('professionalLicenceRegistration'))
-    _hv_dic['qualifiedProfessionalAddress'] = hvs.get(chefs_hv_param('qualifiedProfessionalAddress'))
-    _hv_dic['qualifiedProfessionalCity'] = hvs.get(chefs_hv_param('qualifiedProfessionalCity'))
-    _hv_dic['qualifiedProfessionalProvince'] = hvs.get(chefs_hv_param('qualifiedProfessionalProvince'))
-    _hv_dic['qualifiedProfessionalCountry'] = hvs.get(chefs_hv_param('qualifiedProfessionalCountry'))
-    _hv_dic['qualifiedProfessionalPostalCode'] = hvs.get(chefs_hv_param('qualifiedProfessionalPostalCode'))
-    _hv_dic['qualifiedProfessionalPhoneNumber'] = hvs.get(chefs_hv_param('qualifiedProfessionalPhoneNumber'))
-    _hv_dic['qualifiedProfessionalEmail'] = hvs.get(chefs_hv_param('qualifiedProfessionalEmail'))
-    _hv_dic['signaturerFirstAndLastName'] = hvs.get(chefs_hv_param('signaturerFirstAndLastName'))
-    _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs.get(chefs_hv_param('dateSigned')))
-    _hv_dic['createAt'] = helper.get_create_date(hvs, chefs_hv_param('form'), chefs_hv_param('createdAt'))
+    _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(hvs, helper.chefs_hv_param('crownLandFileNumbers'))
+    _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, helper.chefs_hv_param('receivingSiteLandUse'))
+    _hv_dic['hvsConfirmation'] = hvs.get(helper.chefs_hv_param('hvsConfirmation'))
+    _hv_dic['dateSiteBecameHighVolume'] = helper.convert_simple_datetime_format_in_str(hvs.get(helper.chefs_hv_param('dateSiteBecameHighVolume')))
+    _hv_dic['howRelocatedSoilWillBeUsed'] = hvs.get(helper.chefs_hv_param('howRelocatedSoilWillBeUsed'))
+    _hv_dic['soilDepositIsALR'] = hvs.get(helper.chefs_hv_param('soilDepositIsALR'))
+    _hv_dic['soilDepositIsReserveLands'] = hvs.get(helper.chefs_hv_param('soilDepositIsReserveLands'))
+    _hv_dic['qualifiedProfessionalFirstName'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalFirstName'))
+    _hv_dic['qualifiedProfessionalLastName'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalLastName'))
+    _hv_dic['qualifiedProfessionalType'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalType'))
+    _hv_dic['qualifiedProfessionalOrganization'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalOrganization'))
+    _hv_dic['professionalLicenceRegistration'] = hvs.get(helper.chefs_hv_param('professionalLicenceRegistration'))
+    _hv_dic['qualifiedProfessionalAddress'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalAddress'))
+    _hv_dic['qualifiedProfessionalCity'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalCity'))
+    _hv_dic['qualifiedProfessionalProvince'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalProvince'))
+    _hv_dic['qualifiedProfessionalCountry'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalCountry'))
+    _hv_dic['qualifiedProfessionalPostalCode'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalPostalCode'))
+    _hv_dic['qualifiedProfessionalPhoneNumber'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalPhoneNumber'))
+    _hv_dic['qualifiedProfessionalEmail'] = hvs.get(helper.chefs_hv_param('qualifiedProfessionalEmail'))
+    _hv_dic['signaturerFirstAndLastName'] = hvs.get(helper.chefs_hv_param('signaturerFirstAndLastName'))
+    _hv_dic['dateSigned'] = helper.convert_simple_datetime_format_in_str(hvs.get(helper.chefs_hv_param('dateSigned')))
+    _hv_dic['createAt'] = helper.get_create_date(hvs, helper.chefs_hv_param('form'), helper.chefs_hv_param('createdAt'))
     _hv_dic['confirmationId'] = _confirmation_id
   return _hv_dic
 
@@ -740,7 +589,7 @@ def send_email_subscribers(today):
               _diff = helper.get_difference_datetimes_in_hour(today, _hv_site_dic['createAt'])
               if (_diff is not None and _diff <= 24):  #within the last 24 hours.
                 _hv_popup_links = create_popup_links(_hv_sites_in_rd, 'HV')
-                _hv_reg_dis = convert_regional_district_to_name(_srd)
+                _hv_reg_dis = helper.convert_regional_district_to_name(_srd)
                 _hv_email_msg = create_hv_site_email_msg(_hv_reg_dis, _hv_popup_links)
 
                 # create high volume relocation notification substriber dictionary
@@ -880,7 +729,6 @@ for hvs in hvsJson:
 
 
 print('Creating soil source site CSV...')
-print('>> current directory:' + os.getcwd())
 with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer = csv.DictWriter(f, fieldnames=constant.SOURCE_SITE_HEADERS)
   writer.writeheader()
@@ -899,7 +747,6 @@ with open(constant.HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer.writerows(hvSites)
 
 
-"""
 print('Connecting to AGOL GIS...')
 # connect to GIS
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
@@ -961,6 +808,12 @@ else:
 print('Sending subscriber emails...')
 today = datetime.datetime.now(tz=pytz.timezone('Canada/Pacific'))
 send_email_subscribers(today)
-"""
+
 
 print('Completed Soils data publishing')
+
+#### to track the version of forms (Sept/26/2022)
+# CHEFS generates new vresion of forms when changes of data fields, manages data by each version
+# 1.soil relocation form version: v9
+# 2.high volume submission version v7
+# 3.subscriber form version: v9

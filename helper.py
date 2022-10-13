@@ -172,3 +172,64 @@ def is_not_none_true(val):
     return val
   else:
     return False
+
+def chefs_rcv_param(key, rcv_clz):
+  if rcv_clz == 1: # 1st receiver
+    name = constant.CHEFS_RCV1_PARAM_DIC.get(key)
+  elif rcv_clz == 2: # 2nd receiver
+    name = constant.CHEFS_RCV2_PARAM_DIC.get(key)
+  elif rcv_clz == 3: # 3rd receiver
+    name = constant.CHEFS_RCV3_PARAM_DIC.get(key)
+
+  if name is not None:
+    return name
+  else:
+    return key
+
+def chefs_hv_param(key):
+  name = constant.CHEFS_HV_PARAM_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key
+
+def validate_additional_rcv_site(chefs_dic, rcv_clz):
+  if rcv_clz == 2 or rcv_clz == 3:
+    return is_not_none_true(chefs_dic.get(chefs_rcv_param('additionalRcvSite', rcv_clz)).get(chefs_rcv_param('additionalRcvInformation', rcv_clz)))
+  else:
+    return True
+  
+def chefs_src_param(key):
+  name = constant.CHEFS_SOURCE_PARAM_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key
+
+def convert_regional_district_to_name(key):
+  name = constant.REGIONAL_DISTRICT_NAME_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key
+
+def convert_source_site_use_to_name(key):
+  name = constant.SOURCE_SITE_USE_NAME_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key
+
+def convert_receiving_site_use_to_name(key):
+  name = constant.RECEIVING_SITE_USE_NAME_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key
+
+def convert_soil_quality_to_name(key):
+  name = constant.SOIL_QUALITY_NAME_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key    
