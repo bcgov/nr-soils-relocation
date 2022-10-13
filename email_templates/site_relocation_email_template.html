@@ -1,0 +1,23 @@
+<p>Soil Relocation Notifications are received by the ministry under section 55 of the <em>Environmental Management Act</em>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=\"https://soil-relocation-information-system-governmentofbc.hub.arcgis.com\">webpage</a>.</p>
+<p>This email is to notify you that soil is being relocated in the Regional District: <span style=font-weight:bold;color:red;>{{regional_district}}</span></p>
+<p>The following new submission(s) were received.</p>
+<p font-style:italic>
+    {% for item in popup_links %}
+    <a href=\"{{ item.href }}\">Link to new submission</a><br/>
+    {% endfor %}
+</p><br/>
+<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p>
+<p><span style=font-weight:bold;>To search the <a href=\"https://soil-relocation-information-system-governmentofbc.hub.arcgis.com\">Soil Relocation Information System</a> (SRIS):</span></p>
+<p>Click on the link above to access the web page containing information on soil movement from commercial and industrial sites in BC.</p>
+Click &#8216;view&#8217; under the <span style=font-weight:bold;>Soil Relocation Dashboard</span> and follow the search instructions below:
+<ul>
+    <li>click on the small arrow on the left of the screen  to open search options</li>
+    <li>Filter by site address, regional district, high volume sites, and more.</li>
+    <li>On the map, you can zoom to the area you interested in and click on a single location. This will bring up information on that site including the address, volume of soil being moved, start date and finish date of the soil movement.</li>
+    <li>On the map, you can also select a rectangular area and view data in csv format for all sites within that rectangle.</li>
+</ul>
+<p>You can also search for information on the <span style=font-weight:bold;>Soil Relocation Site Map</span> by clicking on &#8216;view&#8217; under the Soil relocation site map on the main page.
+<p><hr style=height:1px;border-top:dotted;color:#1c1b1b;background-color:#1c1b1b;/></p><br/><br/>
+<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>
+<span style=font-style:italic;color:#4da6ff;>You are receiving this email because you subscribed to receive email notifications of soil relocation or high-volume site registrations in select Regional Districts in BC.  If you wish to stop receiving these email notifications, please select &#8216;unsubscribe&#8217; on the subscription <a href=\"https://chefs.nrs.gov.bc.ca/app/form/submit?f={{chefs_mail_form_id}}\">form</a></span>.<br/>
+<hr style=height:4px;border:none;color:#4da6ff;background-color:#4da6ff;/>
