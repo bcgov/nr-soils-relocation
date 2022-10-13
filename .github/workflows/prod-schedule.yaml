@@ -33,6 +33,7 @@ jobs:
           pip install six
           pip install ujson
           pip install pytz
+          pip install Jinja2
       - name: execute the python script
         env:
           CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
