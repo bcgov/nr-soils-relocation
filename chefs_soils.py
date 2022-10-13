@@ -1,4 +1,4 @@
-import json, csv, copy, os
+import json, csv, os
 import urllib.parse
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
@@ -18,14 +18,6 @@ RCV_LAYER_ID = config['AGOL_ITEMS']['RCV_LAYER_ID']
 HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
 HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
 WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
-
-
-def convert_land_ownership_to_name(key):
-  name = constant.LAND_OWNERSHIP_NAME_DIC.get(key)
-  if name is not None:
-    return name
-  else:
-    return key
 
 def create_popup_link_body(_site_dic):
   _link_body = ''
@@ -63,79 +55,6 @@ def create_popup_links(sites, site_type):
 
       _popup_links += _link
   return _popup_links
-
-def create_land_file_numbers(chefs_dic, field):
-  _land_file_numbers = []
-  if chefs_dic.get(field) is not None : 
-    for _item in chefs_dic[field]:
-      for _v in _item.values():
-        if _v != '':
-          _land_file_numbers.append(_v)
-
-  if len(_land_file_numbers) > 0: 
-    _land_file_numbers = "\"" + ",".join(_land_file_numbers) + "\""   # could be more than one    
-
-  return _land_file_numbers if len(_land_file_numbers) > 0 else None
-
-def create_receiving_site_lan_uses(chefs_dic, field):
-  _land_uses = []
-  for _k, _v in chefs_dic[field].items():
-    if helper.is_not_none_true(_v):
-      _land_uses.append(helper.convert_receiving_site_use_to_name(_k))
-  if len(_land_uses) > 0:
-    _land_uses = "\"" + ",".join(_land_uses) + "\""
-  return _land_uses
-
-def create_regional_district(chefs_dic, field):
-  _regional_district = None
-  if chefs_dic.get(field) is not None and len(chefs_dic[field]) > 0: 
-    _regional_district = helper.convert_regional_district_to_name(chefs_dic[field][0])
-  return _regional_district
-
-def create_land_ownership(chefs_dic, field):
-  _land_ownership = None
-  if chefs_dic.get(field) is not None : 
-    _land_ownership = convert_land_ownership_to_name(chefs_dic[field])
-  return _land_ownership
-
-def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_dic):
-  _total_soil_volume = 0
-  _soil_volume = 0
-  if chefs_dic.get(data_grid) is not None and len(chefs_dic[data_grid]) > 0: 
-    for _dg9 in chefs_dic[data_grid]:
-      if (_dg9.get(volume_field) is not None 
-          and _dg9.get(claz_field) is not None and len(_dg9.get(claz_field)) > 0): 
-        _soil_volume = _dg9[volume_field]
-        if not helper.isfloat(_soil_volume):
-          _soil_volume = helper.extract_floating_from_string(_soil_volume)
-        _soil_volume = helper.str_to_double(_soil_volume)
-        _soil_claz = _dg9.get("B1-soilClassificationSource")
-        if helper.is_not_none_true(_soil_claz.get("urbanParkLandUsePl")):
-          working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume
-        elif helper.is_not_none_true(_soil_claz.get("commercialLandUseCl")):
-          working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume            
-        elif helper.is_not_none_true(_soil_claz.get("industrialLandUseIl")):
-          working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume            
-        elif helper.is_not_none_true(_soil_claz.get("agriculturalLandUseAl")):
-          working_dic['agriculturalLandUseSoilVolume'] = working_dic['agriculturalLandUseSoilVolume'] + _soil_volume if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume            
-        elif helper.is_not_none_true(_soil_claz.get("wildlandsNaturalLandUseWln")):
-          working_dic['wildlandsNaturalLandUseSoilVolume'] = working_dic['wildlandsNaturalLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume            
-        elif helper.is_not_none_true(_soil_claz.get("wildlandsRevertedLandUseWlr")):
-          working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume
-        elif helper.is_not_none_true(_soil_claz.get("residentialLandUseLowDensityRlld")):
-          working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume
-        elif helper.is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
-          working_dic['residentialLandUseHighDensitySoilVolume'] = working_dic['residentialLandUseHighDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
-          _total_soil_volume += _soil_volume
-    if _total_soil_volume != 0:
-      working_dic['totalSoilVolme'] = _total_soil_volume
 
 def create_site_relocation_email_msg(regional_district, popup_links):
   msg = '<p>Soil Relocation Notifications are received by the ministry under section 55 of the <i>Environmental Management Act</i>. For more information on soil relocation from commercial and industrial sites in BC, please visit our <a href=https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/>webpage</a>.</p>'
@@ -197,23 +116,6 @@ def create_hv_site_email_msg(regional_district, popup_links):
 
   return msg
 
-def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_field):
-  _pid = None
-  _desc = None
-  if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
-    if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
-      _pid = chefs_dic.get(data_grid_field)[0].get(pid_pin_field)
-      if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
-        _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
-  return _pid, _desc
-
-def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
-  _desc = None
-  if chefs_dic.get(parent_field) is not None and len(chefs_dic.get(parent_field)) > 0: 
-    if chefs_dic[parent_field][0].get(desc_field) is not None and chefs_dic[parent_field][0].get(desc_field).strip() != '':
-      _desc = chefs_dic[parent_field][0].get(desc_field).strip()
-  return _desc
-
 def map_source_site(submission):
   _src_dic = {}
   _confirmation_id = helper.get_confirm_id(submission, helper.chefs_src_param('form'), helper.chefs_src_param('confirmationId'))
@@ -263,19 +165,19 @@ def map_source_site(submission):
       submission[helper.chefs_src_param('latitudeDegrees')], submission[helper.chefs_src_param('latitudeMinutes')], submission[helper.chefs_src_param('latitudeSeconds')], 
       submission[helper.chefs_src_param('longitudeDegrees')], submission[helper.chefs_src_param('longitudeMinutes')], submission[helper.chefs_src_param('longitudeSeconds')])
 
-    _src_dic['landOwnership'] = create_land_ownership(submission, helper.chefs_src_param('landOwnership'))
-    _src_dic['regionalDistrict'] = create_regional_district(submission, helper.chefs_src_param('regionalDistrict'))
+    _src_dic['landOwnership'] = helper.create_land_ownership(submission, helper.chefs_src_param('landOwnership'))
+    _src_dic['regionalDistrict'] = helper.create_regional_district(submission, helper.chefs_src_param('regionalDistrict'))
     _src_dic['legallyTitledSiteAddress'] = submission.get(helper.chefs_src_param('legallyTitledSiteAddress'))
     _src_dic['legallyTitledSiteCity'] = submission.get(helper.chefs_src_param('legallyTitledSiteCity'))
     _src_dic['legallyTitledSitePostalCode'] = submission.get(helper.chefs_src_param('legallyTitledSitePostalCode'))
-    _src_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, helper.chefs_src_param('crownLandFileNumbers'))
+    _src_dic['crownLandFileNumbers'] = helper.create_land_file_numbers(submission, helper.chefs_src_param('crownLandFileNumbers'))
 
-    _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_src_param('pidDataGrid'), helper.chefs_src_param('pid'), helper.chefs_src_param('pidDesc'))  #PID
+    _src_dic['PID'], _src_dic['legalLandDescription'] = helper.create_pid_pin_and_desc(submission, helper.chefs_src_param('pidDataGrid'), helper.chefs_src_param('pid'), helper.chefs_src_param('pidDesc'))  #PID
     if (_src_dic['PID'] is None or _src_dic['PID'].strip() == ''): #PIN
-      _src_dic['PIN'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_src_param('pinDataGrid'), helper.chefs_src_param('pin'), helper.chefs_src_param('pinDesc'))
+      _src_dic['PIN'], _src_dic['legalLandDescription'] = helper.create_pid_pin_and_desc(submission, helper.chefs_src_param('pinDataGrid'), helper.chefs_src_param('pin'), helper.chefs_src_param('pinDesc'))
     if ((_src_dic['PID'] is None or _src_dic['PID'].strip() == '')
         and (_src_dic['PIN'] is None or _src_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _src_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, helper.chefs_src_param('untitledMunicipalLand'), helper.chefs_src_param('untitledMunicipalLandDesc'))
+      _src_dic['legalLandDescription'] = helper.create_untitled_municipal_land_desc(submission, helper.chefs_src_param('untitledMunicipalLand'), helper.chefs_src_param('untitledMunicipalLandDesc'))
 
     if submission.get(helper.chefs_src_param('sourceSiteLandUse')) is not None and len(submission.get(helper.chefs_src_param('sourceSiteLandUse'))) > 0 : 
       _source_site_land_uses = []
@@ -287,7 +189,7 @@ def map_source_site(submission):
     _src_dic['soilRelocationPurpose'] = submission.get(helper.chefs_src_param('soilRelocationPurpose'))
     _src_dic['soilStorageType'] = submission.get(helper.chefs_src_param('soilStorageType'))
 
-    create_soil_volumes(submission, helper.chefs_src_param('soilVolumeDataGrid'), helper.chefs_src_param('soilVolume'), helper.chefs_src_param('soilClassificationSource'), _src_dic)
+    helper.create_soil_volumes(submission, helper.chefs_src_param('soilVolumeDataGrid'), helper.chefs_src_param('soilVolume'), helper.chefs_src_param('soilClassificationSource'), _src_dic)
 
     _src_dic['soilCharacterMethod'] = submission.get(helper.chefs_src_param('soilCharacterMethod'))
     _src_dic['vapourExemption'] = submission.get(helper.chefs_src_param('vapourExemption'))
@@ -348,18 +250,18 @@ def map_rcv_site(submission, rcv_clz):
     _rcv_dic['owner2PhoneNumber'] = submission.get(helper.chefs_rcv_param('owner2PhoneNumber', rcv_clz))
     _rcv_dic['owner2Email'] = submission.get(helper.chefs_rcv_param('owner2Email', rcv_clz))
 
-    _rcv_dic['additionalOwners'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactFirstName'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactLastName'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactCompany'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactAddress'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactCity'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactProvince'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactCountry'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactPostalCode'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactPhoneNumber'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['contactEmail'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
-    _rcv_dic['SID'] = submission.get(helper.chefs_rcv_param('', rcv_clz))
+    _rcv_dic['additionalOwners'] = submission.get(helper.chefs_rcv_param('additionalOwners', rcv_clz))
+    _rcv_dic['contactFirstName'] = submission.get(helper.chefs_rcv_param('contactFirstName', rcv_clz))
+    _rcv_dic['contactLastName'] = submission.get(helper.chefs_rcv_param('contactLastName', rcv_clz))
+    _rcv_dic['contactCompany'] = submission.get(helper.chefs_rcv_param('contactCompany', rcv_clz))
+    _rcv_dic['contactAddress'] = submission.get(helper.chefs_rcv_param('contactAddress', rcv_clz))
+    _rcv_dic['contactCity'] = submission.get(helper.chefs_rcv_param('contactCity', rcv_clz))
+    _rcv_dic['contactProvince'] = submission.get(helper.chefs_rcv_param('contactProvince', rcv_clz))
+    _rcv_dic['contactCountry'] = submission.get(helper.chefs_rcv_param('contactCountry', rcv_clz))
+    _rcv_dic['contactPostalCode'] = submission.get(helper.chefs_rcv_param('contactPostalCode', rcv_clz))
+    _rcv_dic['contactPhoneNumber'] = submission.get(helper.chefs_rcv_param('contactPhoneNumber', rcv_clz))
+    _rcv_dic['contactEmail'] = submission.get(helper.chefs_rcv_param('contactEmail', rcv_clz))
+    _rcv_dic['SID'] = submission.get(helper.chefs_rcv_param('SID', rcv_clz))
 
     _rcv_lat, _rcv_lon = helper.convert_deciaml_lat_long(
       submission.get(helper.chefs_rcv_param('latitudeDegrees', rcv_clz)), submission.get(helper.chefs_rcv_param('latitudeMinutes', rcv_clz)), submission.get(helper.chefs_rcv_param('latitudeSeconds', rcv_clz)), 
@@ -367,22 +269,22 @@ def map_rcv_site(submission, rcv_clz):
     _rcv_dic['latitude'] = _rcv_lat
     _rcv_dic['longitude'] = _rcv_lon
 
-    _rcv_dic['regionalDistrict'] = create_regional_district(submission, helper.chefs_rcv_param('regionalDistrict', rcv_clz))
-    _rcv_dic['landOwnership'] = create_land_ownership(submission, helper.chefs_rcv_param('landOwnership', rcv_clz))
+    _rcv_dic['regionalDistrict'] = helper.create_regional_district(submission, helper.chefs_rcv_param('regionalDistrict', rcv_clz))
+    _rcv_dic['landOwnership'] = helper.create_land_ownership(submission, helper.chefs_rcv_param('landOwnership', rcv_clz))
 
     _rcv_dic['legallyTitledSiteAddress'] = submission.get(helper.chefs_rcv_param('legallyTitledSiteAddress', rcv_clz))
     _rcv_dic['legallyTitledSiteCity'] = submission.get(helper.chefs_rcv_param('legallyTitledSiteCity', rcv_clz))
     _rcv_dic['legallyTitledSitePostalCode'] = submission.get(helper.chefs_rcv_param('legallyTitledSitePostalCode', rcv_clz))
 
-    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_rcv_param('pidDataGrid', rcv_clz), helper.chefs_rcv_param('pid', rcv_clz), helper.chefs_rcv_param('pidDesc', rcv_clz))  #PID
+    _rcv_dic['PID'], _rcv_dic['legalLandDescription'] = helper.create_pid_pin_and_desc(submission, helper.chefs_rcv_param('pidDataGrid', rcv_clz), helper.chefs_rcv_param('pid', rcv_clz), helper.chefs_rcv_param('pidDesc', rcv_clz))  #PID
     if (_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == ''): #PIN
-      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = create_pid_pin_and_desc(submission, helper.chefs_rcv_param('pinDataGrid', rcv_clz), helper.chefs_rcv_param('pin', rcv_clz), helper.chefs_rcv_param('pinDesc', rcv_clz))
+      _rcv_dic['PIN'], _rcv_dic['legalLandDescription'] = helper.create_pid_pin_and_desc(submission, helper.chefs_rcv_param('pinDataGrid', rcv_clz), helper.chefs_rcv_param('pin', rcv_clz), helper.chefs_rcv_param('pinDesc', rcv_clz))
     if ((_rcv_dic['PID'] is None or _rcv_dic['PID'].strip() == '')
         and (_rcv_dic['PIN'] is None or _rcv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _rcv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(submission, helper.chefs_rcv_param('untitledMunicipalLand', rcv_clz), helper.chefs_rcv_param('untitledMunicipalLandDesc', rcv_clz))
+      _rcv_dic['legalLandDescription'] = helper.create_untitled_municipal_land_desc(submission, helper.chefs_rcv_param('untitledMunicipalLand', rcv_clz), helper.chefs_rcv_param('untitledMunicipalLandDesc', rcv_clz))
 
-    _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(submission, helper.chefs_rcv_param('crownLandFileNumbers', rcv_clz))
-    _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(submission, helper.chefs_rcv_param('receivingSiteLandUse', rcv_clz))
+    _rcv_dic['crownLandFileNumbers'] = helper.create_land_file_numbers(submission, helper.chefs_rcv_param('crownLandFileNumbers', rcv_clz))
+    _rcv_dic['receivingSiteLandUse'] = helper.create_receiving_site_lan_uses(submission, helper.chefs_rcv_param('receivingSiteLandUse', rcv_clz))
 
     _rcv_dic['CSRFactors'] = submission.get(helper.chefs_rcv_param('CSRFactors', rcv_clz))
     _rcv_dic['relocatedSoilUse'] = submission.get(helper.chefs_rcv_param('relocatedSoilUse', rcv_clz))
@@ -442,21 +344,21 @@ def map_hv_site(hvs):
       hvs[helper.chefs_hv_param('latitudeDegrees')], hvs[helper.chefs_hv_param('latitudeMinutes')], hvs[helper.chefs_hv_param('latitudeSeconds')], 
       hvs[helper.chefs_hv_param('longitudeDegrees')], hvs[helper.chefs_hv_param('longitudeMinutes')], hvs[helper.chefs_hv_param('longitudeSeconds')])
 
-    _hv_dic['regionalDistrict'] = create_regional_district(hvs, helper.chefs_hv_param('regionalDistrict'))
-    _hv_dic['landOwnership'] = create_land_ownership(hvs, helper.chefs_hv_param('landOwnership'))
+    _hv_dic['regionalDistrict'] = helper.create_regional_district(hvs, helper.chefs_hv_param('regionalDistrict'))
+    _hv_dic['landOwnership'] = helper.create_land_ownership(hvs, helper.chefs_hv_param('landOwnership'))
     _hv_dic['legallyTitledSiteAddress'] = hvs.get(helper.chefs_hv_param('legallyTitledSiteAddress'))
     _hv_dic['legallyTitledSiteCity'] = hvs.get(helper.chefs_hv_param('legallyTitledSiteCity'))
     _hv_dic['legallyTitledSitePostalCode'] = hvs.get(helper.chefs_hv_param('legallyTitledSitePostalCode'))
 
-    _hv_dic['PID'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, helper.chefs_hv_param('pidDataGrid'), helper.chefs_hv_param('pid'), helper.chefs_hv_param('pidDesc')) #PID
+    _hv_dic['PID'], _hv_dic['legalLandDescription'] = helper.create_pid_pin_and_desc(hvs, helper.chefs_hv_param('pidDataGrid'), helper.chefs_hv_param('pid'), helper.chefs_hv_param('pidDesc')) #PID
     if (_hv_dic['PID'] is None or _hv_dic['PID'].strip() == ''): #PIN
-      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = create_pid_pin_and_desc(hvs, helper.chefs_hv_param('pinDataGrid'), helper.chefs_hv_param('pin'), helper.chefs_hv_param('pinDesc'))
+      _hv_dic['PIN'], _hv_dic['legalLandDescription'] = helper.create_pid_pin_and_desc(hvs, helper.chefs_hv_param('pinDataGrid'), helper.chefs_hv_param('pin'), helper.chefs_hv_param('pinDesc'))
     if ((_hv_dic['PID'] is None or _hv_dic['PID'].strip() == '')
         and (_hv_dic['PIN'] is None or _hv_dic['PIN'].strip() == '')): #Description when selecting 'Untitled Municipal Land'
-      _hv_dic['legalLandDescription'] = create_untitled_municipal_land_desc(hvs, helper.chefs_hv_param('untitledMunicipalLand'), helper.chefs_hv_param('untitledMunicipalLandDesc'))
+      _hv_dic['legalLandDescription'] = helper.create_untitled_municipal_land_desc(hvs, helper.chefs_hv_param('untitledMunicipalLand'), helper.chefs_hv_param('untitledMunicipalLandDesc'))
 
-    _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(hvs, helper.chefs_hv_param('crownLandFileNumbers'))
-    _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(hvs, helper.chefs_hv_param('receivingSiteLandUse'))
+    _hv_dic['crownLandFileNumbers'] = helper.create_land_file_numbers(hvs, helper.chefs_hv_param('crownLandFileNumbers'))
+    _hv_dic['receivingSiteLandUse'] = helper.create_receiving_site_lan_uses(hvs, helper.chefs_hv_param('receivingSiteLandUse'))
     _hv_dic['hvsConfirmation'] = hvs.get(helper.chefs_hv_param('hvsConfirmation'))
     _hv_dic['dateSiteBecameHighVolume'] = helper.convert_simple_datetime_format_in_str(hvs.get(helper.chefs_hv_param('dateSiteBecameHighVolume')))
     _hv_dic['howRelocatedSoilWillBeUsed'] = hvs.get(helper.chefs_hv_param('howRelocatedSoilWillBeUsed'))
@@ -479,25 +381,6 @@ def map_hv_site(hvs):
     _hv_dic['createAt'] = helper.get_create_date(hvs, helper.chefs_hv_param('form'), helper.chefs_hv_param('createdAt'))
     _hv_dic['confirmationId'] = _confirmation_id
   return _hv_dic
-
-# add Regional Districts in site forms to dictionary - key:regional district string / value:site data dictionary
-def add_regional_district_dic(site_dic, reg_dist_dic):
-  if 'regionalDistrict' in site_dic and site_dic['regionalDistrict'] is not None: # could be none regional district key
-    _dic_copy = {}
-    _dic_copy = copy.deepcopy(site_dic)
-    _rd_str = site_dic['regionalDistrict'] # could be more than one
-    if _rd_str is not None:
-      _rd_str = _rd_str.strip('\"')
-      _rds = []
-      _rds = _rd_str.split(",")
-      for _rd in _rds:
-        # reverse-convert name to id for searching key
-        _rd_key = [k for k, v in constant.REGIONAL_DISTRICT_NAME_DIC.items() if v == _rd]
-        if len(_rd_key) > 0:
-          if _rd_key[0] in reg_dist_dic:
-            reg_dist_dic[_rd_key[0]].append(_dic_copy)
-          else:
-            reg_dist_dic[_rd_key[0]] = [_dic_copy]
 
 # iterate through the submissions and send an email
 # only send emails for sites that are new (don't resend for old sites)
@@ -558,7 +441,7 @@ def send_email_subscribers(today):
               _diff = helper.get_difference_datetimes_in_hour(today, _receiving_site_dic['createAt'])
               if (_diff is not None and _diff <= 24):  #within the last 24 hours.
                 _rcv_popup_links = create_popup_links(_rcv_sites_in_rd, 'SR')
-                _reg_dis_name = convert_regional_district_to_name(_srd)
+                _reg_dis_name = helper.convert_regional_district_to_name(_srd)
                 _email_msg = create_site_relocation_email_msg(_reg_dis_name, _rcv_popup_links)
 
                 # create soil relocation notification substriber dictionary
@@ -655,7 +538,6 @@ def send_email_subscribers(today):
       print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
 
-
 CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
 CHEFS_SOILS_API_KEY = os.getenv('CHEFS_SOILS_API_KEY')
 CHEFS_HV_FORM_ID = os.getenv('CHEFS_HV_FORM_ID')
@@ -704,17 +586,17 @@ for submission in submissionsJson:
   _1rcvDic = map_rcv_site(submission, 1)
   if _1rcvDic:
     receivingSites.append(_1rcvDic)
-    add_regional_district_dic(_1rcvDic, rcvRegDistDic)
+    helper.add_regional_district_dic(_1rcvDic, rcvRegDistDic)
 
   _2rcvDic = map_rcv_site(submission, 2)
   if _2rcvDic:
     receivingSites.append(_2rcvDic)
-    add_regional_district_dic(_2rcvDic, rcvRegDistDic)
+    helper.add_regional_district_dic(_2rcvDic, rcvRegDistDic)
 
   _3rcvDic = map_rcv_site(submission, 3)
   if _3rcvDic:
     receivingSites.append(_3rcvDic)
-    add_regional_district_dic(_3rcvDic, rcvRegDistDic)  
+    helper.add_regional_district_dic(_3rcvDic, rcvRegDistDic)  
 
 print('Creating high volume site records records...')
 hvSites = []
@@ -724,7 +606,7 @@ for hvs in hvsJson:
   _hvDic = map_hv_site(hvs)
   if _hvDic:
     hvSites.append(_hvDic)
-    add_regional_district_dic(_hvDic, hvRegDistDic)  
+    helper.add_regional_district_dic(_hvDic, hvRegDistDic)  
 
 
 
@@ -746,7 +628,7 @@ with open(constant.HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
   writer.writeheader()
   writer.writerows(hvSites)
 
-
+"""
 print('Connecting to AGOL GIS...')
 # connect to GIS
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
@@ -808,7 +690,7 @@ else:
 print('Sending subscriber emails...')
 today = datetime.datetime.now(tz=pytz.timezone('Canada/Pacific'))
 send_email_subscribers(today)
-
+"""
 
 print('Completed Soils data publishing')
 

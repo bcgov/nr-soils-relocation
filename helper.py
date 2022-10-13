@@ -2,6 +2,7 @@ import configparser
 import re
 import json
 import requests
+import copy
 from requests.auth import HTTPBasicAuth
 import os
 import datetime
@@ -233,3 +234,119 @@ def convert_soil_quality_to_name(key):
     return name
   else:
     return key    
+
+def create_receiving_site_lan_uses(chefs_dic, field):
+  _land_uses = []
+  for _k, _v in chefs_dic[field].items():
+    if is_not_none_true(_v):
+      _land_uses.append(convert_receiving_site_use_to_name(_k))
+  if len(_land_uses) > 0:
+    _land_uses = "\"" + ",".join(_land_uses) + "\""
+  return _land_uses
+
+def create_regional_district(chefs_dic, field):
+  _regional_district = None
+  if chefs_dic.get(field) is not None and len(chefs_dic[field]) > 0: 
+    _regional_district = convert_regional_district_to_name(chefs_dic[field][0])
+  return _regional_district
+
+def convert_land_ownership_to_name(key):
+  name = constant.LAND_OWNERSHIP_NAME_DIC.get(key)
+  if name is not None:
+    return name
+  else:
+    return key
+
+def create_land_ownership(chefs_dic, field):
+  _land_ownership = None
+  if chefs_dic.get(field) is not None : 
+    _land_ownership = convert_land_ownership_to_name(chefs_dic[field])
+  return _land_ownership
+
+def create_land_file_numbers(chefs_dic, field):
+  _land_file_numbers = []
+  if chefs_dic.get(field) is not None : 
+    for _item in chefs_dic[field]:
+      for _v in _item.values():
+        if _v != '':
+          _land_file_numbers.append(_v)
+
+  if len(_land_file_numbers) > 0: 
+    _land_file_numbers = "\"" + ",".join(_land_file_numbers) + "\""   # could be more than one    
+
+  return _land_file_numbers if len(_land_file_numbers) > 0 else None  
+
+def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_field):
+  _pid = None
+  _desc = None
+  if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0: 
+    if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
+      _pid = chefs_dic.get(data_grid_field)[0].get(pid_pin_field)
+      if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
+        _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
+  return _pid, _desc
+
+def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
+  _desc = None
+  if chefs_dic.get(parent_field) is not None and len(chefs_dic.get(parent_field)) > 0: 
+    if chefs_dic[parent_field][0].get(desc_field) is not None and chefs_dic[parent_field][0].get(desc_field).strip() != '':
+      _desc = chefs_dic[parent_field][0].get(desc_field).strip()
+  return _desc
+
+def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_dic):
+  _total_soil_volume = 0
+  _soil_volume = 0
+  if chefs_dic.get(data_grid) is not None and len(chefs_dic[data_grid]) > 0: 
+    for _dg9 in chefs_dic[data_grid]:
+      if (_dg9.get(volume_field) is not None 
+          and _dg9.get(claz_field) is not None and len(_dg9.get(claz_field)) > 0): 
+        _soil_volume = _dg9[volume_field]
+        if not isfloat(_soil_volume):
+          _soil_volume = extract_floating_from_string(_soil_volume)
+        _soil_volume = str_to_double(_soil_volume)
+        _soil_claz = _dg9.get("B1-soilClassificationSource")
+        if is_not_none_true(_soil_claz.get("urbanParkLandUsePl")):
+          working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif is_not_none_true(_soil_claz.get("commercialLandUseCl")):
+          working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif is_not_none_true(_soil_claz.get("industrialLandUseIl")):
+          working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif is_not_none_true(_soil_claz.get("agriculturalLandUseAl")):
+          working_dic['agriculturalLandUseSoilVolume'] = working_dic['agriculturalLandUseSoilVolume'] + _soil_volume if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif is_not_none_true(_soil_claz.get("wildlandsNaturalLandUseWln")):
+          working_dic['wildlandsNaturalLandUseSoilVolume'] = working_dic['wildlandsNaturalLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume            
+        elif is_not_none_true(_soil_claz.get("wildlandsRevertedLandUseWlr")):
+          working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif is_not_none_true(_soil_claz.get("residentialLandUseLowDensityRlld")):
+          working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+        elif is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
+          working_dic['residentialLandUseHighDensitySoilVolume'] = working_dic['residentialLandUseHighDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
+          _total_soil_volume += _soil_volume
+    if _total_soil_volume != 0:
+      working_dic['totalSoilVolme'] = _total_soil_volume  
+
+# add Regional Districts in site forms to dictionary - key:regional district string / value:site data dictionary
+def add_regional_district_dic(site_dic, reg_dist_dic):
+  if 'regionalDistrict' in site_dic and site_dic['regionalDistrict'] is not None: # could be none regional district key
+    _dic_copy = {}
+    _dic_copy = copy.deepcopy(site_dic)
+    _rd_str = site_dic['regionalDistrict'] # could be more than one
+    if _rd_str is not None:
+      _rd_str = _rd_str.strip('\"')
+      _rds = []
+      _rds = _rd_str.split(",")
+      for _rd in _rds:
+        # reverse-convert name to id for searching key
+        _rd_key = [k for k, v in constant.REGIONAL_DISTRICT_NAME_DIC.items() if v == _rd]
+        if len(_rd_key) > 0:
+          if _rd_key[0] in reg_dist_dic:
+            reg_dist_dic[_rd_key[0]].append(_dic_copy)
+          else:
+            reg_dist_dic[_rd_key[0]] = [_dic_copy]      
