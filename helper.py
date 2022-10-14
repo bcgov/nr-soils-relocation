@@ -15,16 +15,18 @@ import constant
 
 CHES_API_OAUTH_SECRET = os.getenv('CHES_API_OAUTH_SECRET')
 
+CHEFS_API_URL = os.getenv('CHEFS_API_URL')
+AUTH_URL = os.getenv('AUTH_URL')
+CHES_URL = os.getenv('CHES_URL')
+print(f"[INFO]Value of env variable url='CHEFS_API_URL': {CHEFS_API_URL}")
+print(f"[INFO]Value of env variable url='AUTH_URL': {AUTH_URL}")
+print(f"[INFO]Value of env variable url='CHES_URL': {CHES_URL}")
+
 def read_config():
     """Read configuration information to access AGOL and CHES"""
     _config = configparser.ConfigParser()
     _config.read('configurations.ini')
     return _config
-
-config = read_config()
-CHEFS_API_URL = config['COMMON_SERVICES']['CHEFS_API_URL']
-AUTH_URL = config['COMMON_SERVICES']['AUTH_URL']
-CHES_URL = config['COMMON_SERVICES']['CHES_URL']
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
     """Convert to DD in mapLatitude and mapLongitude"""
