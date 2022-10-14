@@ -1,3 +1,7 @@
+# pylint: disable=line-too-long
+"""
+strings, dictionaries, arrays Constant
+"""
 EXP_EXTRACT_FLOATING = r'[-+]?\d*\.\d+|\d+'
 VALUE_ERROR_EXCEPTION_RAISED = r'ValueError Raised:'
 EMAIL_SUBJECT_SOIL_RELOCATION = r'SRIS Subscription Service - New Notification(s) Received (Soil Relocation)'
@@ -122,7 +126,7 @@ SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing, bulk storage, s
                                 , i4='I4. treated wood storage at the site of treatment'
                                 , i5='I5. veneer or plywood manufacturing'
                                 , i6='I6. wood treatment (antisapstain or preservation)'
-                                , i7='I7. wood treatment chemical manufacturing, bulk storage')                     
+                                , i7='I7. wood treatment chemical manufacturing, bulk storage')
 RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                                   , commercialLandUseCl='Commercial Land Use (CL)'
                                   , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
@@ -130,7 +134,7 @@ RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)
                                   , urbanParkLandUsePl='Urban Park Land Use (PL)'
                                   , agriculturalLandUseAl='Agricultural Land Use (AL)'
                                   , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')                                           
+                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
 SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                             , commercialLandUseCl='Commercial Land Use (CL)'
                             , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
@@ -138,7 +142,7 @@ SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                             , urbanParkLandUsePl='Urban Park Land Use (PL)'
                             , agriculturalLandUseAl='Agricultural Land Use (AL)'
                             , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                            , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')     
+                            , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
 LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land')
@@ -198,7 +202,7 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , sourceSiteLandUse='A4-schedule2ReferenceSourceSite'
                             , highVolumeSite='isTheSourceSiteHighRisk'
                             , soilRelocationPurpose='A5-PurposeOfSoilExcavationSource'
-                            , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'                                                        
+                            , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
                             , soilClassificationSource='B1-soilClassificationSource'
@@ -276,7 +280,7 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , pidDataGrid='dataGrid2'
                             , pid='A-LegallyTitled-PIDReceivingSite'
                             , pidDesc='legalLandDescriptionReceivingSite'
-                            , pinDataGrid='dataGrid5'                            
+                            , pinDataGrid='dataGrid5'
                             , pin='A-LegallyTitled-PID'
                             , pinDesc='legalLandDescriptionUntitledCrownLandReceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn1'
@@ -318,7 +322,7 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , owner2PostalCode='A1-firstadditionalreceivingmoreownersPostalCode7'
                             , owner2PhoneNumber='phoneNumber2AdditionalReceivingSiteOwner'
                             , owner2Email='C1-Email3AdditionalReceivingSiteOwner'
-                            , additionalOwners='C1-haveMoreThanTwoOwnersIncludeTheirInformationBelow2ReceivingSite'
+                            , additionalOwners='C1-haveMoreThanTwoOwnerIncludeTheirInformationBelow2ReceivingSite'
                             , contactFirstName='C2-RSC-FirstName1AdditionalReceivingSite'
                             , contactLastName='C2-RSC-LastName1AdditionalReceivingSite'
                             , contactCompany='C2-RSC-Company1AdditionalReceivingSite'
@@ -340,7 +344,7 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , pidDataGrid='dataGrid3'
                             , pid='A-LegallyTitled-PIDFirstAdditionalReceivingSite'
                             , pidDesc='legalLandDescriptionFirstAdditionalReceivingSite'
-                            , pinDataGrid='dataGrid6'                            
+                            , pinDataGrid='dataGrid6'
                             , pin='A-UntitledCrown-PINFirstAdditionalReceivingSite'
                             , pinDesc='legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn2'
@@ -570,7 +574,7 @@ SOURCE_SITE_HEADERS = ["updateToPreviousForm",
                        "signaturerFirstAndLastName",
                        "dateSigned",
                        "createAt",
-                       "confirmationId"]                            
+                       "confirmationId"]
 RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "ownerLastName",
                           "ownerCompany",
@@ -588,7 +592,7 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "owner2City",
                           "owner2Province",
                           "owner2Country",
-                          "owner2PostalCode",  
+                          "owner2PostalCode",
                           "owner2PhoneNumber",
                           "owner2Email",
                           "additionalOwners",
@@ -599,7 +603,7 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "contactCity",
                           "contactProvince",
                           "contactCountry",
-                          "contactPostalCode",  
+                          "contactPostalCode",
                           "contactPhoneNumber",
                           "contactEmail",
                           "SID",
@@ -613,7 +617,7 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "PID",
                           "legalLandDescription",
                           "PIN",
-                          "crownLandFileNumbers",  
+                          "crownLandFileNumbers",
                           "receivingSiteLandUse",
                           "CSRFactors",
                           "relocatedSoilUse",
@@ -622,7 +626,7 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "soilDepositIsReserveLands",
                           "dateSigned",
                           "createAt",
-                          "confirmationId"]  
+                          "confirmationId"]
 HV_SITE_HEADERS = ["ownerFirstName",
                    "ownerLastName",
                    "ownerCompany",
@@ -657,7 +661,7 @@ HV_SITE_HEADERS = ["ownerFirstName",
                    "SID",
                    "latitude",
                    "longitude",
-                   "regionalDistrict",  
+                   "regionalDistrict",
                    "landOwnership",
                    "legallyTitledSiteAddress",
                    "legallyTitledSiteCity",
