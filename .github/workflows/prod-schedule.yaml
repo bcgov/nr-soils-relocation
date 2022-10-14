@@ -45,5 +45,15 @@ jobs:
           CHES_API_OAUTH_SECRET: ${{ secrets.CHES_API_OAUTH_SECRET }}
           MAPHUB_USER: ${{ secrets.MAPHUB_USER }}
           MAPHUB_PASS: ${{ secrets.MAPHUB_PASS }}
+          SRC_CSV_ID: ${{ secrets.SRC_CSV_ID }}
+          SRC_LAYER_ID: ${{ secrets.SRC_LAYER_ID }}
+          RCV_CSV_ID: ${{ secrets.RCV_CSV_ID }}
+          RCV_LAYER_ID: ${{ secrets.RCV_LAYER_ID }}
+          HV_CSV_ID: ${{ secrets.HV_CSV_ID }}
+          HV_LAYER_ID: ${{ secrets.HV_LAYER_ID }}
+          WEB_MAP_APP_ID: ${{ secrets.WEB_MAP_APP_ID }}
+          CHEFS_API_URL: ${{ secrets.CHEFS_API_URL }}
+          AUTH_URL: ${{ secrets.AUTH_URL }}
+          CHES_URL: ${{ secrets.CHES_URL }}          
         run: |
           python chefs_soils.py
