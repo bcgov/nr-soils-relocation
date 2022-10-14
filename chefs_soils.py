@@ -1,4 +1,5 @@
 # pylint: disable=line-too-long
+# pylint: disable=no-member
 """
 Retrieve CHEFS form data, overwrite it into AGOL CSVs and Layers,
 send notification email to subscribers who want to get information for the soil relocation
