@@ -84,7 +84,6 @@ jobs:
           --from-literal=MAPHUB_USER=${{ env.MAPHUB_USER }} --from-literal=MAPHUB_PASS=${{ env.MAPHUB_PASS }} \
           --from-literal=SRC_CSV_ID=${{ env.SRC_CSV_ID }} --from-literal=SRC_LAYER_ID=${{ env.SRC_LAYER_ID }} \
           --from-literal=RCV_CSV_ID=${{ env.RCV_CSV_ID }} --from-literal=RCV_LAYER_ID=${{ env.RCV_LAYER_ID }} \
-          --from-literal=RCV_LAYER_ID=${{ env.RCV_LAYER_ID }} --from-literal=MAPHUB_PASS=${{ env.HV_CSV_ID }} \
           --from-literal=HV_CSV_ID=${{ env.HV_CSV_ID }} --from-literal=HV_LAYER_ID=${{ env.HV_LAYER_ID }} \
           --from-literal=WEB_MAP_APP_ID=${{ env.WEB_MAP_APP_ID }} --from-literal=CHEFS_API_URL=${{ env.CHEFS_API_URL }} \
           --from-literal=AUTH_URL=${{ env.AUTH_URL }} --from-literal=CHES_URL=${{ env.CHES_URL }} \
