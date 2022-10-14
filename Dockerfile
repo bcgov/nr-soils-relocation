@@ -11,7 +11,8 @@ RUN       pip install requests && \
           pip install requests_toolbelt  && \
           pip install six && \
           pip install ujson && \
-          pip install pytz
+          pip install pytz && \
+          pip install Jinja2
 RUN addgroup docker &&  useradd -ms /bin/bash -G docker $user
 RUN chmod -R 777 $home
 WORKDIR $home

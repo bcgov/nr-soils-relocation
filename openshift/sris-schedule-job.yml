@@ -21,9 +21,9 @@ objects:
     metadata:
       name: "${APP_NAME}-cron-job"
     spec:
-      schedule: "*/10 * * * *"
+      schedule: "*/15 * * * *"
       concurrencyPolicy: "Replace"
-      startingDeadlineSeconds: 200
+      startingDeadlineSeconds: 300
       suspend: false
       successfulJobsHistoryLimit: 5
       failedJobsHistoryLimit: 3

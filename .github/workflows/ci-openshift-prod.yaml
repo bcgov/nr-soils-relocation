@@ -1,4 +1,4 @@
-name: Build And Add Job to Openshift
+name: Build And Add Job to Openshift Prod
 env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository }}
   OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
@@ -14,14 +14,19 @@ env:
   MAPHUB_USER: ${{ secrets.MAPHUB_USER }}
   MAPHUB_PASS: ${{ secrets.MAPHUB_PASS }}
   APP_NAME: "sris"
-  TAG: "latest"
+  TAG: ${{ github.event.inputs.RELEASE_VERSION }}
 on:
   workflow_dispatch:
+    inputs:
+      RELEASE_VERSION:
+        required: true
+        description: The Tag release to PROD.
 
 jobs:
   Build_Deploy:
     name: Build and deploy to OpenShift
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to GitHub runner.
@@ -33,7 +38,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      
+
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
@@ -51,7 +56,7 @@ jobs:
             "${{ env.IMAGE_REGISTRY }}/${{ env.APP_NAME }}:${{ env.TAG }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      
+
       - name: Install oc
         uses: redhat-actions/openshift-tools-installer@v1
         with:
@@ -61,10 +66,12 @@ jobs:
           set +e -ux
           # Login to OpenShift and select project
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
-          oc tag -d ${{ env.APP_NAME }}:${{ env.TAG }}
           oc tag ${{ env.IMAGE_REGISTRY }}/${{ env.APP_NAME }}:${{ env.TAG }} ${{ env.APP_NAME }}:${{ env.TAG }}
           oc create configmap ${{ env.APP_NAME }}-config-map --from-literal=CHEFS_SOILS_FORM_ID=${{ env.CHEFS_SOILS_FORM_ID }} --from-literal=CHEFS_SOILS_API_KEY=${{ env.CHEFS_SOILS_API_KEY }} --from-literal=CHEFS_HV_FORM_ID=${{ env.CHEFS_HV_FORM_ID }} --from-literal=CHEFS_HV_API_KEY=${{ env.CHEFS_HV_API_KEY }} --from-literal=CHEFS_MAIL_FORM_ID=${{ env.CHEFS_MAIL_FORM_ID }} --from-literal=CHEFS_MAIL_API_KEY=${{ env.CHEFS_MAIL_API_KEY }} --from-literal=CHES_API_KEY=${{ env.CHES_API_KEY }} --from-literal=MAPHUB_USER=${{ env.MAPHUB_USER }} --from-literal=MAPHUB_PASS=${{ env.MAPHUB_PASS }} --dry-run -o yaml \
           | oc apply -f -
           
           oc process -f ./openshift/sris-schedule-job.yml -p APP_NAME=${{ env.APP_NAME }} -p TAG=${{ env.TAG }}  -p NAMESPACE=${{ env.OPENSHIFT_NAMESPACE_NO_ENV }}-tools \
           | oc apply -f -
+      - name: Create A Tag in Git
+        run: |
+          git tag -a release/${{ env.TAG }} -m "Release version ${{ env.TAG }}"
