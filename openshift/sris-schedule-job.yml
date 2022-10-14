@@ -1,0 +1,52 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: "${APP_NAME}-template"
+  app: "${APP_NAME}"
+metadata:
+  name: "${APP_NAME}-template"
+parameters:
+  - name: APP_NAME
+    description: Application name
+    value: sris
+  - name: TAG
+    description: The identifying tag for this specific deployment
+    required: true
+  - name: NAMESPACE
+    description: Target namespace reference (i.e. 'k8vopl-dev')
+    required: true
+objects:
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: "${APP_NAME}-cron-job"
+    spec:
+      schedule: "*/15 * * * *"
+      concurrencyPolicy: "Replace"
+      startingDeadlineSeconds: 300
+      suspend: false
+      successfulJobsHistoryLimit: 5
+      failedJobsHistoryLimit: 3
+      jobTemplate:
+        spec:
+          template:
+            metadata:
+              labels:
+                app: "${APP_NAME}"
+            spec:
+              containers:
+                - name: "${APP_NAME}-job"
+                  image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${APP_NAME}:${TAG}
+                  resources:
+                    requests:
+                      cpu: "100m"
+                      memory: "2Gi"
+                    limits:
+                      cpu: "1.5"
+                      memory: "4Gi"
+                  envFrom:
+                    - configMapRef:
+                        name: "${APP_NAME}-config-map"
+              restartPolicy: OnFailure
+
+
