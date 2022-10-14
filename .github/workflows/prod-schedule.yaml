@@ -54,6 +54,7 @@ jobs:
           WEB_MAP_APP_ID: ${{ secrets.WEB_MAP_APP_ID }}
           CHEFS_API_URL: ${{ secrets.CHEFS_API_URL }}
           AUTH_URL: ${{ secrets.AUTH_URL }}
-          CHES_URL: ${{ secrets.CHES_URL }}            
+          CHES_URL: ${{ secrets.CHES_URL }}          
+
         run: |
           python chefs_soils.py
