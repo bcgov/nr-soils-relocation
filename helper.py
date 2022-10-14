@@ -22,9 +22,9 @@ def read_config():
     return _config
 
 config = read_config()
-AUTH_URL = config['CHEFS']['AUTH_URL']
-CHEFS_URL = config['CHEFS']['CHEFS_URL']
-CHEFS_API_URL = config['CHEFS']['CHEFS_API_URL']
+CHEFS_API_URL = config['COMMON_SERVICES']['CHEFS_API_URL']
+AUTH_URL = config['COMMON_SERVICES']['AUTH_URL']
+CHES_URL = config['COMMON_SERVICES']['CHES_URL']
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
     """Convert to DD in mapLatitude and mapLongitude"""
@@ -97,13 +97,13 @@ def send_mail(to_email, subject, message):
         if auth_response_json.get('access_token'):
             access_token = auth_response_json['access_token']
 
-            from_email = "noreply@gov.bc.ca"
+            from_email = "donotreplySRIS@gov.bc.ca"
             ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
             ches_headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + access_token
             }
-            ches_response = requests.request("POST", CHEFS_URL +
+            ches_response = requests.request("POST", CHES_URL +
               '/api/v1/email', headers=ches_headers, data=ches_pay_load)
         else:
             raise KeyError(auth_response_json.get('error_description') + ", "
