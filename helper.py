@@ -13,7 +13,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import constant
 
-CHES_API_KEY = os.getenv('CHES_API_KEY')
+CHES_API_OAUTH_SECRET = os.getenv('CHES_API_OAUTH_SECRET')
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
@@ -88,7 +88,7 @@ def send_mail(to_email, subject, message):
         auth_pay_load = 'grant_type=client_credentials'
         auth_headers = {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic ' + CHES_API_KEY
+          'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
         auth_response = requests.request("POST", AUTH_URL +
           '/auth/realms/jbd6rnxw/protocol/openid-connect/token',
