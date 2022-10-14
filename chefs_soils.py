@@ -23,17 +23,17 @@ CHEFS_MAIL_FORM_ID = os.getenv('CHEFS_MAIL_FORM_ID')
 CHEFS_MAIL_API_KEY = os.getenv('CHEFS_MAIL_API_KEY')
 MAPHUB_USER = os.getenv('MAPHUB_USER')
 MAPHUB_PASS = os.getenv('MAPHUB_PASS')
+SRC_CSV_ID = os.getenv('SRC_CSV_ID')
+SRC_LAYER_ID = os.getenv('SRC_LAYER_ID')
+RCV_CSV_ID = os.getenv('RCV_CSV_ID')
+RCV_LAYER_ID = os.getenv('RCV_LAYER_ID')
+HV_CSV_ID = os.getenv('HV_CSV_ID')
+HV_LAYER_ID = os.getenv('HV_LAYER_ID')
+WEB_MAP_APP_ID = os.getenv('WEB_MAP_APP_ID')
 
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
-SRC_CSV_ID = config['AGOL_ITEMS']['SRC_CSV_ID']
-SRC_LAYER_ID = config['AGOL_ITEMS']['SRC_LAYER_ID']
-RCV_CSV_ID = config['AGOL_ITEMS']['RCV_CSV_ID']
-RCV_LAYER_ID = config['AGOL_ITEMS']['RCV_LAYER_ID']
-HV_CSV_ID = config['AGOL_ITEMS']['HV_CSV_ID']
-HV_LAYER_ID = config['AGOL_ITEMS']['HV_LAYER_ID']
-WEB_MAP_APP_ID = config['AGOL_ITEMS']['WEB_MAP_APP_ID']
 
 def get_popup_search_value(_site_dic):
     """Returns popup search value"""
