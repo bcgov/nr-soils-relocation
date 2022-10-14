@@ -3,7 +3,7 @@ env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository }}
   OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
-  OPENSHIFT_NAMESPACE_NO_ENV: ${{ secrets.NAMESPACE_NO_ENV}}
+  OPENSHIFT_NAMESPACE: ${{ secrets.NAMESPACE }}
   CHEFS_SOILS_FORM_ID: ${{ secrets.CHEFS_SOILS_FORM_ID }}
   CHEFS_SOILS_API_KEY: ${{ secrets.CHEFS_SOILS_API_KEY }}
   CHEFS_HV_FORM_ID: ${{ secrets.CHEFS_HV_FORM_ID }}
@@ -70,8 +70,12 @@ jobs:
           oc create configmap ${{ env.APP_NAME }}-config-map --from-literal=CHEFS_SOILS_FORM_ID=${{ env.CHEFS_SOILS_FORM_ID }} --from-literal=CHEFS_SOILS_API_KEY=${{ env.CHEFS_SOILS_API_KEY }} --from-literal=CHEFS_HV_FORM_ID=${{ env.CHEFS_HV_FORM_ID }} --from-literal=CHEFS_HV_API_KEY=${{ env.CHEFS_HV_API_KEY }} --from-literal=CHEFS_MAIL_FORM_ID=${{ env.CHEFS_MAIL_FORM_ID }} --from-literal=CHEFS_MAIL_API_KEY=${{ env.CHEFS_MAIL_API_KEY }} --from-literal=CHES_API_KEY=${{ env.CHES_API_KEY }} --from-literal=MAPHUB_USER=${{ env.MAPHUB_USER }} --from-literal=MAPHUB_PASS=${{ env.MAPHUB_PASS }} --dry-run -o yaml \
           | oc apply -f -
           
-          oc process -f ./openshift/sris-schedule-job.yml -p APP_NAME=${{ env.APP_NAME }} -p TAG=${{ env.TAG }}  -p NAMESPACE=${{ env.OPENSHIFT_NAMESPACE_NO_ENV }}-tools \
+          oc process -f ./openshift/sris-schedule-job.yml -p APP_NAME=${{ env.APP_NAME }} -p TAG=${{ env.TAG }}  -p NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} \
           | oc apply -f -
-      - name: Create A Tag in Git
-        run: |
-          git tag -a release/${{ env.TAG }} -m "Release version ${{ env.TAG }}"
+      - uses: rickstaa/action-create-tag@v1
+        name: Create Release Tag in Git
+        with:
+          tag: "release/${{ env.TAG }}"
+          message: "Release version ${{ env.TAG }}"
+
+      
