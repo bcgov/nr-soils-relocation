@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 """
 Functions to need to execute  chefs_soil.py
 """
@@ -70,8 +71,7 @@ def validate_lat_lon(
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
         _lon_dd >=-139.06 and _lon_dd <= -114.02):
         return True
-    print("[INFO] Can't publish data to AGOL due to Invalidate site coordinates - \
-          Latitude(deg/min/sec):",
+    print("[INFO] Can't publish data to AGOL due to Invalidate site coordinates - Latitude(deg/min/sec):",
           _lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",
           _lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirm ID:",confirmation_id
                   ,", Form:",form_name)
@@ -98,9 +98,7 @@ def send_mail(to_email, subject, message):
             access_token = auth_response_json['access_token']
 
             from_email = "noreply@gov.bc.ca"
-            ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\"\
-              : 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \
-              \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
+            ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
             ches_headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + access_token
@@ -360,11 +358,9 @@ def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_fiel
     _pid = None
     _desc = None
     if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0:
-        if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and \
-          chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
+        if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
             _pid = chefs_dic.get(data_grid_field)[0].get(pid_pin_field)
-            if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and \
-              chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
+            if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
                 _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
     return _pid, _desc
 
@@ -374,8 +370,7 @@ def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
     """
     _desc = None
     if chefs_dic.get(parent_field) is not None and len(chefs_dic.get(parent_field)) > 0:
-        if chefs_dic[parent_field][0].get(desc_field) is not None and \
-          chefs_dic[parent_field][0].get(desc_field).strip() != '':
+        if chefs_dic[parent_field][0].get(desc_field) is not None and chefs_dic[parent_field][0].get(desc_field).strip() != '':
             _desc = chefs_dic[parent_field][0].get(desc_field).strip()
     return _desc
 
@@ -399,59 +394,38 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
                 _soil_volume = str_to_double(_soil_volume)
                 _soil_claz = _dg9.get("B1-soilClassificationSource")
                 if is_not_none_true(_soil_claz.get("urbanParkLandUsePl")):
-                    working_dic['urbanParkLandUseSoilVolume'] = \
-                      working_dic['urbanParkLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("commercialLandUseCl")):
-                    working_dic['commercialLandUseSoilVolume'] = \
-                      working_dic['commercialLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("industrialLandUseIl")):
-                    working_dic['industrialLandUseSoilVolume'] = \
-                      working_dic['industrialLandUseSoilVolume'] + _soil_volume \
-                      if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("agriculturalLandUseAl")):
-                    working_dic['agriculturalLandUseSoilVolume'] = \
-                      working_dic['agriculturalLandUseSoilVolume'] + _soil_volume \
-                      if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['agriculturalLandUseSoilVolume'] = working_dic['agriculturalLandUseSoilVolume'] + _soil_volume if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("wildlandsNaturalLandUseWln")):
-                    working_dic['wildlandsNaturalLandUseSoilVolume'] = \
-                      working_dic['wildlandsNaturalLandUseSoilVolume'] + _soil_volume \
-                      if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None \
-                        else _soil_volume
+                    working_dic['wildlandsNaturalLandUseSoilVolume'] = working_dic['wildlandsNaturalLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("wildlandsRevertedLandUseWlr")):
-                    working_dic['wildlandsRevertedLandUseSoilVolume'] = \
-                      working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume \
-                      if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None \
-                        else _soil_volume
+                    working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("residentialLandUseLowDensityRlld")):
-                    working_dic['residentialLandUseLowDensitySoilVolume'] = \
-                      working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume \
-                      if working_dic['residentialLandUseLowDensitySoilVolume'] is not None \
-                        else _soil_volume
+                    working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
-                    working_dic['residentialLandUseHighDensitySoilVolume'] = \
-                      working_dic['residentialLandUseHighDensitySoilVolume'] + _soil_volume \
-                      if working_dic['residentialLandUseHighDensitySoilVolume'] is not None \
-                        else _soil_volume
+                    working_dic['residentialLandUseHighDensitySoilVolume'] = working_dic['residentialLandUseHighDensitySoilVolume'] + _soil_volume if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
         if _total_soil_volume != 0:
             working_dic['totalSoilVolme'] = _total_soil_volume
 
 def add_regional_district_dic(site_dic, reg_dist_dic):
     """
-    Add Regional Districts in site forms to dictionary 
+    Add Regional Districts in site forms to dictionary
     - key:regional district string / value:site data dictionary
     """
-    if 'regionalDistrict' in site_dic and \
-      site_dic['regionalDistrict'] is not None: # could be none regional district key
+    if 'regionalDistrict' in site_dic and site_dic['regionalDistrict'] is not None: # could be none regional district key
         _dic_copy = {}
         _dic_copy = copy.deepcopy(site_dic)
         _rd_str = site_dic['regionalDistrict'] # could be more than one
