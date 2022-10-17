@@ -31,7 +31,9 @@ on:
       RELEASE_VERSION:
         required: true
         description: The Tag release to PROD.
-
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 jobs:
   Build_Deploy:
     name: Build and deploy to OpenShift
