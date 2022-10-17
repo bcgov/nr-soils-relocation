@@ -1,53 +1,83 @@
 ![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)
+
 # Soil Relocation Information System
-Soil Relocation Information System manages soil relocation notifications and high volume receiving site registration and gives access to Indigenous Nations, municipalities, and other interested parties to access information on soil relocation through a mapping application. Interested parties can subscribe to be automatically notified of soil relocation or high volume receiving site registrations in their areas.
+
+This is a mapping application providing high-volume receiving site registration to Indigenous Nations, municipalities and other interested parties.  Subscribe for notifications in your area!
+
 
 ### Process
-1. Users in BC submit the information about soil relocation using CHEFS Forms.
-2. The Python script, present in this repo, is run on a schedule through openshift cronjobs.
-3. The Script pulls data from CHEF forms and upload csv to AGOL and also triggers emails to people who subscribed(CHEF forms) to be notified for soil movement.
-4. The frontend to display all these details are shown AGOL.
 
-The Project uses OpenShift CronJobs(https://docs.openshift.com/container-platform/4.10/nodes/jobs/nodes-nodes-jobs.html#nodes-nodes-jobs-creating-cron_nodes-nodes-jobs)
+1. BC users in BC submit soil relocation information using a [CHEFS form](link-goes-here)
 
-The openshift template for cronjob is present here(https://raw.githubusercontent.com/bcgov/nr-soils-relocation/main/openshift/sris-schedule-job.yml)
+2. [This script](./chefs_soils.py) is run on a schedule
 
-The workflow file for build and deploy is located here(https://raw.githubusercontent.com/bcgov/nr-soils-relocation/main/.github/workflows/ci-openshift-prod.yaml).
+3. Data from CHEFS forms is uploaded to [ArcGIS Online (AGOL)](https://www.arcgis.com/) and soil movement subscribers are notified
 
-_Due to the fact that both source and destination have only prod environment, the deployment happens to prod directly._
+4. This information is displayed in the [frontend](link-goes-here), which is be made public soon
 
-The secrets in GitHub are passed as env variables to application through config-map.
 
-The CHES API Key is generated from postman, by providing the username(client_id) and (client_secret) and that is added as env variable(CHES_API_OAUTH_SECRET) in the pipeline.
+### Technical
 
-The cron time are in UTC as the OpenShift servers are in UTC.
+The Project uses [OpenShift CronJobs](https://docs.openshift.com/container-platform/4.10/nodes/jobs/nodes-nodes-jobs.html#nodes-nodes-jobs-creating-cron_nodes-nodes-jobs)
 
-### How To Deploy (The below steps are to be followed to deploy into openshift PROD)
-**_Note: This Application is the middle layer between CHEFS forms and AGOL. Both these tools does not have different environments. 
-Once the application is moved to PROD and available to public users future enhancements needs to be thought through and different deployment approach might be needed._**
+The template is [here](https://raw.githubusercontent.com/bcgov/nr-soils-relocation/main/openshift/sris-schedule-job.yml)
 
-1. Once the code coding is done in a specific branch(ex: feature/abc) then create a Pull Request and ask for a reviewer on the code base.
+The workflow file for build and deploy is [here](.github/workflows/ci-openshift-prod.yaml).
+
+GitHub secrets are passed as environment variables through a configmap.
+
+The CHES API Key is generated from Postman, by providing the username(client_id) and (client_secret).  That populates as environment variable(CHES_API_OAUTH_SECRET) in the pipeline.
+
+Cronjob times are in UTC, like the OpenShift servers.
+
+### OpenShift Deployment
+
+NOTE: This application is the middle layer between CHEFS forms and AGOL, neither of which offer non-PROD environments. Once our application hits production and becomes publicly available this approach will be revisited.
+
+1. Clone this repository and make changes in feature branches (e.g. feat/abc).  Submit changes in Pull Requests against the main branch.
+
 2. Once the code is reviewed and approved, merge it to main branch.
-3. Go to Actions tab and click on the `Build And Add Job to Openshift Prod` and trigger a build.
-   1. It would ask for a tag number, please check the releases/tag branch and increase as per the code changes done, before prod release, just update the minor version like, 0.0.5 to 0.0.6. Make sure the tag does not exist otherwise build would fail.
-   2. Click on Run workflow button.
-4. The workflow will do 3 things.
-   1. Build the Docker Image and push it to GHCR and tag it to the tag you just entered above. All the images are available here(https://github.com/bcgov/nr-soils-relocation/pkgs/container/nr-soils-relocation%2Fsris)
-   2. Create a TAG in GitHub as release/$TAG, here $TAG refers to the TAG number entered during the build.
-   3. Deploy the latest code changes and config map changes to openshift.
-5. Once it is deployed, the cronjob is created in the PROD environment. The image in the cronjob refers to the image in image stream with specific TAG.
-6. The Environment variables are supplied to the container through config-map.
-7. The Config Map is populated from GitHub Secrets. Any updates to the environment variables should happen at GitHub Secrets level to maintain the source of truth.
-8. Currently, the cron Schedule is set to run at 1AM daily at Pacific Time.
-9. if there is a need to run a one time job to test the changes that was made, rather than waiting for the scheduled process, a one time job can be created. please follow the one time job section below for more details.
 
-#### One Time Job
-There are certain instances where waiting for the schedule job to test the changes are not possible, in that case a one time job could be created. Please follow the steps below to achieve that.
-1. Go to(https://console.apps.silver.devops.gov.bc.ca/k8s/ns/f0431b-prod/cronjobs/sris-cron-job/yaml).
-2. Copy the Spec-> Spec -> Containers section from the yaml(the whole containers section including the containers: tag)
-3. Go to Jobs menu in the same namespace and click on Create Job on the right hand side.
-4. In the name section just give `sris-1-of-job-$name` replace $name with your name and replace the containers section with copied section from step number 2, and click on create.
-5. It should spin up a new pod instantly and execute it. Verify your changes.
-6. Finally, delete this one off job you just created.
+3. Go to the Actions tab, click on (`Build And Add Job to Openshift Prod`)(https://github.com/${{ github.repository }}/actions//workflows/ci-openshift-prod.yaml) and trigger a build
 
+   1. Provide a unique tag number.  Check the [releases/tags](https://github.com/${{ github.repository }}/tags) and increment accordingly
 
+   2. Click on Run workflow button
+
+4. The workflow will:
+
+   1. Build and push a container image to the [GitHub Container Registry (GHCR.io)](https://github.com/${{ github.repository }}/pkgs/container/${{ github.event.repository.name }}), tagged with the release you provided
+
+   2. Create the matching GitHub [release/tag](https://github.com/${{ github.repository }}/tags)
+
+   3. Deploy code and configmap changes to OpenShift
+
+5. A cronjob will be deployed in the PROD environment using the new image
+
+6. Environment variables are supplied to the container through the configmap using GitHub Secrets
+
+7. Environment varialbes must be updated only through GitHub Secrets, our _source of truth_
+
+8. The cronjob is scheduled to run daily at 8 AM UTC (1AM PDT)
+
+9. Cronjobs can be triggered manually, usually for testing, with the One-Time Job steps below
+
+#### One-Time Job
+
+Sometimes waiting for a scheduled cronjob is not practical.  These steps explain how to run a one-time job.
+
+1. Visit the [OpenShift console](https://console.apps.silver.devops.gov.bc.ca/k8s/ns/f0431b-prod/cronjobs/sris-cron-job/yaml)
+
+2. Copy the spec.spec.containers section of the cronjob template, including the container's TAG
+
+3. Go to Jobs menu in the same namespace and click Create Job, located on the right hand side
+
+4. Populate the job, and below, and click Create
+   
+   1. Name: `sris-1-of-job-$name`, using your own name for $name
+   
+   2. Containers: using the code copied in step 2, above
+    
+5. Verify that a new container is running your new job
+
+6. Finally, delete this and any other completed jobs
