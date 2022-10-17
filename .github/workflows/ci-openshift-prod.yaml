@@ -22,7 +22,7 @@ env:
   WEB_MAP_APP_ID: ${{ secrets.WEB_MAP_APP_ID }}
   CHEFS_API_URL: ${{ secrets.CHEFS_API_URL }}
   AUTH_URL: ${{ secrets.AUTH_URL }}
-  CHES_URL: ${{ secrets.CHES_URL }}   
+  CHES_URL: ${{ secrets.CHES_URL }}
   APP_NAME: "sris"
   TAG: ${{ github.event.inputs.RELEASE_VERSION }}
 on:
@@ -79,20 +79,18 @@ jobs:
           # Login to OpenShift and select project
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
           oc tag ${{ env.IMAGE_REGISTRY }}/${{ env.APP_NAME }}:${{ env.TAG }} ${{ env.APP_NAME }}:${{ env.TAG }}
-          oc create configmap ${{ env.APP_NAME }}-config-map --from-literal=CHEFS_SOILS_FORM_ID=${{ env.CHEFS_SOILS_FORM_ID }} \
-          --from-literal=CHEFS_SOILS_API_KEY=${{ env.CHEFS_SOILS_API_KEY }} --from-literal=CHEFS_HV_FORM_ID=${{ env.CHEFS_HV_FORM_ID }} \
-          --from-literal=CHEFS_HV_API_KEY=${{ env.CHEFS_HV_API_KEY }} --from-literal=CHEFS_MAIL_FORM_ID=${{ env.CHEFS_MAIL_FORM_ID }} \
-          --from-literal=CHEFS_MAIL_API_KEY=${{ env.CHEFS_MAIL_API_KEY }} --from-literal=CHES_API_OAUTH_SECRET=${{ env.CHES_API_OAUTH_SECRET }} \
-          --from-literal=MAPHUB_USER=${{ env.MAPHUB_USER }} --from-literal=MAPHUB_PASS=${{ env.MAPHUB_PASS }} \
-          --from-literal=SRC_CSV_ID=${{ env.SRC_CSV_ID }} --from-literal=SRC_LAYER_ID=${{ env.SRC_LAYER_ID }} \
-          --from-literal=RCV_CSV_ID=${{ env.RCV_CSV_ID }} --from-literal=RCV_LAYER_ID=${{ env.RCV_LAYER_ID }} \
-          --from-literal=HV_CSV_ID=${{ env.HV_CSV_ID }} --from-literal=HV_LAYER_ID=${{ env.HV_LAYER_ID }} \
-          --from-literal=WEB_MAP_APP_ID=${{ env.WEB_MAP_APP_ID }} --from-literal=CHEFS_API_URL=${{ env.CHEFS_API_URL }} \
-          --from-literal=AUTH_URL=${{ env.AUTH_URL }} --from-literal=CHES_URL=${{ env.CHES_URL }} \
-          --dry-run -o yaml \
-          | oc apply -f -
           
           oc process -f ./openshift/sris-schedule-job.yml -p APP_NAME=${{ env.APP_NAME }} -p TAG=${{ env.TAG }}  -p NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }} \
+          -p CHEFS_SOILS_FORM_ID=${{ env.CHEFS_SOILS_FORM_ID }} \
+          -p CHEFS_SOILS_API_KEY=${{ env.CHEFS_SOILS_API_KEY }} -p CHEFS_HV_FORM_ID=${{ env.CHEFS_HV_FORM_ID }} \
+          -p CHEFS_HV_API_KEY=${{ env.CHEFS_HV_API_KEY }} -p CHEFS_MAIL_FORM_ID=${{ env.CHEFS_MAIL_FORM_ID }} \
+          -p CHEFS_MAIL_API_KEY=${{ env.CHEFS_MAIL_API_KEY }} -p CHES_API_OAUTH_SECRET=${{ env.CHES_API_OAUTH_SECRET }} \
+          -p MAPHUB_USER=${{ env.MAPHUB_USER }} -p MAPHUB_PASS=${{ env.MAPHUB_PASS }} \
+          -p SRC_CSV_ID=${{ env.SRC_CSV_ID }} -p SRC_LAYER_ID=${{ env.SRC_LAYER_ID }} \
+          -p RCV_CSV_ID=${{ env.RCV_CSV_ID }} -p RCV_LAYER_ID=${{ env.RCV_LAYER_ID }} \
+          -p HV_CSV_ID=${{ env.HV_CSV_ID }} -p HV_LAYER_ID=${{ env.HV_LAYER_ID }} \
+          -p WEB_MAP_APP_ID=${{ env.WEB_MAP_APP_ID }} -p CHEFS_API_URL=${{ env.CHEFS_API_URL }} \
+          -p AUTH_URL=${{ env.AUTH_URL }} -p CHES_URL=${{ env.CHES_URL }} \
           | oc apply -f -
       - uses: rickstaa/action-create-tag@v1
         name: Create Release Tag in Git
@@ -100,4 +98,4 @@ jobs:
           tag: "release/${{ env.TAG }}"
           message: "Release version ${{ env.TAG }}"
 
-      
+
