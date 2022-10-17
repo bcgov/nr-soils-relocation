@@ -9,6 +9,7 @@ EMAIL_SUBJECT_HIGH_VOLUME = r'SRIS Subscription Service - New Registration(s) Re
 SOURCE_CSV_FILE = r'soil_relocation_source_sites.csv'
 RECEIVE_CSV_FILE = r'soil_relocation_receiving_sites.csv'
 HIGH_VOLUME_CSV_FILE = r'high_volume_receiving_sites.csv'
+EMAIL_SENDER_ADDRESS = r'donotreplySRIS@gov.bc.ca'
 CHES_HEALTH_200_STATUS = r'[INFO] The status of CHES returned the healthy.'
 CHES_HEALTH_401_STATUS = r'[ERROR] Access token is mission or invalid.'
 CHES_HEALTH_403_STATUS = r'[ERROR] Lack required role to perform action.'

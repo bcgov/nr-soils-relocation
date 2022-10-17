@@ -601,7 +601,7 @@ def send_email_subscribers():
     for _k, _v in notify_soil_reloc_subscriber_dic.items():
         #key:(subscriber email, regional district),
         #value:email message, subscription create date, subscription confirm id)
-        _ches_response = helper.send_mail(_k[0], constant.EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
+        _ches_response = helper.send_single_email(_k[0], constant.EMAIL_SUBJECT_SOIL_RELOCATION, _v[0])
         if _ches_response is not None and _ches_response.status_code is not None:
             print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
@@ -609,7 +609,7 @@ def send_email_subscribers():
     for _k, _v in notify_hvs_subscriber_dic.items():
         #key:(subscriber email, regional district),
         #value:email message, subscription create date, subscription confirm id)
-        _ches_response = helper.send_mail(_k[0], constant.EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
+        _ches_response = helper.send_single_email(_k[0], constant.EMAIL_SUBJECT_HIGH_VOLUME, _v[0])
         if _ches_response is not None and _ches_response.status_code is not None:
             print("[INFO] CHEFS Email response: " + str(_ches_response.status_code) + ", subscriber email: " + _k[0])
 
@@ -617,6 +617,7 @@ def send_email_subscribers():
 # Fetch all submissions from chefs API
 print('Loading Submissions List...')
 submissionsJson = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
+print(len(submissionsJson), "Submissions are retrived.")
 #print(submissionsJson)
 print('Loading Submission attributes and headers...')
 soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
@@ -624,6 +625,7 @@ soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 
 print('Loading High Volume Sites list...')
 hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
+print(len(hvsJson), "High Volume Sites are retrived.")
 #print(hvsJson)
 print('Loading High Volume Sites attributes and headers...')
 hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
@@ -632,6 +634,7 @@ hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 # Fetch subscribers list
 print('Loading submission subscribers list...')
 subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
+print(len(subscribersJson), "Submission Subscribers are retrived.")
 #print(subscribersJson)
 print('Loading submission subscribers attributes and headers...')
 subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
@@ -702,7 +705,7 @@ _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
 print('Updating Soil Relocation Soruce Site CSV...')
 _srcCsvItem = _gis.content.get(SRC_CSV_ID)
 if _srcCsvItem is None:
-    print('Error: Source Site CSV Item ID is invalid!')
+    print('[ERROR] Source Site CSV Item ID is invalid!')
 else:
     _srcCsvUpdateResult = _srcCsvItem.update({}, constant.SOURCE_CSV_FILE)
     print('Updated Soil Relocation Source Site CSV successfully: ' + str(_srcCsvUpdateResult))
@@ -710,7 +713,7 @@ else:
     print('Updating Soil Relocation Soruce Site Feature Layer...')
     _srcLyrItem = _gis.content.get(SRC_LAYER_ID)
     if _srcLyrItem is None:
-        print('Error: Source Site Layter Item ID is invalid!')
+        print('[ERROR] Source Site Layter Item ID is invalid!')
     else:
         _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
         _srcLyrOverwriteResult = _srcFlc.manager.overwrite(constant.SOURCE_CSV_FILE)
@@ -720,7 +723,7 @@ else:
 print('Updating Soil Relocation Receiving Site CSV...')
 _rcvCsvItem = _gis.content.get(RCV_CSV_ID)
 if _rcvCsvItem is None:
-    print('Error: Receiving Site CSV Item ID is invalid!')
+    print('[ERROR] Receiving Site CSV Item ID is invalid!')
 else:
     _rcvCsvUpdateResult = _rcvCsvItem.update({}, constant.RECEIVE_CSV_FILE)
     print('Updated Soil Relocation Receiving Site CSV successfully: ' + str(_rcvCsvUpdateResult))
@@ -728,8 +731,8 @@ else:
     print('Updating Soil Relocation Receiving Site Feature Layer...')
     _rcvLyrItem = _gis.content.get(RCV_LAYER_ID)
     if _rcvLyrItem is None:
-        print('Error: Receiving Site Layer Item ID is invalid!')
-    else:    
+        print('[ERROR] Receiving Site Layer Item ID is invalid!')
+    else:
         _rcvFlc = FeatureLayerCollection.fromitem(_rcvLyrItem)
         _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(constant.RECEIVE_CSV_FILE)
         print('Updated Soil Relocation Receiving Site Feature Layer successfully: ' + json.dumps(_rcvLyrOverwriteResult))
@@ -738,7 +741,7 @@ else:
 print('Updating High Volume Receiving Site CSV...')
 _hvCsvItem = _gis.content.get(HV_CSV_ID)
 if _hvCsvItem is None:
-    print('Error: High Volume Receiving Site CSV Item ID is invalid!')
+    print('[ERROR] High Volume Receiving Site CSV Item ID is invalid!')
 else:
     _hvCsvUpdateResult = _hvCsvItem.update({}, constant.HIGH_VOLUME_CSV_FILE)
     print('Updated High Volume Receiving Site CSV successfully: ' + str(_hvCsvUpdateResult))
@@ -746,11 +749,15 @@ else:
     print('Updating High Volume Receiving Site Feature Layer...')
     _hvLyrItem = _gis.content.get(HV_LAYER_ID)
     if _hvLyrItem is None:
-        print('Error: High Volume Receiving Site Layer Item ID is invalid!')
+        print('[ERROR] High Volume Receiving Site Layer Item ID is invalid!')
     else:
         _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
         _hvLyrOverwriteResult = _hvFlc.manager.overwrite(constant.HIGH_VOLUME_CSV_FILE)
         print('Updated High Volume Receiving Site Feature Layer successfully: ' + json.dumps(_hvLyrOverwriteResult))
+
+
+print('Checking CHES Health...')
+print(helper.check_ches_health())
 
 
 print('Sending subscriber emails...')

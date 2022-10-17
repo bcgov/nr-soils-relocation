@@ -124,19 +124,19 @@ def check_ches_health():
     else:
         return "[ERROR] CHES Health returned staus code:" + str(_ches_response.status_code), ", text:" + _ches_response.text
 
-def send_mail(to_email, subject, message):
+def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
     _ches_response = None
     _access_token = get_ches_token()
     if _access_token is not None:
-        from_email = "donotreplySRIS@gov.bc.ca"
+        from_email = constant.EMAIL_SENDER_ADDRESS
         ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
         ches_headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + _access_token
         }
-        _ches_response = requests.request("POST", CHES_URL + '/api/v1/email',#CHES_API_ENDPOINT
-            headers=ches_headers, data=ches_pay_load)
+        _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
+        _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load)
     return _ches_response
 
 def site_list(form_id, form_key):
