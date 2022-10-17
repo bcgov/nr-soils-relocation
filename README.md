@@ -7,20 +7,20 @@ This is a mapping application providing high-volume receiving site registration 
 
 ### Process
 
-1. BC users in BC submit soil relocation information using a [CHEFS form](link-goes-here)
+1. BC users in BC submit soil relocation information using a CHEFS form (link coming soon)
 
 2. [This script](./chefs_soils.py) is run on a schedule
 
 3. Data from CHEFS forms is uploaded to [ArcGIS Online (AGOL)](https://www.arcgis.com/) and soil movement subscribers are notified
 
-4. This information is displayed in the [frontend](link-goes-here), which is be made public soon
+4. This information is displayed in the frontend, which is be made public soon
 
 
 ### Technical
 
 The Project uses [OpenShift CronJobs](https://docs.openshift.com/container-platform/4.10/nodes/jobs/nodes-nodes-jobs.html#nodes-nodes-jobs-creating-cron_nodes-nodes-jobs)
 
-The template is [here](https://raw.githubusercontent.com/bcgov/nr-soils-relocation/main/openshift/sris-schedule-job.yml)
+The template is [here](./openshift/sris-schedule-job.yml)
 
 The workflow file for build and deploy is [here](.github/workflows/ci-openshift-prod.yaml).
 
@@ -38,17 +38,17 @@ NOTE: This application is the middle layer between CHEFS forms and AGOL, neither
 
 2. Once the code is reviewed and approved, merge it to main branch.
 
-3. Go to the Actions tab, click on (`Build And Add Job to Openshift Prod`)(https://github.com/${{ github.repository }}/actions//workflows/ci-openshift-prod.yaml) and trigger a build
+3. Go to the Actions tab, click on [Build And Add Job to Openshift Prod](https://github.com/bcgov/nr-soils-relocation/actions//workflows/ci-openshift-prod.yaml) and trigger a build
 
-   1. Provide a unique tag number.  Check the [releases/tags](https://github.com/${{ github.repository }}/tags) and increment accordingly
+   1. Provide a unique tag number.  Check the [releases/tags](https://github.com/bcgov/nr-soils-relocation/tags) and increment accordingly
 
    2. Click on Run workflow button
 
 4. The workflow will:
 
-   1. Build and push a container image to the [GitHub Container Registry (GHCR.io)](https://github.com/${{ github.repository }}/pkgs/container/${{ github.event.repository.name }}), tagged with the release you provided
+   1. Build and push a container image to the [GitHub Container Registry (GHCR.io)](https://github.com/bcgov/nr-soils-relocation/pkgs/container/nr-soils-relocation%2Fsris), tagged with the release you provided
 
-   2. Create the matching GitHub [release/tag](https://github.com/${{ github.repository }}/tags)
+   2. Create the matching GitHub [release/tag](https://github.com/bcgov/nr-soils-relocation/tags)
 
    3. Deploy code and configmap changes to OpenShift
 
@@ -66,7 +66,7 @@ NOTE: This application is the middle layer between CHEFS forms and AGOL, neither
 
 Sometimes waiting for a scheduled cronjob is not practical.  These steps explain how to run a one-time job.
 
-1. Visit the [OpenShift console](https://console.apps.silver.devops.gov.bc.ca/k8s/ns/f0431b-prod/cronjobs/sris-cron-job/yaml)
+1. Visit the appropriate [OpenShift console](https://console.apps.silver.devops.gov.bc.ca/k8s/ns/f0431b-prod/cronjobs/sris-cron-job/yaml)
 
 2. Copy the spec.spec.containers section of the cronjob template, including the container's TAG
 
