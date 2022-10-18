@@ -1,4 +1,5 @@
 # pylint: disable=line-too-long
+# pylint: disable=no-member
 """
 Functions to need to execute  chefs_soil.py
 """
@@ -83,37 +84,60 @@ def is_boolean(obj):
     """Check if boolen type is"""
     return True if isinstance(obj, bool) else False
 
-def send_mail(to_email, subject, message):
-    """Send email via CHES API"""
-    ches_response = None
+def get_ches_token():
+    """"Get GHES Token"""
+    _auth_response = None
     try:
-        auth_pay_load = 'grant_type=client_credentials'
-        auth_headers = {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
+        _auth_pay_load = 'grant_type=client_credentials'
+        _auth_headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        auth_response = requests.request("POST", AUTH_URL +
-          '/auth/realms/jbd6rnxw/protocol/openid-connect/token',
-          headers=auth_headers, data=auth_pay_load)
-        auth_response_json = json.loads(auth_response.content)
-        if auth_response_json.get('access_token'):
-            access_token = auth_response_json['access_token']
-
-            from_email = "donotreplySRIS@gov.bc.ca"
-            ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
-            ches_headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + access_token
-            }
-            ches_response = requests.request("POST", CHES_URL +
-              '/api/v1/email', headers=ches_headers, data=ches_pay_load)
+        _ches_token_enpont = AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token'
+        _auth_response = requests.request("POST", _ches_token_enpont, headers=_auth_headers, data=_auth_pay_load)
+        _auth_response_json = json.loads(_auth_response.content)
+        if _auth_response_json.get('access_token'):
+            return _auth_response_json['access_token']
         else:
-            raise KeyError(auth_response_json.get('error_description') + ", "
-                + auth_response_json.get('error') + ", status code:"
-                + str(auth_response.status_code) + ", reason:"+ auth_response.reason)
+            raise KeyError(_auth_response_json.get('error_description') + ", "
+                + _auth_response_json.get('error') + ", status code:"
+                + str(_auth_response.status_code) + ", reason:"+ _auth_response.reason)
     except KeyError as _ke:
         print("[ERROR] The email could not be sent due to an authorization issue. (" , _ke , ")")
-    return ches_response
+    return _auth_response
+
+def check_ches_health():
+    """Returns health checks of external service dependencies"""
+    _access_token = get_ches_token()
+    ches_headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + _access_token
+    }
+    _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
+    _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers)
+    if _ches_response.status_code == 200:
+        return constant.CHES_HEALTH_200_STATUS
+    elif _ches_response.status_code == 401:
+        return constant.CHES_HEALTH_401_STATUS
+    elif _ches_response.status_code == 403:
+        return constant.CHES_HEALTH_403_STATUS
+    else:
+        return "[ERROR] CHES Health returned staus code:" + str(_ches_response.status_code), ", text:" + _ches_response.text
+
+def send_single_email(to_email, subject, message):
+    """Send email via CHES API"""
+    _ches_response = None
+    _access_token = get_ches_token()
+    if _access_token is not None:
+        from_email = constant.EMAIL_SENDER_ADDRESS
+        ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
+        ches_headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _access_token
+        }
+        _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
+        _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load)
+    return _ches_response
 
 def site_list(form_id, form_key):
     """Retrieve CHEFS form data via CHEFS API"""
