@@ -129,14 +129,34 @@ def send_single_email(to_email, subject, message):
     _ches_response = None
     _access_token = get_ches_token()
     if _access_token is not None:
-        from_email = constant.EMAIL_SENDER_ADDRESS
-        ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
-        ches_headers = {
+        _from_email = constant.EMAIL_SENDER_ADDRESS
+        _ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+_from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
+        _ches_headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + _access_token
         }
         _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
-        _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load)
+        _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=_ches_headers, data=_ches_pay_load)
+    return _ches_response
+
+def send_bulk_email_validate(body, contexts, subject):
+    """
+    This endpoint returns an array of transformed message objects with the templates populated.
+    Should there be validation errors, the endpoint will return a list of reasons why it failed validation.
+    """
+    _ches_response = None
+    _access_token = get_ches_token()
+    if _access_token is not None:
+        _from_email = constant.EMAIL_SENDER_ADDRESS
+        contexts = str(contexts).replace("[","").replace("]","")
+        contexts = contexts.replace("'","\"")
+        _ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+body+"\",\n \"contexts\": [\""+contexts+"\"]\n \"encoding\": \"utf-8\",\n \"from\": \""+_from_email+"\",\n \"priority\": \"normal\",\n \"subject\": \""+subject+"\"\n }\n"
+        ches_headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _access_token
+        }
+        _ches_api_bulk_email_validate_endpoint = CHES_URL + '/api/v1/emailMerge/preview'
+        _ches_response = requests.request("POST", _ches_api_bulk_email_validate_endpoint, headers=ches_headers, data=_ches_pay_load)
     return _ches_response
 
 def site_list(form_id, form_key):

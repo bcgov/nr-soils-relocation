@@ -61,6 +61,16 @@ def create_popup_links(sites):
                 _popup_links.append({'href':_link})
     return _popup_links
 
+def get_site_relocation_email_template():
+    return create_template_email(
+      template='site_relocation_email_template.html',
+    )
+
+def create_bulk_email_contexts():
+    _contexts = []
+    _contexts.append({"to": ["rjeong@vividsolutions.com"], "context": {"regional_district": "test", "chefs_mail_form_id":"kkkk"}})
+    return _contexts
+
 def create_template_email(template, **kwargs):
     """Load the given email template and do rendering with the given arguments"""
     env = Environment(
@@ -756,8 +766,15 @@ else:
         print('Updated High Volume Receiving Site Feature Layer successfully: ' + json.dumps(_hvLyrOverwriteResult))
 
 
+
 print('Checking CHES Health...')
 print(helper.check_ches_health())
+
+print('Requeting to validate bulk email - Soil Relocation Template...')
+helper.send_bulk_email_validate(
+    body=get_site_relocation_email_template(),
+    contexts=create_bulk_email_contexts(),
+    subject=constant.EMAIL_SUBJECT_SOIL_RELOCATION)
 
 
 print('Sending subscriber emails...')
