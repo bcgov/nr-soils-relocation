@@ -766,8 +766,8 @@ send_email_subscribers()
 
 print('Completed Soils data publishing')
 
-#### to track the version of forms (Sept/26/2022)
+#### to track the version of forms (Oct/18/2022)
 # CHEFS generates new vresion of forms when changes of data fields, manages data by each version
-# 1.soil relocation form version: v9
-# 2.high volume submission version v7
+# 1.soil relocation form version: v10
+# 2.high volume submission version v8
 # 3.subscriber form version: v9
