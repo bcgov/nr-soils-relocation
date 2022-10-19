@@ -59,7 +59,7 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
                 _lon_dd = - _lon_dd # longitude degrees should be minus in BC bouding box
 
     except ValueError as _ve:
-        print(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
+        logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
 
     return _lat_dd, _lon_dd
 
@@ -101,7 +101,7 @@ def get_ches_token():
                 + _auth_response_json.get('error') + ", status code:"
                 + str(_auth_response.status_code) + ", reason:"+ _auth_response.reason)
     except KeyError as _ke:
-        print("[ERROR] The email could not be sent due to an authorization issue. (" , _ke , ")")
+        logging.exception("Email could not be sent due to an authorization issue:%s", _ke)
     return _auth_response
 
 def check_ches_health():
@@ -114,13 +114,13 @@ def check_ches_health():
     _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
     _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers)
     if _ches_response.status_code == 200:
-        return constant.CHES_HEALTH_200_STATUS
+        logging.info(constant.CHES_HEALTH_200_STATUS)
     elif _ches_response.status_code == 401:
-        return constant.CHES_HEALTH_401_STATUS
+        logging.error(constant.CHES_HEALTH_401_STATUS)
     elif _ches_response.status_code == 403:
-        return constant.CHES_HEALTH_403_STATUS
+        logging.error(constant.CHES_HEALTH_403_STATUS)
     else:
-        return "[ERROR] CHES Health returned staus code:" + str(_ches_response.status_code), ", text:" + _ches_response.text
+        logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
 
 def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
@@ -140,7 +140,6 @@ def send_single_email(to_email, subject, message):
 def site_list(form_id, form_key):
     """Retrieve CHEFS form data via CHEFS API"""
     request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-    # print('Parsing JSON response')
     content = json.loads(request.content)
     return content
 
@@ -149,7 +148,6 @@ def fetch_columns(form_id, form_key):
     request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
     request_json = json.loads(request.content)
     version = request_json[0]['id']
-
     attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
     attributes = json.loads(attribute_request.content)
     return attributes
@@ -159,7 +157,7 @@ def get_difference_datetimes_in_hour(datetime1, datetime2):
     _diff = None
     if datetime1 is not None and datetime2 is not None:
         _diff = (datetime1 - datetime2).total_seconds() / 60 / 60 #difference in hour
-        #print('difference datetimes in hour:',_diff)
+        logging.debug("difference datetimes in hour:%s", _diff)
     return _diff
 
 def get_create_date(cefs_dic, form_field, create_at_field):
@@ -168,7 +166,7 @@ def get_create_date(cefs_dic, form_field, create_at_field):
     if cefs_dic.get(form_field) is not None :
         _created_at = cefs_dic.get(form_field).get(create_at_field)
         if _created_at is not None:
-            #print('the supported timezones by the pytz module:', pytz.all_timezones, '\n')
+            logging.debug("The supported timezones by the pytz module:%s\n", timezone.pytz.all_timezones)
             _created_at = datetime.datetime.strptime(_created_at, '%Y-%m-%dT%H:%M:%S.%f%z') #convert string to datetime with timezone(UTC)
             _created_at = _created_at.astimezone(timezone('Canada/Pacific'))  #convert to PST
     return _created_at
@@ -191,10 +189,9 @@ def convert_simple_datetime_format_in_str(str_date):
         if str_date is not None and str_date != '':
             _datetime_in_str = str_date.split('T')
             if len(_datetime_in_str) > 1:
-                _result = datetime.datetime.strptime(_datetime_in_str[0],
-                            '%Y-%m-%d').strftime('%m/%d/%Y')
+                _result = datetime.datetime.strptime(_datetime_in_str[0], '%Y-%m-%d').strftime('%m/%d/%Y')
     except ValueError as _ve:
-        print(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
+        logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
     return _result if _result is not None else str_date
 
 def isfloat(value):
@@ -215,7 +212,7 @@ def extract_floating_from_string(value):
                 _result = _exp_result[0]
 
     except ValueError as _ve:
-        print(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
+        logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
 
     return _result
 def str_to_double(obj):

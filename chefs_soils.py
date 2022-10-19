@@ -496,12 +496,14 @@ def send_email_subscribers():
                                 # subscription confirm id
                                 if (_subscriber_email,_srd) not in notify_soil_reloc_subscriber_dic:
                                     notify_soil_reloc_subscriber_dic[(_subscriber_email,_srd)] = (_email_msg, _subscription_created_at, _subscription_confirm_id)
-                                    logging.debug("notifySoilRelocSubscriberDic added email:%s, region:%s, confirm id:%s, subscription created at:%s", _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+                                    logging.debug("notifySoilRelocSubscriberDic added email:%s, region:%s, confirm id:%s, subscription created at:%s", 
+                                        _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
                                 else:
                                     _subscrb_created = notify_soil_reloc_subscriber_dic.get((_subscriber_email,_srd))[1]
                                     if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
                                         notify_soil_reloc_subscriber_dic.update({(_subscriber_email,_srd):(_email_msg, _subscription_created_at, _subscription_confirm_id)})
-                                        logging.debug("notifySoilRelocSubscriberDic updated email:%s, region:%s, confirm id:%s, subscription created at:%s", _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+                                        logging.debug("notifySoilRelocSubscriberDic updated email:%s, region:%s, confirm id:%s, subscription created at:%s", 
+                                            _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
 
             # Notification of high volume site registration in selected Regional District(s) ============================================
             if _notify_hvs:
@@ -513,7 +515,8 @@ def send_email_subscribers():
 
                     if _hv_sites_in_rd is not None:
                         for _hv_site_dic in _hv_sites_in_rd:
-                            logging.debug("today:%s, created at:%s, confirm Id:%s", _today, _hv_site_dic['createAt'], _hv_site_dic['confirmationId'])
+                            logging.debug("today:%s, created at:%s, confirm Id:%s", 
+                                _today, _hv_site_dic['createAt'], _hv_site_dic['confirmationId'])
                             # comparing the submission create date against the current script runtime.
                             _diff = helper.get_difference_datetimes_in_hour(_today, _hv_site_dic['createAt'])
                             if (_diff is not None and _diff <= 24):  #within the last 24 hours.
@@ -527,12 +530,14 @@ def send_email_subscribers():
                                 # subscription confirm id
                                 if (_subscriber_email,_srd) not in notify_hvs_subscriber_dic:
                                     notify_hvs_subscriber_dic[(_subscriber_email,_srd)] = (_hv_email_msg, _subscription_created_at, _subscription_confirm_id)
-                                    logging.debug("notifyHVSSubscriberDic added email:%s, region:%s, confirm id:%s ,subscription created at:%s", _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+                                    logging.debug("notifyHVSSubscriberDic added email:%s, region:%s, confirm id:%s ,subscription created at:%s", 
+                                        _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
                                 else:
                                     _subscrb_created = notify_hvs_subscriber_dic.get((_subscriber_email,_srd))[1]
                                     if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
                                         notify_hvs_subscriber_dic.update({(_subscriber_email,_srd):(_hv_email_msg, _subscription_created_at, _subscription_confirm_id)})
-                                        logging.debug("notifyHVSSubscriberDic updated email:%s, region:%s, confirm id:%s, subscription created at:%s", _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+                                        logging.debug("notifyHVSSubscriberDic updated email:%s, region:%s, confirm id:%s, subscription created at:%s", 
+                                            _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
 
         elif (_subscriber_email is not None and _subscriber_email.strip() != '' and
               _subscriber_regional_district is not None and len(_subscriber_regional_district) > 0 and
@@ -541,12 +546,14 @@ def send_email_subscribers():
             for _srd in _subscriber_regional_district:
                 if (_subscriber_email,_srd) not in unsubscribers_dic:
                     unsubscribers_dic[(_subscriber_email,_srd)] = _subscription_created_at
-                    logging.debug("unSubscribersDic added email:%s, region:%s, confirm id:%s, unsubscription created at:%s", _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+                    logging.debug("unSubscribersDic added email:%s, region:%s, confirm id:%s, unsubscription created at:%s", 
+                        _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
                 else:
                     _unsubscrb_created = unsubscribers_dic.get((_subscriber_email,_srd))
                     if (_subscription_created_at is not None and _subscription_created_at > _unsubscrb_created):
                         unsubscribers_dic.update({(_subscriber_email,_srd):_subscription_created_at})
-                        logging.debug("unSubscribersDic updated email:%s, region:%s, confirm id:%s, unsubscription created at:%s", _subscriber_email, _srd, str( _subscription_confirm_id), str(_subscription_created_at))
+                        logging.debug("unSubscribersDic updated email:%s, region:%s, confirm id:%s, unsubscription created at:%s", 
+                            _subscriber_email, _srd, str( _subscription_confirm_id), str(_subscription_created_at))
 
     logging.info('Removing unsubscribers from notifyHVSSubscriberDic and notifySoilRelocSubscriberDic ...')
     # Processing of data subscribed and unsubscribed by the same email in the same region -
@@ -557,22 +564,18 @@ def send_email_subscribers():
             _subscribe_confirm_id = notify_soil_reloc_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[2]
             if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
                 notify_soil_reloc_subscriber_dic.pop((_k1_subscriber_email,_k2_srd))
-                #print("remove subscription from notifySoilRelocSubscriberDic
-                #  - email:" + _k1_subscriberEmail+ ', region:'
-                #      + _k2_srd + ', confirm id:' +str( _subscription_confirm_id) + ',
-                #  unsubscription created at:' + str(_unsubscribe_create_at))
+                logging.debug("remove subscription from notifySoilRelocSubscriberDic - email:%s, region:%s, confirm id:%s, unsubscription created at:%s", 
+                    _k1_subscriber_email, _k2_srd, str(_subscribe_confirm_id), str(_unsubscribe_create_at))
 
         if (_k1_subscriber_email,_k2_srd) in notify_hvs_subscriber_dic:
             _subscribe_create_at = notify_hvs_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[1]
             _subscribe_confirm_id = notify_hvs_subscriber_dic.get((_k1_subscriber_email,_k2_srd))[2]
             if (_unsubscribe_create_at is not None and _subscribe_create_at is not None and _unsubscribe_create_at > _subscribe_create_at):
                 notify_hvs_subscriber_dic.pop((_k1_subscriber_email,_k2_srd))
-                #print("remove subscription from notifyHVSSubscriberDic - email:" +
-                # _k1_subscriberEmail+ ', region:'
-                #      + _k2_srd + ', confirm id:' +str( _subscribe_confirm_id) + ',
-                # unsubscription created at:' + str(_unsubscribe_create_at))
+                logging.debug("remove subscription from notifyHVSSubscriberDic - email:%s, region:%s, confirm id:%s, unsubscription created at:%s", 
+                    _k1_subscriber_email, _k2_srd, str(_subscribe_confirm_id), str(_unsubscribe_create_at))
 
-    print('Sending Notification of soil relocation in selected Regional District(s) ...')
+    logging.info('Sending Notification of soil relocation in selected Regional District(s) ...')
     for _k, _v in notify_soil_reloc_subscriber_dic.items():
         #key:(subscriber email, regional district),
         #value:email message, subscription create date, subscription confirm id)
@@ -580,7 +583,7 @@ def send_email_subscribers():
         if _ches_response is not None and _ches_response.status_code is not None:
             logging.info("CHEFS Email response: %s, subscriber email: %s", str(_ches_response.status_code), _k[0])
 
-    print('Sending Notification of high volume site registration in selected Regional District(s) ...')
+    logging.info('Sending Notification of high volume site registration in selected Regional District(s) ...')
     for _k, _v in notify_hvs_subscriber_dic.items():
         #key:(subscriber email, regional district),
         #value:email message, subscription create date, subscription confirm id)
@@ -673,7 +676,7 @@ _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
 logging.info('Updating Soil Relocation Soruce Site CSV...')
 _srcCsvItem = _gis.content.get(SRC_CSV_ID)
 if _srcCsvItem is None:
-    print('[ERROR] Source Site CSV Item ID is invalid!')
+    logging.error('Source Site CSV Item ID is invalid!')
 else:
     _srcCsvUpdateResult = _srcCsvItem.update({}, constant.SOURCE_CSV_FILE)
     logging.info("Updated Soil Relocation Source Site CSV successfully:%s", str(_srcCsvUpdateResult))
@@ -681,7 +684,7 @@ else:
     logging.info('Updating Soil Relocation Soruce Site Feature Layer...')
     _srcLyrItem = _gis.content.get(SRC_LAYER_ID)
     if _srcLyrItem is None:
-        print('[ERROR] Source Site Layter Item ID is invalid!')
+        logging.error('Source Site Layter Item ID is invalid!')
     else:
         _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
         _srcLyrOverwriteResult = _srcFlc.manager.overwrite(constant.SOURCE_CSV_FILE)
@@ -691,7 +694,7 @@ else:
 logging.info('Updating Soil Relocation Receiving Site CSV...')
 _rcvCsvItem = _gis.content.get(RCV_CSV_ID)
 if _rcvCsvItem is None:
-    print('[ERROR] Receiving Site CSV Item ID is invalid!')
+    logging.error('Receiving Site CSV Item ID is invalid!')
 else:
     _rcvCsvUpdateResult = _rcvCsvItem.update({}, constant.RECEIVE_CSV_FILE)
     logging.info("Updated Soil Relocation Receiving Site CSV successfully:%s", str(_rcvCsvUpdateResult))
@@ -699,7 +702,7 @@ else:
     logging.info('Updating Soil Relocation Receiving Site Feature Layer...')
     _rcvLyrItem = _gis.content.get(RCV_LAYER_ID)
     if _rcvLyrItem is None:
-        print('[ERROR] Receiving Site Layer Item ID is invalid!')
+        logging.error('Receiving Site Layer Item ID is invalid!')
     else:
         _rcvFlc = FeatureLayerCollection.fromitem(_rcvLyrItem)
         _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(constant.RECEIVE_CSV_FILE)
@@ -709,7 +712,7 @@ else:
 logging.info('Updating High Volume Receiving Site CSV...')
 _hvCsvItem = _gis.content.get(HV_CSV_ID)
 if _hvCsvItem is None:
-    print('[ERROR] High Volume Receiving Site CSV Item ID is invalid!')
+    logging.error('High Volume Receiving Site CSV Item ID is invalid!')
 else:
     _hvCsvUpdateResult = _hvCsvItem.update({}, constant.HIGH_VOLUME_CSV_FILE)
     logging.info("Updated High Volume Receiving Site CSV successfully: %s", str(_hvCsvUpdateResult))
@@ -717,7 +720,7 @@ else:
     logging.info('Updating High Volume Receiving Site Feature Layer...')
     _hvLyrItem = _gis.content.get(HV_LAYER_ID)
     if _hvLyrItem is None:
-        print('[ERROR] High Volume Receiving Site Layer Item ID is invalid!')
+        logging.error('High Volume Receiving Site Layer Item ID is invalid!')
     else:
         _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
         _hvLyrOverwriteResult = _hvFlc.manager.overwrite(constant.HIGH_VOLUME_CSV_FILE)
@@ -725,8 +728,7 @@ else:
 
 
 logging.info('Checking CHES Health...')
-print(helper.check_ches_health())
-
+helper.check_ches_health()
 
 logging.info('Sending subscriber emails...')
 send_email_subscribers()
