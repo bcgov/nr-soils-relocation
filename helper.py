@@ -10,6 +10,7 @@ import datetime
 import re
 import configparser
 import logging
+import logging.config
 from pytz import timezone
 import pytz
 import requests
@@ -25,7 +26,6 @@ AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
-logging.basicConfig(level=LOGLEVEL)
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
@@ -36,6 +36,7 @@ def read_config():
 config = read_config()
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
 
+logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
     """Convert to DD in mapLatitude and mapLongitude"""
