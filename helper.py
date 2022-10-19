@@ -10,6 +10,7 @@ import datetime
 import re
 import configparser
 import logging
+import logging.config
 from pytz import timezone
 import pytz
 import requests
@@ -25,7 +26,6 @@ AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
-logging.basicConfig(level=LOGLEVEL)
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
@@ -36,6 +36,7 @@ def read_config():
 config = read_config()
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
 
+logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec):
     """Convert to DD in mapLatitude and mapLongitude"""
@@ -91,7 +92,7 @@ def is_boolean(obj):
     return True if isinstance(obj, bool) else False
 
 def get_ches_token():
-    """"Get GHES Token"""
+    """"Get CHES Token"""
     _auth_response = None
     try:
         _auth_pay_load = 'grant_type=client_credentials'
@@ -99,8 +100,8 @@ def get_ches_token():
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        _ches_token_enpont = AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token'
-        _auth_response = requests.request("POST", _ches_token_enpont, headers=_auth_headers, data=_auth_pay_load)
+        _ches_token_endpoint = AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token'
+        _auth_response = requests.request("POST", _ches_token_endpoint, headers=_auth_headers, data=_auth_pay_load)
         _auth_response_json = json.loads(_auth_response.content)
         if _auth_response_json.get('access_token'):
             return _auth_response_json['access_token']

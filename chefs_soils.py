@@ -34,7 +34,7 @@ LOGLEVEL = os.getenv('LOGLEVEL')
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 
-logging.basicConfig(level=LOGLEVEL)
+logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def send_email_subscribers():
     """
