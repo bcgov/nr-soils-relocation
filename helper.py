@@ -91,7 +91,7 @@ def is_boolean(obj):
     return True if isinstance(obj, bool) else False
 
 def get_ches_token():
-    """"Get GHES Token"""
+    """"Get CHES Token"""
     _auth_response = None
     try:
         _auth_pay_load = 'grant_type=client_credentials'
