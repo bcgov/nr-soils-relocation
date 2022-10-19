@@ -73,6 +73,9 @@ parameters:
   - name: CHEFS_SOILS_API_KEY
     description: Soils API Key
     required: true
+  - name: LOGLEVEL
+    description: Logging level
+    required: true    
 objects:
   - kind: ConfigMap
     apiVersion: v1
@@ -100,6 +103,7 @@ objects:
       HV_LAYER_ID: ${HV_LAYER_ID}
       CHEFS_HV_API_KEY: ${CHEFS_HV_API_KEY}
       CHEFS_SOILS_API_KEY: ${CHEFS_SOILS_API_KEY}
+      LOGLEVEL: ${LOGLEVEL}
 
   - apiVersion: batch/v1
     kind: CronJob
