@@ -9,19 +9,19 @@ import copy
 import datetime
 import re
 import configparser
+import logging
 from pytz import timezone
 import requests
 from requests.auth import HTTPBasicAuth
 import constant
+
+logging.basicConfig(level=logging.INFO)
 
 CHES_API_OAUTH_SECRET = os.getenv('CHES_API_OAUTH_SECRET')
 
 CHEFS_API_URL = os.getenv('CHEFS_API_URL')
 AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
-print(f"[INFO]Value of env variable url='CHEFS_API_URL': {CHEFS_API_URL}")
-print(f"[INFO]Value of env variable url='AUTH_URL': {AUTH_URL}")
-print(f"[INFO]Value of env variable url='CHES_URL': {CHES_URL}")
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
@@ -74,10 +74,8 @@ def validate_lat_lon(
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
         _lon_dd >=-139.06 and _lon_dd <= -114.02):
         return True
-    print("[INFO] Can't publish data to AGOL due to Invalidate site coordinates - Latitude(deg/min/sec):",
-          _lat_dd,"(",lat_deg,"/",lat_min,"/",lat_sec,"), Longitude(deg/min/sec):",
-          _lon_dd,"(",lon_deg,"/",lon_min,"/",lon_sec,"), Confirm ID:",confirmation_id
-                  ,", Form:",form_name)
+    logging.warning("Can't publish data to AGOL due to invalidate site coordinates - Latitude(deg/min/sec):%s(%s/%s,%s), Longitude(deg/min/sec):%s(%s/%s/%s), Confirm ID:%s, Form:%s"
+    , _lat_dd, lat_deg, lat_min, lat_sec, _lon_dd, lon_deg, lon_min, lon_sec, confirmation_id, form_name)
     return False
 
 def is_boolean(obj):
