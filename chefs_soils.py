@@ -31,12 +31,13 @@ RCV_LAYER_ID = os.getenv('RCV_LAYER_ID')
 HV_CSV_ID = os.getenv('HV_CSV_ID')
 HV_LAYER_ID = os.getenv('HV_LAYER_ID')
 WEB_MAP_APP_ID = os.getenv('WEB_MAP_APP_ID')
+LOGLEVEL = os.getenv('LOGLEVEL')
 
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=LOGLEVEL)
 
 def get_popup_search_value(_site_dic):
     """Returns popup search value"""
@@ -594,21 +595,21 @@ def send_email_subscribers():
 
 logging.info('Loading Submissions List...')
 submissionsJson = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
-logging.info(len(submissionsJson), "Submissions are retrived.")
+logging.info("%s Submissions are retrived.", len(submissionsJson))
 logging.debug(submissionsJson)
 logging.info('Loading Submission attributes and headers...')
 soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 
 logging.info('Loading High Volume Sites list...')
 hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
-logging.info(len(hvsJson), "High Volume Sites are retrived.")
+logging.info("%s High Volume Sites are retrived.", len(hvsJson))
 logging.debug(hvsJson)
 logging.info('Loading High Volume Sites attributes and headers...')
 hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 
 logging.info('Loading submission subscribers list...')
 subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
-logging.info(len(subscribersJson), "Submission Subscribers are retrived.")
+logging.info("%s Submission Subscribers are retrived.", len(subscribersJson))
 logging.debug(subscribersJson)
 logging.info('Loading submission subscribers attributes and headers...')
 subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)

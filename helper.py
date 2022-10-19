@@ -11,17 +11,18 @@ import re
 import configparser
 import logging
 from pytz import timezone
+import pytz
 import requests
 from requests.auth import HTTPBasicAuth
 import constant
 
-logging.basicConfig(level=logging.INFO)
-
 CHES_API_OAUTH_SECRET = os.getenv('CHES_API_OAUTH_SECRET')
-
 CHEFS_API_URL = os.getenv('CHEFS_API_URL')
 AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
+LOGLEVEL = os.getenv('LOGLEVEL')
+
+logging.basicConfig(level=LOGLEVEL)
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
@@ -166,7 +167,7 @@ def get_create_date(cefs_dic, form_field, create_at_field):
     if cefs_dic.get(form_field) is not None :
         _created_at = cefs_dic.get(form_field).get(create_at_field)
         if _created_at is not None:
-            logging.debug("The supported timezones by the pytz module:%s\n", timezone.pytz.all_timezones)
+            logging.debug("The supported timezones by the pytz module:%s\n", pytz.all_timezones)
             _created_at = datetime.datetime.strptime(_created_at, '%Y-%m-%dT%H:%M:%S.%f%z') #convert string to datetime with timezone(UTC)
             _created_at = _created_at.astimezone(timezone('Canada/Pacific'))  #convert to PST
     return _created_at
