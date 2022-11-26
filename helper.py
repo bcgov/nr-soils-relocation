@@ -100,8 +100,7 @@ def get_ches_token():
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        _ches_token_endpoint = AUTH_URL + '/auth/realms/jbd6rnxw/protocol/openid-connect/token'
-        _auth_response = requests.request("POST", _ches_token_endpoint, headers=_auth_headers, data=_auth_pay_load)
+        _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load)
         _auth_response_json = json.loads(_auth_response.content)
         if _auth_response_json.get('access_token'):
             return _auth_response_json['access_token']
