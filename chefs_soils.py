@@ -264,6 +264,13 @@ for hvs in hvsJson:
         helper.add_regional_district_dic(_hvDic, hvRegDistDic)
 
 
+for sourceSite in sourceSites:
+    logging.info('regionalDistrict:%s', sourceSite.get('regionalDistrict'))
+    if (sourceSite.get('regionalDistrict') is None and sourceSite.get('latitude') and sourceSite.get('longitude')):
+        _regional_district = helper.get_regional_district(sourceSite.get('latitude'), sourceSite.get('longitude'))
+        logging.info('filled in regional district using arcgis feature service:%s', _regional_district)
+
+
 logging.info('Creating soil source site CSV...')
 with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=constant.SOURCE_SITE_HEADERS)
