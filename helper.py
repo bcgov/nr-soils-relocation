@@ -598,6 +598,13 @@ def map_source_site(_submission):
                                                     _submission[chefs_src_param('longitudeMinutes')],
                                                     _submission[chefs_src_param('longitudeSeconds')])
 
+        _src_dic['latitudeDegrees'] = _submission.get(chefs_src_param('latitudeDegrees'))
+        _src_dic['latitudeMinutes'] = _submission.get(chefs_src_param('latitudeMinutes'))
+        _src_dic['latitudeSeconds'] = _submission.get(chefs_src_param('latitudeSeconds'))
+        _src_dic['longitudeDegrees'] = _submission.get(chefs_src_param('longitudeDegrees'))
+        _src_dic['longitudeMinutes'] = _submission.get(chefs_src_param('longitudeMinutes'))
+        _src_dic['longitudeSeconds'] = _submission.get(chefs_src_param('longitudeSeconds'))
+
         _src_dic['landOwnership'] = create_land_ownership(_submission, chefs_src_param('landOwnership'))
         _src_dic['regionalDistrict'] = create_regional_district(_submission, chefs_src_param('regionalDistrict'))
         _src_dic['legallyTitledSiteAddress'] = _submission.get(chefs_src_param('legallyTitledSiteAddress'))
@@ -728,6 +735,13 @@ def map_rcv_site(_submission, rcv_clz):
                                                     _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
                                                     _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)))
 
+        _rcv_dic['latitudeDegrees'] = _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz))
+        _rcv_dic['latitudeMinutes'] = _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz))
+        _rcv_dic['latitudeSeconds'] = _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz))
+        _rcv_dic['longitudeDegrees'] = _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz))
+        _rcv_dic['longitudeMinutes'] = _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz))
+        _rcv_dic['longitudeSeconds'] = _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz))
+
         _rcv_dic['regionalDistrict'] = create_regional_district(_submission, chefs_rcv_param('regionalDistrict', rcv_clz))
         _rcv_dic['landOwnership'] = create_land_ownership(_submission, chefs_rcv_param('landOwnership', rcv_clz))
         _rcv_dic['legallyTitledSiteAddress'] = _submission.get(chefs_rcv_param('legallyTitledSiteAddress', rcv_clz))
@@ -841,6 +855,13 @@ def map_hv_site(_hvs):
                                                     _hvs[chefs_hv_param('longitudeDegrees')],
                                                     _hvs[chefs_hv_param('longitudeMinutes')],
                                                     _hvs[chefs_hv_param('longitudeSeconds')])
+
+        _hv_dic['latitudeDegrees'] = _hvs.get(chefs_hv_param('latitudeDegrees'))
+        _hv_dic['latitudeMinutes'] = _hvs.get(chefs_hv_param('latitudeMinutes'))
+        _hv_dic['latitudeSeconds'] = _hvs.get(chefs_hv_param('latitudeSeconds'))
+        _hv_dic['longitudeDegrees'] = _hvs.get(chefs_hv_param('longitudeDegrees'))
+        _hv_dic['longitudeMinutes'] = _hvs.get(chefs_hv_param('longitudeMinutes'))
+        _hv_dic['longitudeSeconds'] = _hvs.get(chefs_hv_param('longitudeSeconds'))
 
         _hv_dic['regionalDistrict'] = create_regional_district(_hvs, chefs_hv_param('regionalDistrict'))
         _hv_dic['landOwnership'] = create_land_ownership(_hvs, chefs_hv_param('landOwnership'))
