@@ -799,6 +799,7 @@ def map_rcv_site(_submission, rcv_clz):
                                 chefs_rcv_param('form', rcv_clz),
                                 chefs_rcv_param('createdAt', rcv_clz))
         _rcv_dic['confirmationId'] = _confirmation_id
+        _rcv_dic['receivingSiteClass'] = rcv_clz # contaning 1, 2, or 3 for receiving site order
     return _rcv_dic
 
 def map_hv_site(_hvs):
@@ -919,6 +920,26 @@ def map_hv_site(_hvs):
         _hv_dic['createAt'] = get_create_date(_hvs, chefs_hv_param('form'), chefs_hv_param('createdAt'))
         _hv_dic['confirmationId'] = _confirmation_id
     return _hv_dic
+
+def map_source_receiving_site_address(_source_sites, _receiving_sites):
+    """Adding receiving site addresses into source site and source site address into receiving sites"""
+    for _src_site in _source_sites:
+        for _rcv_site in _receiving_sites:
+            if _rcv_site.get('confirmationId') == _src_site.get('confirmationId'):
+                # adding receiving site addresses into source site
+                if _rcv_site.get('receivingSiteClass') == '1':
+                    _src_site['receivingSite1Address'] = _rcv_site.get('legallyTitledSiteAddress')
+                    _src_site['receivingSite1City'] = _rcv_site.get('legallyTitledSiteCity')
+                elif _rcv_site.get('receivingSiteClass') == '2':
+                    _src_site['receivingSite2Address'] = _rcv_site.get('legallyTitledSiteAddress')
+                    _src_site['receivingSite2City'] = _rcv_site.get('legallyTitledSiteCity')
+                elif _rcv_site.get('receivingSiteClass') == '3':
+                    _src_site['receivingSite3Address'] = _rcv_site.get('legallyTitledSiteAddress')
+                    _src_site['receivingSite3City'] = _rcv_site.get('legallyTitledSiteCity')
+                # adding source site address into receiving sites
+                _rcv_site['sourceSiteAddress'] = _src_site.get('legallyTitledSiteAddress')
+                _rcv_site['sourceSiteCity'] = _src_site.get('legallyTitledSiteCity')
+    return _source_sites, _receiving_sites
 
 def get_regional_district(_lat, _long):
     """Returns regional district for latitude and longutide"""

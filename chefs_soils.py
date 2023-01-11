@@ -289,6 +289,11 @@ for submission in submissionsJson:
         receivingSites.append(_3rcvDic)
         helper.add_regional_district_dic(_3rcvDic, rcvRegDistDic)
 
+
+logging.debug('Adding receiving site addresses into source site and source site address into receiving sites...')
+sourceSites, receivingSites = helper.map_source_receiving_site_address(sourceSites, receivingSites)
+
+
 logging.info('Creating high volume site records records...')
 hvSites = []
 hvRegDistDic = {}

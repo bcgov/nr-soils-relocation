@@ -300,7 +300,8 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
-                            , confirmationId='confirmationId')
+                            , confirmationId='confirmationId'
+                            , receivingSiteClass='receivingSiteClass')
 CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditionalReceivingSite'
                             , latitudeMinutes='C2-Latitude-Minutes1FirstAdditionalReceivingSite'
                             , latitudeSeconds='Section2-Latitude-Seconds2FirstAdditionalReceivingSite'
@@ -367,7 +368,8 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
-                            , confirmationId='confirmationId')
+                            , confirmationId='confirmationId'
+                            , receivingSiteClass='receivingSiteClass')
 CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditionalreceivingSite'
                             , latitudeMinutes='C2-Latitude-Minutes3SecondAdditionalreceivingSite'
                             , latitudeSeconds='Section2-Latitude-Seconds4SecondAdditionalreceivingSite'
@@ -434,7 +436,8 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
-                            , confirmationId='confirmationId')
+                            , confirmationId='confirmationId'
+                            , receivingSiteClass='receivingSiteClass')
 CHEFS_HV_PARAM_DIC = dict(latitudeDegrees='Section3-Latitude-Degrees'
                             , latitudeMinutes='Section3-Latitude-Minutes'
                             , latitudeSeconds='Section3-Latitude-Seconds'
@@ -562,6 +565,12 @@ SOURCE_SITE_HEADERS = ["updateToPreviousForm",
                        "legalLandDescription",
                        "PIN",
                        "crownLandFileNumbers",
+                       "receivingSite1Address",
+                       "receivingSite1City",
+                       "receivingSite2Address",
+                       "receivingSite2City",
+                       "receivingSite3Address",
+                       "receivingSite3City",
                        "sourceSiteLandUse",
                        "highVolumeSite",
                        "soilRelocationPurpose",
@@ -647,6 +656,8 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "legalLandDescription",
                           "PIN",
                           "crownLandFileNumbers",
+                          "sourceSiteAddress",
+                          "sourceSiteCity",
                           "receivingSiteLandUse",
                           "industrialLandUseSoilVolume",
                           "commercialLandUseSoilVolume",
@@ -664,7 +675,8 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "soilDepositIsReserveLands",
                           "dateSigned",
                           "createAt",
-                          "confirmationId"]
+                          "confirmationId",
+                          "receivingSiteClass"]
 HV_SITE_HEADERS = ["ownerFirstName",
                    "ownerLastName",
                    "ownerCompany",
