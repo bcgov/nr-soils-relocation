@@ -557,6 +557,7 @@ def map_source_site(_submission):
 
         _src_dic['updateToPreviousForm'] = _submission.get(chefs_src_param('updateToPreviousForm'))
         _src_dic['previousConfirmCode'] = _submission.get(chefs_src_param('previousConfirmCode'))
+        _src_dic['industrialOrCommercialUses'] = _submission.get(chefs_src_param('industrialOrCommercialUses'))
         _src_dic['ownerFirstName'] = _submission.get(chefs_src_param('ownerFirstName'))
         _src_dic['ownerLastName'] = _submission.get(chefs_src_param('ownerLastName'))
         _src_dic['ownerCompany'] = _submission.get(chefs_src_param('ownerCompany'))

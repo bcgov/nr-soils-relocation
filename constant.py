@@ -160,6 +160,7 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , regionalDistrict='SourceSiteregionalDistrict'
                             , updateToPreviousForm='Intro-New_form_or_update'
                             , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
+                            , industrialOrCommercialUses='Intro-hasthesitebeenusedfor-INDUSTRIALorCOMMERICAL-YESorNO'
                             , ownerFirstName='A1-FIRSTName'
                             , ownerLastName='A1-LASTName'
                             , ownerCompany='A1-Company'
@@ -511,6 +512,7 @@ CHEFS_HV_PARAM_DIC = dict(latitudeDegrees='Section3-Latitude-Degrees'
                             , confirmationId='confirmationId')
 SOURCE_SITE_HEADERS = ["updateToPreviousForm",
                        "previousConfirmCode",
+                       "industrialOrCommercialUses",
                        "ownerFirstName",
                        "ownerLastName",
                        "ownerCompany",
