@@ -556,6 +556,7 @@ def map_source_site(_submission):
             _src_dic[src_header] = None
 
         _src_dic['updateToPreviousForm'] = _submission.get(chefs_src_param('updateToPreviousForm'))
+        _src_dic['previousConfirmCode'] = _submission.get(chefs_src_param('previousConfirmCode'))
         _src_dic['ownerFirstName'] = _submission.get(chefs_src_param('ownerFirstName'))
         _src_dic['ownerLastName'] = _submission.get(chefs_src_param('ownerLastName'))
         _src_dic['ownerCompany'] = _submission.get(chefs_src_param('ownerCompany'))
@@ -758,6 +759,13 @@ def map_rcv_site(_submission, rcv_clz):
         _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(
                                             _submission,
                                             chefs_rcv_param('receivingSiteLandUse', rcv_clz))
+
+        create_soil_volumes(
+            _submission,
+            chefs_src_param('soilVolumeDataGrid'),
+            chefs_src_param('soilVolume'),
+            chefs_src_param('soilClassificationSource'),
+            _rcv_dic)
 
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
         _rcv_dic['relocatedSoilUse'] = _submission.get(chefs_rcv_param('relocatedSoilUse', rcv_clz))
