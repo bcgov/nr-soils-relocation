@@ -607,7 +607,13 @@ def map_source_site(_submission):
         _src_dic['longitudeSeconds'] = _submission.get(chefs_src_param('longitudeSeconds'))
 
         _src_dic['landOwnership'] = create_land_ownership(_submission, chefs_src_param('landOwnership'))
+
         _src_dic['regionalDistrict'] = create_regional_district(_submission, chefs_src_param('regionalDistrict'))
+        logging.debug('regionalDistrict:%s', _src_dic.get('regionalDistrict'))
+        if (_src_dic.get('regionalDistrict') is None and _src_dic.get('latitude') and _src_dic.get('longitude')):
+            _src_dic['regionalDistrict'] = get_regional_district(_src_dic.get('latitude'), _src_dic.get('longitude'))
+            logging.debug('filled in regional district using arcgis feature service:%s', _src_dic['regionalDistrict'])
+
         _src_dic['legallyTitledSiteAddress'] = _submission.get(chefs_src_param('legallyTitledSiteAddress'))
         _src_dic['legallyTitledSiteCity'] = _submission.get(chefs_src_param('legallyTitledSiteCity'))
         _src_dic['legallyTitledSitePostalCode'] = _submission.get(chefs_src_param('legallyTitledSitePostalCode'))

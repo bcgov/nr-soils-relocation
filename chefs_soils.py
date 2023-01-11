@@ -86,11 +86,39 @@ def send_email_subscribers():
               _notify_soil_reloc
             )):
 
-            # Notification of soil relocation in selected Regional District(s)  ============
+            # Notification of soil relocation in selected Regional District(s)  ================================================================================
             if _notify_soil_reloc:
                 for _srd in _subscriber_regional_district:
 
-                    # finding if subscriber's regional district in receiving site registration
+                    # finding if subscriber's regional district in SOURCE SITE registration  ===================================================================
+                    _src_sites_in_rd = srcRegDistDic.get(_srd)
+
+                    if _src_sites_in_rd is not None:
+                        for _source_site_dic in _src_sites_in_rd:
+                            logging.debug("today:%s, created at:%s confirm Id:%s", _today, _source_site_dic['createAt'], _source_site_dic['confirmationId'])
+                            #comparing the submission create date against the current script runtime.
+                            _diff = helper.get_difference_datetimes_in_hour(_today, _source_site_dic['createAt'])
+                            if (_diff is not None and _diff <= 24):  #within the last 24 hours.
+                                _src_popup_links = helper.create_popup_links(_src_sites_in_rd)
+                                _src_reg_dis_name = helper.convert_regional_district_to_name(_srd)
+                                _src_email_msg = helper.create_site_relocation_email_msg(_src_reg_dis_name, _src_popup_links)
+
+                                # create soil relocation notification substriber dictionary
+                                # key-Tuple of email address, RegionalDistrict Tuple,
+                                # value=Tuple of email maessage, subscription create date,
+                                # subscription confirm id
+                                if (_subscriber_email,_srd) not in notify_soil_reloc_subscriber_dic:
+                                    notify_soil_reloc_subscriber_dic[(_subscriber_email,_srd)] = (_src_email_msg, _subscription_created_at, _subscription_confirm_id)
+                                    logging.debug("notifySoilRelocSubscriberDic added email:%s, region:%s, confirm id:%s, subscription created at:%s",
+                                        _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+                                else:
+                                    _subscrb_created = notify_soil_reloc_subscriber_dic.get((_subscriber_email,_srd))[1]
+                                    if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
+                                        notify_soil_reloc_subscriber_dic.update({(_subscriber_email,_srd):(_src_email_msg, _subscription_created_at, _subscription_confirm_id)})
+                                        logging.debug("notifySoilRelocSubscriberDic updated email:%s, region:%s, confirm id:%s, subscription created at:%s",
+                                            _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
+
+                    # finding if subscriber's regional district in RECEIVING SITE registration  ===================================================================
                     _rcv_sites_in_rd = rcvRegDistDic.get(_srd)
 
                     if _rcv_sites_in_rd is not None:
@@ -100,21 +128,21 @@ def send_email_subscribers():
                             _diff = helper.get_difference_datetimes_in_hour(_today, _receiving_site_dic['createAt'])
                             if (_diff is not None and _diff <= 24):  #within the last 24 hours.
                                 _rcv_popup_links = helper.create_popup_links(_rcv_sites_in_rd)
-                                _reg_dis_name = helper.convert_regional_district_to_name(_srd)
-                                _email_msg = helper.create_site_relocation_email_msg(_reg_dis_name, _rcv_popup_links)
+                                _rcv_reg_dis_name = helper.convert_regional_district_to_name(_srd)
+                                _rcv_email_msg = helper.create_site_relocation_email_msg(_rcv_reg_dis_name, _rcv_popup_links)
 
                                 # create soil relocation notification substriber dictionary
                                 # key-Tuple of email address, RegionalDistrict Tuple,
                                 # value=Tuple of email maessage, subscription create date,
                                 # subscription confirm id
                                 if (_subscriber_email,_srd) not in notify_soil_reloc_subscriber_dic:
-                                    notify_soil_reloc_subscriber_dic[(_subscriber_email,_srd)] = (_email_msg, _subscription_created_at, _subscription_confirm_id)
+                                    notify_soil_reloc_subscriber_dic[(_subscriber_email,_srd)] = (_rcv_email_msg, _subscription_created_at, _subscription_confirm_id)
                                     logging.debug("notifySoilRelocSubscriberDic added email:%s, region:%s, confirm id:%s, subscription created at:%s", 
                                         _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
                                 else:
                                     _subscrb_created = notify_soil_reloc_subscriber_dic.get((_subscriber_email,_srd))[1]
                                     if (_subscription_created_at is not None and _subscription_created_at > _subscrb_created):
-                                        notify_soil_reloc_subscriber_dic.update({(_subscriber_email,_srd):(_email_msg, _subscription_created_at, _subscription_confirm_id)})
+                                        notify_soil_reloc_subscriber_dic.update({(_subscriber_email,_srd):(_rcv_email_msg, _subscription_created_at, _subscription_confirm_id)})
                                         logging.debug("notifySoilRelocSubscriberDic updated email:%s, region:%s, confirm id:%s, subscription created at:%s", 
                                             _subscriber_email, _srd, str(_subscription_confirm_id), str(_subscription_created_at))
 
@@ -236,12 +264,14 @@ subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KE
 logging.info('Creating source site, receiving site records...')
 sourceSites = []
 receivingSites = []
+srcRegDistDic = {}
 rcvRegDistDic = {}
 for submission in submissionsJson:
     logging.debug('Mapping submission data to the source site...')
     _srcDic = helper.map_source_site(submission)
     if _srcDic:
         sourceSites.append(_srcDic)
+        helper.add_regional_district_dic(_srcDic, srcRegDistDic)
 
     logging.debug('Mapping submission data to the receiving site...')
     _1rcvDic = helper.map_rcv_site(submission, 1)
@@ -268,14 +298,6 @@ for hvs in hvsJson:
     if _hvDic:
         hvSites.append(_hvDic)
         helper.add_regional_district_dic(_hvDic, hvRegDistDic)
-
-
-for sourceSite in sourceSites:
-    logging.info('regionalDistrict:%s', sourceSite.get('regionalDistrict'))
-    if (sourceSite.get('regionalDistrict') is None and sourceSite.get('latitude') and sourceSite.get('longitude')):
-        _regional_district = helper.get_regional_district(sourceSite.get('latitude'), sourceSite.get('longitude'))
-        logging.info('filled in regional district using arcgis feature service:%s', _regional_district)
-
 
 logging.info('Creating soil source site CSV...')
 with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
