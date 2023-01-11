@@ -207,6 +207,8 @@ def send_email_subscribers():
 
 logging.info('Loading Submissions List...')
 submissionsJson = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
+if int(submissionsJson['status']) > 201:
+    logging.error("Loading Submissions List failed: %s %s, %s", submissionsJson['status'], submissionsJson['title'], submissionsJson['detail'])
 logging.info("%s Submissions are retrived.", len(submissionsJson))
 logging.debug(submissionsJson)
 logging.info('Loading Submission attributes and headers...')
@@ -214,6 +216,8 @@ soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 
 logging.info('Loading High Volume Sites list...')
 hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
+if int(hvsJson['status']) > 201:
+    logging.error("Loading High Volume Sites list failed: %s %s, %s", hvsJson['status'], hvsJson['title'], hvsJson['detail'])
 logging.info("%s High Volume Sites are retrived.", len(hvsJson))
 logging.debug(hvsJson)
 logging.info('Loading High Volume Sites attributes and headers...')
@@ -221,6 +225,8 @@ hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 
 logging.info('Loading submission subscribers list...')
 subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
+if int(subscribersJson['status']) > 201:
+    logging.error("Loading submission subscribers list failed: %s %s, %s", subscribersJson['status'], subscribersJson['title'], subscribersJson['detail'])
 logging.info("%s Submission Subscribers are retrived.", len(subscribersJson))
 logging.debug(subscribersJson)
 logging.info('Loading submission subscribers attributes and headers...')
