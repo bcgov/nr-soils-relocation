@@ -14,6 +14,7 @@ from arcgis.gis import GIS
 from arcgis.features import FeatureLayerCollection
 import constant
 import helper
+import csvwriter
 
 CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
 CHEFS_SOILS_API_KEY = os.getenv('CHEFS_SOILS_API_KEY')
@@ -235,8 +236,8 @@ def send_email_subscribers():
 
 logging.info('Loading Submissions List...')
 submissionsJson = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
-if int(submissionsJson['status']) > 201:
-    logging.error("Loading Submissions List failed: %s %s, %s", submissionsJson['status'], submissionsJson['title'], submissionsJson['detail'])
+# if int(submissionsJson.get('status')) > 201:
+#     logging.error("Loading Submissions List failed: %s %s, %s", submissionsJson['status'], submissionsJson['title'], submissionsJson['detail'])
 logging.info("%s Submissions are retrived.", len(submissionsJson))
 logging.debug(submissionsJson)
 logging.info('Loading Submission attributes and headers...')
@@ -244,8 +245,8 @@ soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 
 logging.info('Loading High Volume Sites list...')
 hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
-if int(hvsJson['status']) > 201:
-    logging.error("Loading High Volume Sites list failed: %s %s, %s", hvsJson['status'], hvsJson['title'], hvsJson['detail'])
+# if int(hvsJson.get('status')) > 201:
+#     logging.error("Loading High Volume Sites list failed: %s %s, %s", hvsJson['status'], hvsJson['title'], hvsJson['detail'])
 logging.info("%s High Volume Sites are retrived.", len(hvsJson))
 logging.debug(hvsJson)
 logging.info('Loading High Volume Sites attributes and headers...')
@@ -253,8 +254,8 @@ hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 
 logging.info('Loading submission subscribers list...')
 subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
-if int(subscribersJson['status']) > 201:
-    logging.error("Loading submission subscribers list failed: %s %s, %s", subscribersJson['status'], subscribersJson['title'], subscribersJson['detail'])
+# if int(subscribersJson.get('status')) > 201:
+#     logging.error("Loading submission subscribers list failed: %s %s, %s", subscribersJson['status'], subscribersJson['title'], subscribersJson['detail'])
 logging.info("%s Submission Subscribers are retrived.", len(subscribersJson))
 logging.debug(subscribersJson)
 logging.info('Loading submission subscribers attributes and headers...')
@@ -293,7 +294,6 @@ for submission in submissionsJson:
 logging.debug('Adding receiving site addresses into source site and source site address into receiving sites...')
 sourceSites, receivingSites = helper.map_source_receiving_site_address(sourceSites, receivingSites)
 
-
 logging.info('Creating high volume site records records...')
 hvSites = []
 hvRegDistDic = {}
@@ -304,25 +304,11 @@ for hvs in hvsJson:
         hvSites.append(_hvDic)
         helper.add_regional_district_dic(_hvDic, hvRegDistDic)
 
-logging.info('Creating soil source site CSV...')
-with open(constant.SOURCE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
-    writer = csv.DictWriter(f, fieldnames=constant.SOURCE_SITE_HEADERS)
-    writer.writeheader()
-    writer.writerows(sourceSites)
 
-logging.info('Creating soil receiving site CSV...')
-with open(constant.RECEIVE_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
-    writer = csv.DictWriter(f, fieldnames=constant.RECEIVING_SITE_HEADERS)
-    writer.writeheader()
-    writer.writerows(receivingSites)
+logging.info('Creating soil source / receiving / high volume site CSV...')
+csvwriter.site_csv_writer(sourceSites, receivingSites, hvSites)
 
-logging.info('Creating soil high volume site CSV...')
-with open(constant.HIGH_VOLUME_CSV_FILE, 'w', encoding='UTF8', newline='') as f:
-    writer = csv.DictWriter(f, fieldnames=constant.HV_SITE_HEADERS)
-    writer.writeheader()
-    writer.writerows(hvSites)
-
-
+"""
 logging.info('Connecting to AGOL GIS...')
 _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
 
@@ -385,12 +371,12 @@ helper.check_ches_health()
 
 logging.info('Sending subscriber emails...')
 send_email_subscribers()
-
+"""
 
 logging.info('Completed Soils data publishing')
 
-#### to track the version of forms (Oct/18/2022)
+#### to track the version of forms (Jan/12/2023)
 # CHEFS generates new vresion of forms when changes of data fields, manages data by each version
-# 1.soil relocation form version: v10
+# 1.soil relocation form version: v11
 # 2.high volume submission version v8
 # 3.subscriber form version: v9
