@@ -7,7 +7,7 @@ send notification email to subscribers who want to get information for the soil 
 import os
 import logging
 import helper
-import csvwriter
+import csv_writer
 import agol_updater
 import email_sender
 import submission_mapper
@@ -28,8 +28,8 @@ submissionsJson = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 #     logging.error("Loading Submissions List failed: %s %s, %s", submissionsJson['status'], submissionsJson['title'], submissionsJson['detail'])
 logging.info("%s Submissions are retrived.", len(submissionsJson))
 logging.debug(submissionsJson)
-logging.info('Loading Submission attributes and headers...')
-soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
+# logging.info('Loading Submission attributes and headers...')
+# soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 
 logging.info('Loading High Volume Sites list...')
 hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
@@ -37,8 +37,8 @@ hvsJson = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 #     logging.error("Loading High Volume Sites list failed: %s %s, %s", hvsJson['status'], hvsJson['title'], hvsJson['detail'])
 logging.info("%s High Volume Sites are retrived.", len(hvsJson))
 logging.debug(hvsJson)
-logging.info('Loading High Volume Sites attributes and headers...')
-hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
+# logging.info('Loading High Volume Sites attributes and headers...')
+# hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 
 logging.info('Loading submission subscribers list...')
 subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
@@ -46,15 +46,15 @@ subscribersJson = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 #     logging.error("Loading submission subscribers list failed: %s %s, %s", subscribersJson['status'], subscribersJson['title'], subscribersJson['detail'])
 logging.info("%s Submission Subscribers are retrived.", len(subscribersJson))
 logging.debug(subscribersJson)
-logging.info('Loading submission subscribers attributes and headers...')
-subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
+# logging.info('Loading submission subscribers attributes and headers...')
+# subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 
 
 logging.info('Creating source site, receiving site records...')
 sourceSites, srcRegDistDic, receivingSites, rcvRegDistDic, hvSites, hvRegDistDic = submission_mapper.map_sites(submissionsJson, hvsJson)
 
 logging.info('Creating soil source / receiving / high volume site CSV...')
-csvwriter.site_csv_writer(sourceSites, receivingSites, hvSites)
+csv_writer.site_csv_writer(sourceSites, receivingSites, hvSites)
 
 logging.info('Updating source / receiving / high volume site CSV and Layer in AGOL...')
 agol_updater.agol_items_overwrite()
