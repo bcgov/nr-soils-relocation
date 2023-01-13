@@ -24,6 +24,7 @@ CHES_API_OAUTH_SECRET = os.getenv('CHES_API_OAUTH_SECRET')
 CHEFS_API_URL = os.getenv('CHEFS_API_URL')
 AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
+FEATURE_SERVICE_URL = os.getenv('FEATURE_SERVICE_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
 
@@ -555,6 +556,8 @@ def map_source_site(_submission):
             _src_dic[src_header] = None
 
         _src_dic['updateToPreviousForm'] = _submission.get(chefs_src_param('updateToPreviousForm'))
+        _src_dic['previousConfirmCode'] = _submission.get(chefs_src_param('previousConfirmCode'))
+        _src_dic['industrialOrCommercialUses'] = _submission.get(chefs_src_param('industrialOrCommercialUses'))
         _src_dic['ownerFirstName'] = _submission.get(chefs_src_param('ownerFirstName'))
         _src_dic['ownerLastName'] = _submission.get(chefs_src_param('ownerLastName'))
         _src_dic['ownerCompany'] = _submission.get(chefs_src_param('ownerCompany'))
@@ -596,8 +599,21 @@ def map_source_site(_submission):
                                                     _submission[chefs_src_param('longitudeMinutes')],
                                                     _submission[chefs_src_param('longitudeSeconds')])
 
+        _src_dic['latitudeDegrees'] = _submission.get(chefs_src_param('latitudeDegrees'))
+        _src_dic['latitudeMinutes'] = _submission.get(chefs_src_param('latitudeMinutes'))
+        _src_dic['latitudeSeconds'] = _submission.get(chefs_src_param('latitudeSeconds'))
+        _src_dic['longitudeDegrees'] = _submission.get(chefs_src_param('longitudeDegrees'))
+        _src_dic['longitudeMinutes'] = _submission.get(chefs_src_param('longitudeMinutes'))
+        _src_dic['longitudeSeconds'] = _submission.get(chefs_src_param('longitudeSeconds'))
+
         _src_dic['landOwnership'] = create_land_ownership(_submission, chefs_src_param('landOwnership'))
+
         _src_dic['regionalDistrict'] = create_regional_district(_submission, chefs_src_param('regionalDistrict'))
+        logging.debug('regionalDistrict:%s', _src_dic.get('regionalDistrict'))
+        if (_src_dic.get('regionalDistrict') is None and _src_dic.get('latitude') and _src_dic.get('longitude')):
+            _src_dic['regionalDistrict'] = get_regional_district(_src_dic.get('latitude'), _src_dic.get('longitude'))
+            logging.debug('filled in regional district using arcgis feature service:%s', _src_dic['regionalDistrict'])
+
         _src_dic['legallyTitledSiteAddress'] = _submission.get(chefs_src_param('legallyTitledSiteAddress'))
         _src_dic['legallyTitledSiteCity'] = _submission.get(chefs_src_param('legallyTitledSiteCity'))
         _src_dic['legallyTitledSitePostalCode'] = _submission.get(chefs_src_param('legallyTitledSitePostalCode'))
@@ -726,6 +742,13 @@ def map_rcv_site(_submission, rcv_clz):
                                                     _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
                                                     _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)))
 
+        _rcv_dic['latitudeDegrees'] = _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz))
+        _rcv_dic['latitudeMinutes'] = _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz))
+        _rcv_dic['latitudeSeconds'] = _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz))
+        _rcv_dic['longitudeDegrees'] = _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz))
+        _rcv_dic['longitudeMinutes'] = _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz))
+        _rcv_dic['longitudeSeconds'] = _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz))
+
         _rcv_dic['regionalDistrict'] = create_regional_district(_submission, chefs_rcv_param('regionalDistrict', rcv_clz))
         _rcv_dic['landOwnership'] = create_land_ownership(_submission, chefs_rcv_param('landOwnership', rcv_clz))
         _rcv_dic['legallyTitledSiteAddress'] = _submission.get(chefs_rcv_param('legallyTitledSiteAddress', rcv_clz))
@@ -758,6 +781,13 @@ def map_rcv_site(_submission, rcv_clz):
                                             _submission,
                                             chefs_rcv_param('receivingSiteLandUse', rcv_clz))
 
+        create_soil_volumes(
+            _submission,
+            chefs_src_param('soilVolumeDataGrid'),
+            chefs_src_param('soilVolume'),
+            chefs_src_param('soilClassificationSource'),
+            _rcv_dic)
+
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
         _rcv_dic['relocatedSoilUse'] = _submission.get(chefs_rcv_param('relocatedSoilUse', rcv_clz))
         _rcv_dic['highVolumeSite'] = _submission.get(chefs_rcv_param('highVolumeSite', rcv_clz))
@@ -769,6 +799,7 @@ def map_rcv_site(_submission, rcv_clz):
                                 chefs_rcv_param('form', rcv_clz),
                                 chefs_rcv_param('createdAt', rcv_clz))
         _rcv_dic['confirmationId'] = _confirmation_id
+        _rcv_dic['receivingSiteClass'] = str(rcv_clz) # contaning string 1, 2, or 3 for receiving site classfication
     return _rcv_dic
 
 def map_hv_site(_hvs):
@@ -833,6 +864,13 @@ def map_hv_site(_hvs):
                                                     _hvs[chefs_hv_param('longitudeMinutes')],
                                                     _hvs[chefs_hv_param('longitudeSeconds')])
 
+        _hv_dic['latitudeDegrees'] = _hvs.get(chefs_hv_param('latitudeDegrees'))
+        _hv_dic['latitudeMinutes'] = _hvs.get(chefs_hv_param('latitudeMinutes'))
+        _hv_dic['latitudeSeconds'] = _hvs.get(chefs_hv_param('latitudeSeconds'))
+        _hv_dic['longitudeDegrees'] = _hvs.get(chefs_hv_param('longitudeDegrees'))
+        _hv_dic['longitudeMinutes'] = _hvs.get(chefs_hv_param('longitudeMinutes'))
+        _hv_dic['longitudeSeconds'] = _hvs.get(chefs_hv_param('longitudeSeconds'))
+
         _hv_dic['regionalDistrict'] = create_regional_district(_hvs, chefs_hv_param('regionalDistrict'))
         _hv_dic['landOwnership'] = create_land_ownership(_hvs, chefs_hv_param('landOwnership'))
         _hv_dic['legallyTitledSiteAddress'] = _hvs.get(chefs_hv_param('legallyTitledSiteAddress'))
@@ -882,3 +920,43 @@ def map_hv_site(_hvs):
         _hv_dic['createAt'] = get_create_date(_hvs, chefs_hv_param('form'), chefs_hv_param('createdAt'))
         _hv_dic['confirmationId'] = _confirmation_id
     return _hv_dic
+
+def map_source_receiving_site_address(_source_sites, _receiving_sites):
+    """Adding receiving site addresses into source site and source site address into receiving sites"""
+    for _src_site in _source_sites:
+        for _rcv_site in _receiving_sites:
+            if _rcv_site.get('confirmationId') == _src_site.get('confirmationId'):
+                # adding receiving site addresses into source site
+                if _rcv_site.get('receivingSiteClass') == '1':
+                    _src_site['receivingSite1Address'] = _rcv_site.get('legallyTitledSiteAddress')
+                    _src_site['receivingSite1City'] = _rcv_site.get('legallyTitledSiteCity')
+                elif _rcv_site.get('receivingSiteClass') == '2':
+                    _src_site['receivingSite2Address'] = _rcv_site.get('legallyTitledSiteAddress')
+                    _src_site['receivingSite2City'] = _rcv_site.get('legallyTitledSiteCity')
+                elif _rcv_site.get('receivingSiteClass') == '3':
+                    _src_site['receivingSite3Address'] = _rcv_site.get('legallyTitledSiteAddress')
+                    _src_site['receivingSite3City'] = _rcv_site.get('legallyTitledSiteCity')
+                # adding source site address into receiving sites
+                _rcv_site['sourceSiteAddress'] = _src_site.get('legallyTitledSiteAddress')
+                _rcv_site['sourceSiteCity'] = _src_site.get('legallyTitledSiteCity')
+    return _source_sites, _receiving_sites
+
+def get_regional_district(_lat, _long):
+    """Returns regional district for latitude and longutide"""
+    _arcgis_regional_districts_query_url = FEATURE_SERVICE_URL + '&geometry=' + str(_long) + ',' + str(_lat)
+    _service_response = requests.request("GET", FEATURE_SERVICE_URL)
+    _service_response_json = json.loads(_service_response.content)
+    if _service_response_json.get('features')[0].get('attributes').get('ADMIN_AREA_NAME'):
+        return _service_response_json['features'][0]['attributes']['ADMIN_AREA_NAME']
+    else:
+        raise KeyError("status code:" + str(_service_response.status_code))
+    """
+    if _ches_response.status_code == 200:
+        logging.info(constant.CHES_HEALTH_200_STATUS)
+    elif _ches_response.status_code == 401:
+        logging.error(constant.CHES_HEALTH_401_STATUS)
+    elif _ches_response.status_code == 403:
+        logging.error(constant.CHES_HEALTH_403_STATUS)
+    else:
+        logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
+    """        

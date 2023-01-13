@@ -159,6 +159,8 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , landOwnership='SourcelandOwnership-checkbox'
                             , regionalDistrict='SourceSiteregionalDistrict'
                             , updateToPreviousForm='Intro-New_form_or_update'
+                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
+                            , industrialOrCommercialUses='Intro-hasthesitebeenusedfor-INDUSTRIALorCOMMERICAL-YESorNO'
                             , ownerFirstName='A1-FIRSTName'
                             , ownerLastName='A1-LASTName'
                             , ownerCompany='A1-Company'
@@ -278,6 +280,9 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , legallyTitledSiteCity='C2-LegallyTitled-CityReceivingSite'
                             , legallyTitledSitePostalCode='C2-LegallyTitled-PostalReceivingSite'
                             , crownLandFileNumbers='A-UntitledCrownLand-FileNumberColumn1'
+                            , soilVolumeDataGrid='ReceivingSiteVolumeAndLandUse'
+                            , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
+                            , soilClassificationSource='B1-soilClassificationSource'
 							, receivingSiteLandUse='C3-soilClassification1ReceivingSite'
 							, CSRFactors='C3-applicableSiteSpecificFactorsForCsrSchedule31ReceivingSite'
 							, relocatedSoilUse='C3-applicableSiteSpecificFactorsForCsrSchedule32ReceivingSite'
@@ -295,7 +300,8 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
-                            , confirmationId='confirmationId')
+                            , confirmationId='confirmationId'
+                            , receivingSiteClass='receivingSiteClass')
 CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditionalReceivingSite'
                             , latitudeMinutes='C2-Latitude-Minutes1FirstAdditionalReceivingSite'
                             , latitudeSeconds='Section2-Latitude-Seconds2FirstAdditionalReceivingSite'
@@ -342,6 +348,9 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , legallyTitledSiteCity='C2-LegallyTitled-City1FirstAdditionalReceivingSite'
                             , legallyTitledSitePostalCode='C2-LegallyTitled-PostalZipCode1FirstAdditionalReceivingSite'
                             , crownLandFileNumbers='A-UntitledCrownLand-FileNumberColumn2'
+                            , soilVolumeDataGrid='FirstAdditionalReceivingSiteVolumeAndLandUse'
+                            , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
+                            , soilClassificationSource='B1-soilClassificationSource'
 							, receivingSiteLandUse='C3-soilClassification2FirstAdditionalReceivingSite'
 							, CSRFactors='C3-applicableSiteSpecificFactorsForCsrSchedule33FirstAdditionalReceivingSite'
 							, relocatedSoilUse='C3-applicableSiteSpecificFactorsForCsrSchedule34FirstAdditionalReceivingSite'
@@ -359,7 +368,8 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
-                            , confirmationId='confirmationId')
+                            , confirmationId='confirmationId'
+                            , receivingSiteClass='receivingSiteClass')
 CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditionalreceivingSite'
                             , latitudeMinutes='C2-Latitude-Minutes3SecondAdditionalreceivingSite'
                             , latitudeSeconds='Section2-Latitude-Seconds4SecondAdditionalreceivingSite'
@@ -406,6 +416,9 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
                             , legallyTitledSiteCity='C2-LegallyTitled-City3SecondAdditionalreceivingSite'
                             , legallyTitledSitePostalCode='C2-LegallyTitled-PostalZipCode3SecondAdditionalreceivingSite'
                             , crownLandFileNumbers='A-UntitledCrownLand-FileNumberColumn2'
+                            , soilVolumeDataGrid='SecondAdditionalReceivingSiteVolumeAndLandUse'
+                            , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
+                            , soilClassificationSource='B1-soilClassificationSource'
 							, receivingSiteLandUse='C3-soilClassification4SecondAdditionalreceivingSite'
 							, CSRFactors='C3-applicableSiteSpecificFactorsForCsrSchedule37SecondAdditionalreceivingSite'
 							, relocatedSoilUse='C3-applicableSiteSpecificFactorsForCsrSchedule38SecondAdditionalreceivingSite'
@@ -423,7 +436,8 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
-                            , confirmationId='confirmationId')
+                            , confirmationId='confirmationId'
+                            , receivingSiteClass='receivingSiteClass')
 CHEFS_HV_PARAM_DIC = dict(latitudeDegrees='Section3-Latitude-Degrees'
                             , latitudeMinutes='Section3-Latitude-Minutes'
                             , latitudeSeconds='Section3-Latitude-Seconds'
@@ -500,6 +514,8 @@ CHEFS_HV_PARAM_DIC = dict(latitudeDegrees='Section3-Latitude-Degrees'
                             , createdAt='createdAt'
                             , confirmationId='confirmationId')
 SOURCE_SITE_HEADERS = ["updateToPreviousForm",
+                       "previousConfirmCode",
+                       "industrialOrCommercialUses",
                        "ownerFirstName",
                        "ownerLastName",
                        "ownerCompany",
@@ -534,6 +550,12 @@ SOURCE_SITE_HEADERS = ["updateToPreviousForm",
                        "SID",
                        "latitude",
                        "longitude",
+                       "latitudeDegrees",
+                       "latitudeMinutes",
+                       "latitudeSeconds",
+                       "longitudeDegrees",
+                       "longitudeMinutes",
+                       "longitudeSeconds",
                        "regionalDistrict",
                        "landOwnership",
                        "legallyTitledSiteAddress",
@@ -543,6 +565,12 @@ SOURCE_SITE_HEADERS = ["updateToPreviousForm",
                        "legalLandDescription",
                        "PIN",
                        "crownLandFileNumbers",
+                       "receivingSite1Address",
+                       "receivingSite1City",
+                       "receivingSite2Address",
+                       "receivingSite2City",
+                       "receivingSite3Address",
+                       "receivingSite3City",
                        "sourceSiteLandUse",
                        "highVolumeSite",
                        "soilRelocationPurpose",
@@ -613,6 +641,12 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "SID",
                           "latitude",
                           "longitude",
+                          "latitudeDegrees",
+                          "latitudeMinutes",
+                          "latitudeSeconds",
+                          "longitudeDegrees",
+                          "longitudeMinutes",
+                          "longitudeSeconds",
                           "regionalDistrict",
                           "landOwnership",
                           "legallyTitledSiteAddress",
@@ -622,7 +656,18 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "legalLandDescription",
                           "PIN",
                           "crownLandFileNumbers",
+                          "sourceSiteAddress",
+                          "sourceSiteCity",
                           "receivingSiteLandUse",
+                          "industrialLandUseSoilVolume",
+                          "commercialLandUseSoilVolume",
+                          "residentialLandUseHighDensitySoilVolume",
+                          "residentialLandUseLowDensitySoilVolume",
+                          "urbanParkLandUseSoilVolume",
+                          "agriculturalLandUseSoilVolume",
+                          "wildlandsNaturalLandUseSoilVolume",
+                          "wildlandsRevertedLandUseSoilVolume",
+                          "totalSoilVolme",
                           "CSRFactors",
                           "relocatedSoilUse",
                           "highVolumeSite",
@@ -630,7 +675,8 @@ RECEIVING_SITE_HEADERS = ["ownerFirstName",
                           "soilDepositIsReserveLands",
                           "dateSigned",
                           "createAt",
-                          "confirmationId"]
+                          "confirmationId",
+                          "receivingSiteClass"]
 HV_SITE_HEADERS = ["ownerFirstName",
                    "ownerLastName",
                    "ownerCompany",
@@ -665,6 +711,12 @@ HV_SITE_HEADERS = ["ownerFirstName",
                    "SID",
                    "latitude",
                    "longitude",
+                   "latitudeDegrees",
+                   "latitudeMinutes",
+                   "latitudeSeconds",
+                   "longitudeDegrees",
+                   "longitudeMinutes",
+                   "longitudeSeconds",
                    "regionalDistrict",
                    "landOwnership",
                    "legallyTitledSiteAddress",
