@@ -8,8 +8,9 @@ import os
 import logging
 import helper
 import csvwriter
-import agol
+import agol_updater
 import email_sender
+import submission_mapper
 
 CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
 CHEFS_SOILS_API_KEY = os.getenv('CHEFS_SOILS_API_KEY')
@@ -50,53 +51,13 @@ subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KE
 
 
 logging.info('Creating source site, receiving site records...')
-sourceSites = []
-receivingSites = []
-srcRegDistDic = {}
-rcvRegDistDic = {}
-for submission in submissionsJson:
-    logging.debug('Mapping submission data to the source site...')
-    _srcDic = helper.map_source_site(submission)
-    if _srcDic:
-        sourceSites.append(_srcDic)
-        helper.add_regional_district_dic(_srcDic, srcRegDistDic)
-
-    logging.debug('Mapping submission data to the receiving site...')
-    _1rcvDic = helper.map_rcv_site(submission, 1)
-    if _1rcvDic:
-        receivingSites.append(_1rcvDic)
-        helper.add_regional_district_dic(_1rcvDic, rcvRegDistDic)
-
-    _2rcvDic = helper.map_rcv_site(submission, 2)
-    if _2rcvDic:
-        receivingSites.append(_2rcvDic)
-        helper.add_regional_district_dic(_2rcvDic, rcvRegDistDic)
-
-    _3rcvDic = helper.map_rcv_site(submission, 3)
-    if _3rcvDic:
-        receivingSites.append(_3rcvDic)
-        helper.add_regional_district_dic(_3rcvDic, rcvRegDistDic)
-
-
-logging.debug('Adding receiving site addresses into source site and source site address into receiving sites...')
-sourceSites, receivingSites = helper.map_source_receiving_site_address(sourceSites, receivingSites)
-
-logging.info('Creating high volume site records records...')
-hvSites = []
-hvRegDistDic = {}
-for hvs in hvsJson:
-    logging.debug('Mapping hv data to the hv site...')
-    _hvDic = helper.map_hv_site(hvs)
-    if _hvDic:
-        hvSites.append(_hvDic)
-        helper.add_regional_district_dic(_hvDic, hvRegDistDic)
-
+sourceSites, srcRegDistDic, receivingSites, rcvRegDistDic, hvSites, hvRegDistDic = submission_mapper.map_sites(submissionsJson, hvsJson)
 
 logging.info('Creating soil source / receiving / high volume site CSV...')
 csvwriter.site_csv_writer(sourceSites, receivingSites, hvSites)
 
 logging.info('Updating source / receiving / high volume site CSV and Layer in AGOL...')
-agol.agol_updater()
+agol_updater.agol_items_overwrite()
 
 logging.info('Sending notification emails to subscribers...')
 email_sender.email_to_subscribers(subscribersJson, srcRegDistDic, rcvRegDistDic, hvRegDistDic)

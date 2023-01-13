@@ -26,7 +26,7 @@ MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
-def agol_updater():
+def agol_items_overwrite():
     """Update source / receiving / high volume site CSV and Layer in AGOL"""
     logging.info('Connecting to AGOL GIS...')
     _gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
