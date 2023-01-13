@@ -15,6 +15,7 @@ from arcgis.features import FeatureLayerCollection
 import constant
 import helper
 import csvwriter
+import agol
 
 CHEFS_SOILS_FORM_ID = os.getenv('CHEFS_SOILS_FORM_ID')
 CHEFS_SOILS_API_KEY = os.getenv('CHEFS_SOILS_API_KEY')
@@ -308,64 +309,10 @@ for hvs in hvsJson:
 logging.info('Creating soil source / receiving / high volume site CSV...')
 csvwriter.site_csv_writer(sourceSites, receivingSites, hvSites)
 
+logging.info('Update source / receiving / high volume site CSV and Layer in AGOL...')
+agol.agol_updater()
+
 """
-logging.info('Connecting to AGOL GIS...')
-_gis = GIS(MAPHUB_URL, username=MAPHUB_USER, password=MAPHUB_PASS)
-
-logging.info('Updating Soil Relocation Soruce Site CSV...')
-_srcCsvItem = _gis.content.get(SRC_CSV_ID)
-if _srcCsvItem is None:
-    logging.error('Source Site CSV Item ID is invalid!')
-else:
-    _srcCsvUpdateResult = _srcCsvItem.update({}, constant.SOURCE_CSV_FILE)
-    logging.info("Updated Soil Relocation Source Site CSV successfully:%s", str(_srcCsvUpdateResult))
-
-    logging.info('Updating Soil Relocation Soruce Site Feature Layer...')
-    _srcLyrItem = _gis.content.get(SRC_LAYER_ID)
-    if _srcLyrItem is None:
-        logging.error('Source Site Layter Item ID is invalid!')
-    else:
-        _srcFlc = FeatureLayerCollection.fromitem(_srcLyrItem)
-        _srcLyrOverwriteResult = _srcFlc.manager.overwrite(constant.SOURCE_CSV_FILE)
-        logging.info("Updated Soil Relocation Source Site Feature Layer successfully:%s", json.dumps(_srcLyrOverwriteResult))
-
-
-logging.info('Updating Soil Relocation Receiving Site CSV...')
-_rcvCsvItem = _gis.content.get(RCV_CSV_ID)
-if _rcvCsvItem is None:
-    logging.error('Receiving Site CSV Item ID is invalid!')
-else:
-    _rcvCsvUpdateResult = _rcvCsvItem.update({}, constant.RECEIVE_CSV_FILE)
-    logging.info("Updated Soil Relocation Receiving Site CSV successfully:%s", str(_rcvCsvUpdateResult))
-
-    logging.info('Updating Soil Relocation Receiving Site Feature Layer...')
-    _rcvLyrItem = _gis.content.get(RCV_LAYER_ID)
-    if _rcvLyrItem is None:
-        logging.error('Receiving Site Layer Item ID is invalid!')
-    else:
-        _rcvFlc = FeatureLayerCollection.fromitem(_rcvLyrItem)
-        _rcvLyrOverwriteResult = _rcvFlc.manager.overwrite(constant.RECEIVE_CSV_FILE)
-        logging.info("Updated Soil Relocation Receiving Site Feature Layer successfully:%s", json.dumps(_rcvLyrOverwriteResult))
-
-
-logging.info('Updating High Volume Receiving Site CSV...')
-_hvCsvItem = _gis.content.get(HV_CSV_ID)
-if _hvCsvItem is None:
-    logging.error('High Volume Receiving Site CSV Item ID is invalid!')
-else:
-    _hvCsvUpdateResult = _hvCsvItem.update({}, constant.HIGH_VOLUME_CSV_FILE)
-    logging.info("Updated High Volume Receiving Site CSV successfully: %s", str(_hvCsvUpdateResult))
-
-    logging.info('Updating High Volume Receiving Site Feature Layer...')
-    _hvLyrItem = _gis.content.get(HV_LAYER_ID)
-    if _hvLyrItem is None:
-        logging.error('High Volume Receiving Site Layer Item ID is invalid!')
-    else:
-        _hvFlc = FeatureLayerCollection.fromitem(_hvLyrItem)
-        _hvLyrOverwriteResult = _hvFlc.manager.overwrite(constant.HIGH_VOLUME_CSV_FILE)
-        logging.info("Updated High Volume Receiving Site Feature Layer successfully:%s", json.dumps(_hvLyrOverwriteResult))
-
-
 logging.info('Checking CHES Health...')
 helper.check_ches_health()
 

@@ -799,7 +799,7 @@ def map_rcv_site(_submission, rcv_clz):
                                 chefs_rcv_param('form', rcv_clz),
                                 chefs_rcv_param('createdAt', rcv_clz))
         _rcv_dic['confirmationId'] = _confirmation_id
-        _rcv_dic['receivingSiteClass'] = rcv_clz # contaning 1, 2, or 3 for receiving site order
+        _rcv_dic['receivingSiteClass'] = str(rcv_clz) # contaning string 1, 2, or 3 for receiving site classfication
     return _rcv_dic
 
 def map_hv_site(_hvs):
