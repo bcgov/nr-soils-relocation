@@ -81,3 +81,13 @@ Sometimes waiting for a scheduled cronjob is not practical.  These steps explain
 5. Verify that a new container is running your new job
 
 6. Finally, delete this and any other completed jobs
+
+#### Adding GitHub Secret as configmap entry to the job.
+1. Create a new GitHub secret in the repository
+2. Modify/update two places in the workflow file located here `.github/workflows/ci-openshift-prod.yaml`. 
+   1. Add the secret as env variable ENV_VAR_NAME=${{ secrets.SECRET_NAME }}, ex: https://github.com/bcgov/nr-soils-relocation/blob/main/.github/workflows/ci-openshift-prod.yaml#L25
+   2. Pass the env variable as a parameter to the job deployment template `-p CONFIG_NAME=${{env.ENV_VAR__NAME}}, ex: https://github.com/bcgov/nr-soils-relocation/blob/main/.github/workflows/ci-openshift-prod.yaml#L94
+3. Add the corresponding entry into the openshift deploy at 2 places, file located here `openshift/sris-schedule-job.yml` 
+   1. The parameter ,it should have the same name as in the config name in step 2.2 , ex: https://github.com/bcgov/nr-soils-relocation/blob/main/openshift/sris-schedule-job.yml#L25
+   2. Then the parameter is added as a config map, ex: https://github.com/bcgov/nr-soils-relocation/blob/main/openshift/sris-schedule-job.yml#L89
+4. Once this is completed. the new secret is now available as configmap entry to the job.
