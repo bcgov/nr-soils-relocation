@@ -19,7 +19,6 @@ logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(messag
 def load_submissions():
     """Load all site submissions from CHEFS"""
     chefs_loaded = True
-    logging.info('Loading Submissions List...')
     submission_loaded = True
     submissions_json = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
     if isinstance(submissions_json, dict):
