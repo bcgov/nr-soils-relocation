@@ -15,6 +15,7 @@ from pytz import timezone
 import pytz
 import requests
 from requests.auth import HTTPBasicAuth
+from requests.exceptions import Timeout
 from jinja2 import Environment, select_autoescape, FileSystemLoader
 import constant
 
@@ -24,7 +25,6 @@ CHES_API_OAUTH_SECRET = os.getenv('CHES_API_OAUTH_SECRET')
 CHEFS_API_URL = os.getenv('CHEFS_API_URL')
 AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
-FEATURE_SERVICE_URL = os.getenv('FEATURE_SERVICE_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
 
@@ -36,6 +36,7 @@ def read_config():
 
 config = read_config()
 WEBMAP_POPUP_URL = config['AGOL']['WEBMAP_POPUP_URL']
+FEATURE_SERVICE_URL = config['ARCGIS_REST_SERVICES']['FEATURE_SERVICE_URL']
 
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
@@ -944,19 +945,15 @@ def map_source_receiving_site_address(_source_sites, _receiving_sites):
 def get_regional_district(_lat, _long):
     """Returns regional district for latitude and longutide"""
     _arcgis_regional_districts_query_url = FEATURE_SERVICE_URL + '&geometry=' + str(_long) + ',' + str(_lat)
-    _service_response = requests.request("GET", FEATURE_SERVICE_URL)
-    _service_response_json = json.loads(_service_response.content)
-    if _service_response_json.get('features')[0].get('attributes').get('ADMIN_AREA_NAME'):
-        return _service_response_json['features'][0]['attributes']['ADMIN_AREA_NAME']
-    else:
-        raise KeyError("status code:" + str(_service_response.status_code))
-    """
-    if _ches_response.status_code == 200:
-        logging.info(constant.CHES_HEALTH_200_STATUS)
-    elif _ches_response.status_code == 401:
-        logging.error(constant.CHES_HEALTH_401_STATUS)
-    elif _ches_response.status_code == 403:
-        logging.error(constant.CHES_HEALTH_403_STATUS)
-    else:
-        logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
-    """        
+    try:
+        _service_response = requests.request("GET", FEATURE_SERVICE_URL, timeout=5)
+        _service_response_json = json.loads(_service_response.content)
+        if _service_response_json.get('features')[0].get('attributes').get('ADMIN_AREA_NAME'):
+            return _service_response_json['features'][0]['attributes']['ADMIN_AREA_NAME']
+        else:
+            raise KeyError("status code:" + str(_service_response.status_code))
+    except KeyError as err:
+        logging.error(err)
+    except Timeout:
+        logging.error('The request timed out! %s', _arcgis_regional_districts_query_url)
+    
