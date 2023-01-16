@@ -297,6 +297,8 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime'
 							, soilDepositIsALR='D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1'
 							, soilDepositIsReserveLands='D2-receivingsitesoilDepositIsInTheReserveLands1'
+                            , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
+                            , soilRelocationCompletionDate='B4-soilRelocationEstimatedCompletionDateMonthDayYear'
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
@@ -365,6 +367,8 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1'
 							, soilDepositIsALR='D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2'
 							, soilDepositIsReserveLands='D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2'
+                            , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
+                            , soilRelocationCompletionDate='B4-soilRelocationEstimatedCompletionDateMonthDayYear'
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
@@ -433,6 +437,8 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
                             , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3'
 							, soilDepositIsALR='D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3'
 							, soilDepositIsReserveLands='D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3'
+                            , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
+                            , soilRelocationCompletionDate='B4-soilRelocationEstimatedCompletionDateMonthDayYear'
                             , dateSigned='simpledatetime'
                             , form='form'
                             , createdAt='createdAt'
@@ -674,6 +680,8 @@ RECEIVING_SITE_HEADERS = [
                           "highVolumeSite",
                           "soilDepositIsALR",
                           "soilDepositIsReserveLands",
+                          "soilRelocationStartDate",
+                          "soilRelocationCompletionDate",                          
                           # "dateSigned",
                           # "createAt",
                           "confirmationId",
@@ -733,8 +741,8 @@ HV_SITE_HEADERS = [
                    "hvsConfirmation",
                    "dateSiteBecameHighVolume",
                    "howRelocatedSoilWillBeUsed",
-                   # "soilDepositIsALR",
-                   # "soilDepositIsReserveLands",
+                   "soilDepositIsALR",
+                   "soilDepositIsReserveLands",
                    # "qualifiedProfessionalFirstName",
                    # "qualifiedProfessionalLastName",
                    # "qualifiedProfessionalType",
