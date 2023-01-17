@@ -41,8 +41,8 @@ NOTE: This application is the middle layer between CHEFS forms and AGOL, neither
 3. Go to the Actions tab, click on [Build And Add Job to Openshift Prod](https://github.com/bcgov/nr-soils-relocation/actions//workflows/ci-openshift-prod.yaml) and trigger a build
 
    1. Provide a unique tag number.  Check the [releases/tags](https://github.com/bcgov/nr-soils-relocation/tags) and increment accordingly
-
-   2. Click on Run workflow button
+   2. Please make sure you are only entering the number without the `release` prefix, if the latest release shows `release/1.0.0`, your input should be `1.0.1`
+   3. Click on Run workflow button
 
 4. The workflow will:
 
