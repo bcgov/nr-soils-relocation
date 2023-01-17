@@ -948,7 +948,7 @@ def get_regional_district(_lat, _long):
     """Returns regional district for latitude and longutide"""
     _arcgis_regional_districts_query_url = FEATURE_SERVICE_URL + '&geometry=' + str(_long) + ',' + str(_lat)
     try:
-        _service_response = requests.request("GET", FEATURE_SERVICE_URL, timeout=5)
+        _service_response = requests.request("GET", FEATURE_SERVICE_URL, timeout=5) # timeout in seconds
         _service_response_json = json.loads(_service_response.content)
         if _service_response_json.get('features')[0].get('attributes').get('ADMIN_AREA_NAME'):
             return _service_response_json['features'][0]['attributes']['ADMIN_AREA_NAME']
