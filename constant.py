@@ -244,6 +244,7 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , longitudeSeconds='C2-Longitude-SecondsReceivingSite'
                             , landOwnership='C2-receivinglandOwnership-checkbox'
                             , regionalDistrict='ReceivingSiteregionalDistrict'
+                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             #, ownerFirstName='C1-FirstNameReceivingSiteOwner'
                             #, ownerLastName='C1-LastNameReceivingSiteOwner'
                             , ownerCompany='C1-CompanyReceivingSiteOwner'
@@ -314,6 +315,7 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
 							, additionalRcvInformation='firstAdditionalReceivingSiteInformation'
                             , landOwnership='Firstadditionalreceiving-landOwnership-checkbox1'
                             , regionalDistrict='FirstAdditionalReceivingSiteregionalDistrict1'
+                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             #, ownerFirstName='C1-FirstName2FirstAdditionalReceivingSite'
                             #, ownerLastName='C1-LastName2FirstAdditionalReceivingSite'
                             , ownerCompany='C1-Company2FirstAdditionalReceivingSite'
@@ -384,6 +386,7 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
 							, additionalRcvInformation='secondAdditionalReceivingSiteInformation'
                             , landOwnership='Secondadditionalreceiving-landOwnership-checkbox3'
                             , regionalDistrict='SecondAdditionalReceivingSiteregionalDistrict'
+                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             #, ownerFirstName='C1-FirstName6SecondAdditionalreceivingSite'
                             #, ownerLastName='C1-LastName6SecondAdditionalreceivingSite'
                             , ownerCompany='C1-Company6SecondAdditionalreceivingSite'
@@ -613,7 +616,7 @@ SOURCE_SITE_HEADERS = ["updateToPreviousForm",
                        # "dateSigned",
                        # "createAt",
                        "confirmationId"]
-RECEIVING_SITE_HEADERS = [
+RECEIVING_SITE_HEADERS = ["previousConfirmCode",
                           # "ownerFirstName",
                           # "ownerLastName",
                           "ownerCompany",
@@ -681,7 +684,7 @@ RECEIVING_SITE_HEADERS = [
                           "soilDepositIsALR",
                           "soilDepositIsReserveLands",
                           "soilRelocationStartDate",
-                          "soilRelocationCompletionDate",                          
+                          "soilRelocationCompletionDate",
                           # "dateSigned",
                           # "createAt",
                           "confirmationId",

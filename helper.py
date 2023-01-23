@@ -702,6 +702,7 @@ def map_rcv_site(_submission, rcv_clz):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
             _rcv_dic[rcv_header] = None
 
+        _rcv_dic['previousConfirmCode'] = _submission.get(chefs_rcv_param('previousConfirmCode', rcv_clz))
         #_rcv_dic['ownerFirstName'] = _submission.get(chefs_rcv_param('ownerFirstName', rcv_clz))
         #_rcv_dic['ownerLastName'] = _submission.get(chefs_rcv_param('ownerLastName', rcv_clz))
         _rcv_dic['ownerCompany'] = _submission.get(chefs_rcv_param('ownerCompany', rcv_clz))
