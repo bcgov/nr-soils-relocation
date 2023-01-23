@@ -785,9 +785,9 @@ def map_rcv_site(_submission, rcv_clz):
 
         create_soil_volumes(
             _submission,
-            chefs_src_param('soilVolumeDataGrid'),
-            chefs_src_param('soilVolume'),
-            chefs_src_param('soilClassificationSource'),
+            chefs_rcv_param('soilVolumeDataGrid', rcv_clz),
+            chefs_rcv_param('soilVolume', rcv_clz),
+            chefs_rcv_param('soilClassificationSource', rcv_clz),
             _rcv_dic)
 
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
