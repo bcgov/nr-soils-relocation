@@ -122,15 +122,18 @@ def check_ches_health():
     'Authorization': 'Bearer ' + _access_token
     }
     _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
-    _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers)
-    if _ches_response.status_code == 200:
-        logging.info(constant.CHES_HEALTH_200_STATUS)
-    elif _ches_response.status_code == 401:
-        logging.error(constant.CHES_HEALTH_401_STATUS)
-    elif _ches_response.status_code == 403:
-        logging.error(constant.CHES_HEALTH_403_STATUS)
-    else:
-        logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
+    try:
+        _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers, timeout=5) # timeout in seconds
+        if _ches_response.status_code == 200:
+            logging.info(constant.CHES_HEALTH_200_STATUS)
+        elif _ches_response.status_code == 401:
+            logging.error(constant.CHES_HEALTH_401_STATUS)
+        elif _ches_response.status_code == 403:
+            logging.error(constant.CHES_HEALTH_403_STATUS)
+        else:
+            logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
+    except Timeout:
+        logging.error('The request timed out! %s', _ches_api_health_endpoint)
 
 def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
@@ -483,18 +486,8 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
 
 def get_popup_search_value(_site_dic):
     """Returns popup search value"""
-    if _site_dic['SID'] is not None and _site_dic['SID'].strip() != '':
-        return _site_dic['SID']
-    elif _site_dic['PID'] is not None and _site_dic['PID'].strip() != '':
-        return _site_dic['PID']
-    elif _site_dic['PIN'] is not None and _site_dic['PIN'].strip() != '':
-        return _site_dic['PIN']
-    elif _site_dic['latitude'] is not None and _site_dic['longitude'] is not None:
-        return str(_site_dic['latitude'])+','+str(_site_dic['latitude']) #Site lat/lon
-    #elif _site_dic['ownerAddress'] is not None and _site_dic['ownerAddress'].strip() != '':
-    #    return _site_dic['ownerAddress'] #Site Owner Address
-    elif _site_dic['ownerCompany'] is not None and _site_dic['ownerCompany'].strip() != '':
-        return _site_dic['ownerCompany']  #Site Owner Company
+    if _site_dic['confirmationId'] is not None and _site_dic['confirmationId'].strip() != '':
+        return _site_dic['confirmationId']
 
 def create_popup_links(sites):
     """Create and returns popup hyper link """
