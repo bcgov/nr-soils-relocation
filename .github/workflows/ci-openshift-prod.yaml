@@ -24,6 +24,7 @@ env:
   AUTH_URL: ${{ secrets.AUTH_URL }}
   CHES_URL: ${{ secrets.CHES_URL }}
   LOGLEVEL: ${{ secrets.LOGLEVEL }}
+  NOTICE_STANDARD_TIME: ${{ secrets.NOTICE_STANDARD_TIME }}
   APP_NAME: "sris"
   TAG: ${{ github.event.inputs.RELEASE_VERSION }}
 on:
@@ -92,7 +93,7 @@ jobs:
           -p HV_CSV_ID=${{ env.HV_CSV_ID }} -p HV_LAYER_ID=${{ env.HV_LAYER_ID }} \
           -p WEB_MAP_APP_ID=${{ env.WEB_MAP_APP_ID }} -p CHEFS_API_URL=${{ env.CHEFS_API_URL }} \
           -p AUTH_URL=${{ env.AUTH_URL }} -p CHES_URL=${{ env.CHES_URL }} \
-          -p LOGLEVEL=${{ env.LOGLEVEL }} \
+          -p LOGLEVEL=${{ env.LOGLEVEL }} -p NOTICE_STANDARD_TIME=${{ env.NOTICE_STANDARD_TIME }} \
           | oc apply -f -
       - uses: rickstaa/action-create-tag@v1
         name: Create Release Tag in Git
