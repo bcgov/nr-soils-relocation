@@ -75,6 +75,9 @@ parameters:
     required: true
   - name: LOGLEVEL
     description: Logging level
+    required: true
+  - name: NOTICE_STANDARD_TIME
+    description: Notification processing interval time
     required: true    
 objects:
   - kind: ConfigMap
@@ -104,6 +107,7 @@ objects:
       CHEFS_HV_API_KEY: ${CHEFS_HV_API_KEY}
       CHEFS_SOILS_API_KEY: ${CHEFS_SOILS_API_KEY}
       LOGLEVEL: ${LOGLEVEL}
+      NOTICE_STANDARD_TIME: ${NOTICE_STANDARD_TIME} 
 
   - apiVersion: batch/v1
     kind: CronJob
