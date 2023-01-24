@@ -1,5 +1,12 @@
 # pylint: disable=line-too-long
 # pylint: disable=no-member
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-boolean-expressions
+# pylint: disable=chained-comparison
+# pylint: disable=simplifiable-if-expression
+# pylint: disable=no-else-return
+# pylint: disable=too-many-branches
+# pylint: disable=inconsistent-return-statements
 """
 Functions to need to execute  chefs_soil.py
 """
@@ -60,7 +67,7 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
             _lon_min = re.findall(constant.EXP_EXTRACT_FLOATING, lon_min)
             _lon_sec = re.findall(constant.EXP_EXTRACT_FLOATING, lon_sec)
 
-            if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0 
+            if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0
                 and len(_lon_deg) > 0 and len(_lon_min) > 0 and len(_lon_sec) > 0):
                 _lat_dd = (float(_lat_deg[0]) + float(_lat_min[0])/60 + float(_lat_sec[0])/(60*60))
                 _lon_dd = - (float(_lon_deg[0])
@@ -102,7 +109,7 @@ def get_ches_token():
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load)
+        _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load, timeout=5) # timeout in seconds
         _auth_response_json = json.loads(_auth_response.content)
         if _auth_response_json.get('access_token'):
             return _auth_response_json['access_token']
@@ -112,6 +119,8 @@ def get_ches_token():
                 + str(_auth_response.status_code) + ", reason:"+ _auth_response.reason)
     except KeyError as _ke:
         logging.exception("Email could not be sent due to an authorization issue:%s", _ke)
+    except Timeout:
+        logging.error('The request timed out to get CHES token! - %s', AUTH_URL)
     return _auth_response
 
 def check_ches_health():
@@ -122,15 +131,18 @@ def check_ches_health():
     'Authorization': 'Bearer ' + _access_token
     }
     _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
-    _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers)
-    if _ches_response.status_code == 200:
-        logging.info(constant.CHES_HEALTH_200_STATUS)
-    elif _ches_response.status_code == 401:
-        logging.error(constant.CHES_HEALTH_401_STATUS)
-    elif _ches_response.status_code == 403:
-        logging.error(constant.CHES_HEALTH_403_STATUS)
-    else:
-        logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
+    try:
+        _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers, timeout=5) # timeout in seconds
+        if _ches_response.status_code == 200:
+            logging.info(constant.CHES_HEALTH_200_STATUS)
+        elif _ches_response.status_code == 401:
+            logging.error(constant.CHES_HEALTH_401_STATUS)
+        elif _ches_response.status_code == 403:
+            logging.error(constant.CHES_HEALTH_403_STATUS)
+        else:
+            logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
+    except Timeout:
+        logging.error('The request timed out to check CHES Health! - %s', _ches_api_health_endpoint)
 
 def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
@@ -144,22 +156,34 @@ def send_single_email(to_email, subject, message):
         'Authorization': 'Bearer ' + _access_token
         }
         _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
-        _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load)
+        try:
+            _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=5) # timeout in seconds
+        except Timeout:
+            logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
     return _ches_response
 
 def site_list(form_id, form_key):
     """Retrieve CHEFS form data via CHEFS API"""
-    request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-    content = json.loads(request.content)
+    content = None
+    chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions'
+    try:
+        request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
+        content = json.loads(request.content)
+    except Timeout:
+        logging.error('The request timed out! %s', chefs_api_request_url)
     return content
 
 def fetch_columns(form_id, form_key):
     """Retrieve CHEFS form columns"""
-    request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-    request_json = json.loads(request.content)
-    version = request_json[0]['id']
-    attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'})
-    attributes = json.loads(attribute_request.content)
+    attributes = None
+    try:
+        request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
+        request_json = json.loads(request.content)
+        version = request_json[0]['id']
+        attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
+        attributes = json.loads(attribute_request.content)
+    except Timeout:
+        logging.error('The request timed out to retrieve CHEFS form columns!')
     return attributes
 
 def get_difference_datetimes_in_hour(datetime1, datetime2):
@@ -269,8 +293,8 @@ def validate_additional_rcv_site(chefs_dic, rcv_clz):
     check if the given fields exists that to see
     additional receiver information is provided
     """
-    if rcv_clz == 2 or rcv_clz == 3:
-        return is_not_none_true(chefs_dic.get(chefs_rcv_param('additionalRcvSite', 
+    if rcv_clz in (2, 3):
+        return is_not_none_true(chefs_dic.get(chefs_rcv_param('additionalRcvSite',
               rcv_clz)).get(chefs_rcv_param('additionalRcvInformation', rcv_clz)))
     else:
         return True
@@ -371,7 +395,7 @@ def create_land_file_numbers(chefs_dic, field):
     (in case of multiple data, they are joined with comma)
     """
     _land_file_numbers = []
-    if chefs_dic.get(field) is not None : 
+    if chefs_dic.get(field) is not None :
         for _item in chefs_dic[field]:
             for _v in _item.values():
                 if _v != '':
@@ -483,18 +507,8 @@ def add_regional_district_dic(site_dic, reg_dist_dic):
 
 def get_popup_search_value(_site_dic):
     """Returns popup search value"""
-    if _site_dic['SID'] is not None and _site_dic['SID'].strip() != '':
-        return _site_dic['SID']
-    elif _site_dic['PID'] is not None and _site_dic['PID'].strip() != '':
-        return _site_dic['PID']
-    elif _site_dic['PIN'] is not None and _site_dic['PIN'].strip() != '':
-        return _site_dic['PIN']
-    elif _site_dic['latitude'] is not None and _site_dic['longitude'] is not None:
-        return str(_site_dic['latitude'])+','+str(_site_dic['latitude']) #Site lat/lon
-    #elif _site_dic['ownerAddress'] is not None and _site_dic['ownerAddress'].strip() != '':
-    #    return _site_dic['ownerAddress'] #Site Owner Address
-    elif _site_dic['ownerCompany'] is not None and _site_dic['ownerCompany'].strip() != '':
-        return _site_dic['ownerCompany']  #Site Owner Company
+    if _site_dic['confirmationId'] is not None and _site_dic['confirmationId'].strip() != '':
+        return _site_dic['confirmationId']
 
 def create_popup_links(sites):
     """Create and returns popup hyper link """
@@ -543,14 +557,15 @@ def map_source_site(_submission):
     _src_dic = {}
     _confirmation_id = get_confirm_id(_submission, chefs_src_param('form'), chefs_src_param('confirmationId'))
     if (validate_lat_lon(
-        _submission.get(chefs_src_param('latitudeDegrees')),
-        _submission.get(chefs_src_param('latitudeMinutes')),
-        _submission.get(chefs_src_param('latitudeSeconds')),
-        _submission.get(chefs_src_param('longitudeDegrees')),
-        _submission.get(chefs_src_param('longitudeMinutes')),
-        _submission.get(chefs_src_param('longitudeSeconds')),
-        _confirmation_id,
-        'Soil Relocation Notification Form-Source Site')
+            _submission.get(chefs_src_param('latitudeDegrees')),
+            _submission.get(chefs_src_param('latitudeMinutes')),
+            _submission.get(chefs_src_param('latitudeSeconds')),
+            _submission.get(chefs_src_param('longitudeDegrees')),
+            _submission.get(chefs_src_param('longitudeMinutes')),
+            _submission.get(chefs_src_param('longitudeSeconds')),
+            _confirmation_id,
+            'Soil Relocation Notification Form-Source Site')
+        and _submission.get('Submit')
     ):
         logging.debug("Mapping sourece site ...")
         for src_header in constant.SOURCE_SITE_HEADERS:
@@ -684,24 +699,23 @@ def map_source_site(_submission):
 def map_rcv_site(_submission, rcv_clz):
     """Mapping receiving site"""
     _rcv_dic = {}
-    _confirmation_id = get_confirm_id(
-      _submission,
-      chefs_rcv_param('form', rcv_clz),
-      chefs_rcv_param('confirmationId', rcv_clz))
+    _confirmation_id = get_confirm_id(_submission,chefs_rcv_param('form', rcv_clz),chefs_rcv_param('confirmationId', rcv_clz))
     if (validate_additional_rcv_site(_submission, rcv_clz) and
         validate_lat_lon(
-          _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)),
-          _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)),
-          _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)),
-          _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)),
-          _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
-          _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
-          _confirmation_id,
-          'Soil Relocation Notification Form-Receiving Site')
+            _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)),
+            _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)),
+            _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)),
+            _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)),
+            _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
+            _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
+            _confirmation_id,
+            'Soil Relocation Notification Form-Receiving Site')
+        and _submission.get('Submit')
     ):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
             _rcv_dic[rcv_header] = None
 
+        _rcv_dic['previousConfirmCode'] = _submission.get(chefs_rcv_param('previousConfirmCode', rcv_clz))
         #_rcv_dic['ownerFirstName'] = _submission.get(chefs_rcv_param('ownerFirstName', rcv_clz))
         #_rcv_dic['ownerLastName'] = _submission.get(chefs_rcv_param('ownerLastName', rcv_clz))
         _rcv_dic['ownerCompany'] = _submission.get(chefs_rcv_param('ownerCompany', rcv_clz))
@@ -784,9 +798,9 @@ def map_rcv_site(_submission, rcv_clz):
 
         create_soil_volumes(
             _submission,
-            chefs_src_param('soilVolumeDataGrid'),
-            chefs_src_param('soilVolume'),
-            chefs_src_param('soilClassificationSource'),
+            chefs_rcv_param('soilVolumeDataGrid', rcv_clz),
+            chefs_rcv_param('soilVolume', rcv_clz),
+            chefs_rcv_param('soilClassificationSource', rcv_clz),
             _rcv_dic)
 
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
@@ -808,19 +822,17 @@ def map_rcv_site(_submission, rcv_clz):
 def map_hv_site(_hvs):
     """Mapping HV Site"""
     _hv_dic = {}
-    _confirmation_id = get_confirm_id(
-                        _hvs,
-                        chefs_hv_param('form'),
-                        chefs_hv_param('confirmationId'))
+    _confirmation_id = get_confirm_id(_hvs,chefs_hv_param('form'),chefs_hv_param('confirmationId'))
     if (validate_lat_lon(
-      _hvs.get(chefs_hv_param('latitudeDegrees')),
-      _hvs.get(chefs_hv_param('latitudeMinutes')),
-      _hvs.get(chefs_hv_param('latitudeSeconds')),
-      _hvs.get(chefs_hv_param('longitudeDegrees')),
-      _hvs.get(chefs_hv_param('longitudeMinutes')),
-      _hvs.get(chefs_hv_param('longitudeSeconds')),
-      _confirmation_id,
-      'High Volume Receiving Site Form')
+            _hvs.get(chefs_hv_param('latitudeDegrees')),
+            _hvs.get(chefs_hv_param('latitudeMinutes')),
+            _hvs.get(chefs_hv_param('latitudeSeconds')),
+            _hvs.get(chefs_hv_param('longitudeDegrees')),
+            _hvs.get(chefs_hv_param('longitudeMinutes')),
+            _hvs.get(chefs_hv_param('longitudeSeconds')),
+            _confirmation_id,
+            'High Volume Receiving Site Form')
+        and _hvs.get('Submit')
     ):
         logging.debug("Mapping high volume site ...")
         for hv_header in constant.HV_SITE_HEADERS:
@@ -956,6 +968,6 @@ def get_regional_district(_lat, _long):
             raise KeyError("status code:" + str(_service_response.status_code))
     except KeyError as err:
         logging.error(err)
-    #except Timeout:
-    #    logging.error('The request timed out! %s', _arcgis_regional_districts_query_url)
+    except Timeout:
+        logging.error('The request timed out! %s', _arcgis_regional_districts_query_url)
     

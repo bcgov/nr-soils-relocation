@@ -1,4 +1,5 @@
 # pylint: disable=line-too-long
+# pylint: disable=simplifiable-if-expression
 """
 Load all site submissions from CHEFS
 """

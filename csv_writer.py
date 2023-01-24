@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 """
 Write source, receive, high volume receiving site CSV files
 """
