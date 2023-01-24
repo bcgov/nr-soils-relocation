@@ -557,14 +557,15 @@ def map_source_site(_submission):
     _src_dic = {}
     _confirmation_id = get_confirm_id(_submission, chefs_src_param('form'), chefs_src_param('confirmationId'))
     if (validate_lat_lon(
-        _submission.get(chefs_src_param('latitudeDegrees')),
-        _submission.get(chefs_src_param('latitudeMinutes')),
-        _submission.get(chefs_src_param('latitudeSeconds')),
-        _submission.get(chefs_src_param('longitudeDegrees')),
-        _submission.get(chefs_src_param('longitudeMinutes')),
-        _submission.get(chefs_src_param('longitudeSeconds')),
-        _confirmation_id,
-        'Soil Relocation Notification Form-Source Site')
+            _submission.get(chefs_src_param('latitudeDegrees')),
+            _submission.get(chefs_src_param('latitudeMinutes')),
+            _submission.get(chefs_src_param('latitudeSeconds')),
+            _submission.get(chefs_src_param('longitudeDegrees')),
+            _submission.get(chefs_src_param('longitudeMinutes')),
+            _submission.get(chefs_src_param('longitudeSeconds')),
+            _confirmation_id,
+            'Soil Relocation Notification Form-Source Site')
+        and _submission.get('Submit')
     ):
         logging.debug("Mapping sourece site ...")
         for src_header in constant.SOURCE_SITE_HEADERS:
@@ -698,20 +699,18 @@ def map_source_site(_submission):
 def map_rcv_site(_submission, rcv_clz):
     """Mapping receiving site"""
     _rcv_dic = {}
-    _confirmation_id = get_confirm_id(
-      _submission,
-      chefs_rcv_param('form', rcv_clz),
-      chefs_rcv_param('confirmationId', rcv_clz))
+    _confirmation_id = get_confirm_id(_submission,chefs_rcv_param('form', rcv_clz),chefs_rcv_param('confirmationId', rcv_clz))
     if (validate_additional_rcv_site(_submission, rcv_clz) and
         validate_lat_lon(
-          _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)),
-          _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)),
-          _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)),
-          _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)),
-          _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
-          _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
-          _confirmation_id,
-          'Soil Relocation Notification Form-Receiving Site')
+            _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)),
+            _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)),
+            _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)),
+            _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)),
+            _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
+            _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
+            _confirmation_id,
+            'Soil Relocation Notification Form-Receiving Site')
+        and _submission.get('Submit')
     ):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
             _rcv_dic[rcv_header] = None
@@ -823,19 +822,17 @@ def map_rcv_site(_submission, rcv_clz):
 def map_hv_site(_hvs):
     """Mapping HV Site"""
     _hv_dic = {}
-    _confirmation_id = get_confirm_id(
-                        _hvs,
-                        chefs_hv_param('form'),
-                        chefs_hv_param('confirmationId'))
+    _confirmation_id = get_confirm_id(_hvs,chefs_hv_param('form'),chefs_hv_param('confirmationId'))
     if (validate_lat_lon(
-      _hvs.get(chefs_hv_param('latitudeDegrees')),
-      _hvs.get(chefs_hv_param('latitudeMinutes')),
-      _hvs.get(chefs_hv_param('latitudeSeconds')),
-      _hvs.get(chefs_hv_param('longitudeDegrees')),
-      _hvs.get(chefs_hv_param('longitudeMinutes')),
-      _hvs.get(chefs_hv_param('longitudeSeconds')),
-      _confirmation_id,
-      'High Volume Receiving Site Form')
+            _hvs.get(chefs_hv_param('latitudeDegrees')),
+            _hvs.get(chefs_hv_param('latitudeMinutes')),
+            _hvs.get(chefs_hv_param('latitudeSeconds')),
+            _hvs.get(chefs_hv_param('longitudeDegrees')),
+            _hvs.get(chefs_hv_param('longitudeMinutes')),
+            _hvs.get(chefs_hv_param('longitudeSeconds')),
+            _confirmation_id,
+            'High Volume Receiving Site Form')
+        and _hvs.get('Submit')
     ):
         logging.debug("Mapping high volume site ...")
         for hv_header in constant.HV_SITE_HEADERS:
