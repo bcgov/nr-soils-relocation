@@ -1,5 +1,12 @@
 # pylint: disable=line-too-long
 # pylint: disable=no-member
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-boolean-expressions
+# pylint: disable=chained-comparison
+# pylint: disable=simplifiable-if-expression
+# pylint: disable=no-else-return
+# pylint: disable=too-many-branches
+# pylint: disable=inconsistent-return-statements
 """
 Functions to need to execute  chefs_soil.py
 """
@@ -60,7 +67,7 @@ def convert_deciaml_lat_long(lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_se
             _lon_min = re.findall(constant.EXP_EXTRACT_FLOATING, lon_min)
             _lon_sec = re.findall(constant.EXP_EXTRACT_FLOATING, lon_sec)
 
-            if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0 
+            if (len(_lat_deg) > 0 and len(_lat_min) > 0 and len(_lat_sec) > 0
                 and len(_lon_deg) > 0 and len(_lon_min) > 0 and len(_lon_sec) > 0):
                 _lat_dd = (float(_lat_deg[0]) + float(_lat_min[0])/60 + float(_lat_sec[0])/(60*60))
                 _lon_dd = - (float(_lon_deg[0])
@@ -286,8 +293,8 @@ def validate_additional_rcv_site(chefs_dic, rcv_clz):
     check if the given fields exists that to see
     additional receiver information is provided
     """
-    if rcv_clz == 2 or rcv_clz == 3:
-        return is_not_none_true(chefs_dic.get(chefs_rcv_param('additionalRcvSite', 
+    if rcv_clz in (2, 3):
+        return is_not_none_true(chefs_dic.get(chefs_rcv_param('additionalRcvSite',
               rcv_clz)).get(chefs_rcv_param('additionalRcvInformation', rcv_clz)))
     else:
         return True
@@ -388,7 +395,7 @@ def create_land_file_numbers(chefs_dic, field):
     (in case of multiple data, they are joined with comma)
     """
     _land_file_numbers = []
-    if chefs_dic.get(field) is not None : 
+    if chefs_dic.get(field) is not None :
         for _item in chefs_dic[field]:
             for _v in _item.values():
                 if _v != '':

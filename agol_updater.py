@@ -1,5 +1,6 @@
 # pylint: disable=line-too-long
 # pylint: disable=no-member
+# pylint: disable=too-many-locals
 """
 Update source / receiving / high volume site CSV and Layer in AGOL
 """
