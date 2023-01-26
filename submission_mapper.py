@@ -1,5 +1,6 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-locals
+# pylint: disable=no-member
 """
 Map submission data from CHEFS the pre-defined submision dictionaries by sites
 """
@@ -51,8 +52,8 @@ def map_sites(submissions_json, hvs_json, current_date):
             if (_diff_3rcv is not None and _diff_3rcv <= int(NOTICE_STANDARD_TIME)):
                 helper.add_regional_district_dic(_3rcv_dic, rcv_reg_dist_dic)
 
-    logging.debug('Adding receiving site addresses into source site and source site address into receiving sites...')
-    source_sites, receiving_sites = helper.map_source_receiving_site_address(source_sites, receiving_sites)
+    logging.debug('Mapping additional work between source site and receiving sites...')
+    source_sites, receiving_sites = helper.map_source_receiving_site(source_sites, receiving_sites)
 
     logging.info('Creating high volume site records records...')
     for hvs in hvs_json:

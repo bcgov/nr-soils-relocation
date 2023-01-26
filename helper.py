@@ -936,8 +936,8 @@ def map_hv_site(_hvs):
         _hv_dic['confirmationId'] = _confirmation_id
     return _hv_dic
 
-def map_source_receiving_site_address(_source_sites, _receiving_sites):
-    """Adding receiving site addresses into source site and source site address into receiving sites"""
+def map_source_receiving_site(_source_sites, _receiving_sites):
+    """Mapping additional work between source site and receiving sites(address and regional district)"""
     for _src_site in _source_sites:
         for _rcv_site in _receiving_sites:
             if _rcv_site.get('confirmationId') == _src_site.get('confirmationId'):
@@ -945,15 +945,19 @@ def map_source_receiving_site_address(_source_sites, _receiving_sites):
                 if _rcv_site.get('receivingSiteClass') == '1':
                     _src_site['receivingSite1Address'] = _rcv_site.get('legallyTitledSiteAddress')
                     _src_site['receivingSite1City'] = _rcv_site.get('legallyTitledSiteCity')
+                    _src_site['receivingSite1RegionalDistrict'] = _rcv_site.get('regionalDistrict')
                 elif _rcv_site.get('receivingSiteClass') == '2':
                     _src_site['receivingSite2Address'] = _rcv_site.get('legallyTitledSiteAddress')
                     _src_site['receivingSite2City'] = _rcv_site.get('legallyTitledSiteCity')
+                    _src_site['receivingSite2RegionalDistrict'] = _rcv_site.get('regionalDistrict')
                 elif _rcv_site.get('receivingSiteClass') == '3':
                     _src_site['receivingSite3Address'] = _rcv_site.get('legallyTitledSiteAddress')
                     _src_site['receivingSite3City'] = _rcv_site.get('legallyTitledSiteCity')
-                # adding source site address into receiving sites
+                    _src_site['receivingSite3RegionalDistrict'] = _rcv_site.get('regionalDistrict')
+                # adding source site address and regional district into receiving sites
                 _rcv_site['sourceSiteAddress'] = _src_site.get('legallyTitledSiteAddress')
                 _rcv_site['sourceSiteCity'] = _src_site.get('legallyTitledSiteCity')
+                _rcv_site['sourceSiteRegionalDistrict'] = _src_site.get('regionalDistrict')
     return _source_sites, _receiving_sites
 
 def get_regional_district(_lat, _long):
