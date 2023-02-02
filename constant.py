@@ -139,14 +139,14 @@ RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)
                                   , agriculturalLandUseAl='Agricultural Land Use (AL)'
                                   , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
                                   , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
-SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
-                            , commercialLandUseCl='Commercial Land Use (CL)'
-                            , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
-                            , residentialLandUseLowDensityRlld='Residential Land Use Low Density (RLLD)'
-                            , urbanParkLandUsePl='Urban Park Land Use (PL)'
-                            , agriculturalLandUseAl='Agricultural Land Use (AL)'
-                            , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                            , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
+SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
+                            , commercialLandUseCl='Commercial (CL)'
+                            , residentialLandUseHighDensityRlhd='Residential high density (RLHD)'
+                            , residentialLandUseLowDensityRlld='Residential low density (RLLD)'
+                            , urbanParkLandUsePl='Urban park (PL)'
+                            , agriculturalLandUseAl='Agricultural (AL)'
+                            , wildlandsNaturalLandUseWln='Wildlands natural (WLN)'
+                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)')
 LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land')
