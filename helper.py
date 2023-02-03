@@ -634,6 +634,7 @@ def map_source_site(_submission):
         _src_dic['legallyTitledSiteCity'] = _submission.get(chefs_src_param('legallyTitledSiteCity'))
         _src_dic['legallyTitledSitePostalCode'] = _submission.get(chefs_src_param('legallyTitledSitePostalCode'))
         _src_dic['crownLandFileNumbers'] = create_land_file_numbers(_submission,chefs_src_param('crownLandFileNumbers'))
+        _src_dic['reserveNameAndNumber'] = _submission.get(chefs_src_param('reserveNameAndNumber'))
 
         _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(
                                                             _submission,
@@ -789,12 +790,9 @@ def map_rcv_site(_submission, rcv_clz):
                                                 chefs_rcv_param('untitledMunicipalLand', rcv_clz),
                                                 chefs_rcv_param('untitledMunicipalLandDesc', rcv_clz))
 
-        _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(
-                                            _submission,
-                                            chefs_rcv_param('crownLandFileNumbers', rcv_clz))
-        _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(
-                                            _submission,
-                                            chefs_rcv_param('receivingSiteLandUse', rcv_clz))
+        _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(_submission,chefs_rcv_param('crownLandFileNumbers', rcv_clz))
+        _rcv_dic['reserveNameAndNumber'] = _submission.get(chefs_rcv_param('reserveNameAndNumber', rcv_clz))
+        _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(_submission,chefs_rcv_param('receivingSiteLandUse', rcv_clz))
 
         create_soil_volumes(
             _submission,
@@ -912,6 +910,7 @@ def map_hv_site(_hvs):
                                                 chefs_hv_param('untitledMunicipalLandDesc'))
 
         _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(_hvs, chefs_hv_param('crownLandFileNumbers'))
+        _hv_dic['reserveNameAndNumber'] = _hvs.get(chefs_hv_param('reserveNameAndNumber'))
         _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(_hvs, chefs_hv_param('receivingSiteLandUse'))
         _hv_dic['hvsConfirmation'] = _hvs.get(chefs_hv_param('hvsConfirmation'))
         _hv_dic['dateSiteBecameHighVolume'] = convert_simple_datetime_format_in_str(_hvs.get(chefs_hv_param('dateSiteBecameHighVolume')))

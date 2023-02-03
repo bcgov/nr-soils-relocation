@@ -39,8 +39,8 @@ if chefsLoaded:
 
     logging.info('Completed Soils data publishing')
 
-#### to track the version of forms (Feb/01/2023)
+#### to track the version of forms (Feb/02/2023)
 # CHEFS generates new vresion of forms when changes of data fields, manages data by each version
-# 1.soil relocation form version: v12
-# 2.high volume submission version v8
+# 1.soil relocation form version: v15
+# 2.high volume submission version v10
 # 3.subscriber form version: v9
