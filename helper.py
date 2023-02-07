@@ -87,7 +87,7 @@ def validate_lat_lon(
     """Validate if coordinates are within BC bounds"""
     _lat_dd, _lon_dd = convert_deciaml_lat_long(
                         lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec)
-    """
+
     if (_lat_dd is not None and _lat_dd != 0 and
         _lon_dd is not None and _lon_dd != 0 and
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
@@ -96,8 +96,6 @@ def validate_lat_lon(
     logging.warning("Can't publish data to AGOL due to invalidate site coordinates - Latitude(deg/min/sec):%s(%s/%s,%s), Longitude(deg/min/sec):%s(%s/%s/%s), Confirm ID:%s, Form:%s"
     , _lat_dd, lat_deg, lat_min, lat_sec, _lon_dd, lon_deg, lon_min, lon_sec, confirmation_id, form_name)
     return False
-    """
-    return True
 
 def is_boolean(obj):
     """Check if boolen type is"""
@@ -554,17 +552,7 @@ def map_source_site(_submission):
     """Mapping source site"""
     _src_dic = {}
     _confirmation_id = get_confirm_id(_submission, chefs_src_param('form'), chefs_src_param('confirmationId'))
-    if (validate_lat_lon(
-            _submission.get(chefs_src_param('latitudeDegrees')),
-            _submission.get(chefs_src_param('latitudeMinutes')),
-            _submission.get(chefs_src_param('latitudeSeconds')),
-            _submission.get(chefs_src_param('longitudeDegrees')),
-            _submission.get(chefs_src_param('longitudeMinutes')),
-            _submission.get(chefs_src_param('longitudeSeconds')),
-            _confirmation_id,
-            'Soil Relocation Notification Form-Source Site')
-        and _submission.get('Submit')
-    ):
+    if _submission.get('Submit'):
         logging.debug("Mapping sourece site ...")
         for src_header in constant.SOURCE_SITE_HEADERS:
             _src_dic[src_header] = None
@@ -699,16 +687,7 @@ def map_rcv_site(_submission, rcv_clz):
     """Mapping receiving site"""
     _rcv_dic = {}
     _confirmation_id = get_confirm_id(_submission,chefs_rcv_param('form', rcv_clz),chefs_rcv_param('confirmationId', rcv_clz))
-    if (validate_additional_rcv_site(_submission, rcv_clz) and
-        validate_lat_lon(
-            _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)),
-            _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)),
-            _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)),
-            _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)),
-            _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
-            _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
-            _confirmation_id,
-            'Soil Relocation Notification Form-Receiving Site')
+    if (validate_additional_rcv_site(_submission, rcv_clz)
         and _submission.get('Submit')
     ):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
@@ -819,17 +798,7 @@ def map_hv_site(_hvs):
     """Mapping HV Site"""
     _hv_dic = {}
     _confirmation_id = get_confirm_id(_hvs,chefs_hv_param('form'),chefs_hv_param('confirmationId'))
-    if (validate_lat_lon(
-            _hvs.get(chefs_hv_param('latitudeDegrees')),
-            _hvs.get(chefs_hv_param('latitudeMinutes')),
-            _hvs.get(chefs_hv_param('latitudeSeconds')),
-            _hvs.get(chefs_hv_param('longitudeDegrees')),
-            _hvs.get(chefs_hv_param('longitudeMinutes')),
-            _hvs.get(chefs_hv_param('longitudeSeconds')),
-            _confirmation_id,
-            'High Volume Receiving Site Form')
-        and _hvs.get('Submit')
-    ):
+    if _hvs.get('Submit'):
         logging.debug("Mapping high volume site ...")
         for hv_header in constant.HV_SITE_HEADERS:
             _hv_dic[hv_header] = None
