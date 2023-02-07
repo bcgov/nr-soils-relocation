@@ -87,6 +87,7 @@ def validate_lat_lon(
     """Validate if coordinates are within BC bounds"""
     _lat_dd, _lon_dd = convert_deciaml_lat_long(
                         lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec)
+
     if (_lat_dd is not None and _lat_dd != 0 and
         _lon_dd is not None and _lon_dd != 0 and
         _lat_dd >= 48.30 and _lat_dd <= 60.00 and
@@ -446,42 +447,37 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
                 _soil_volume = _dg9[volume_field]
                 if not isfloat(_soil_volume):
                     _soil_volume = extract_floating_from_string(_soil_volume)
+
                 _soil_volume = str_to_double(_soil_volume)
                 _soil_claz = _dg9.get("B1-soilClassificationSource")
+
                 if is_not_none_true(_soil_claz.get("urbanParkLandUsePl")):
-                    working_dic['urbanParkLandUseSoilVolume'] = working_dic['urbanParkLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['urbanParkLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['urbanParkSoilVol'] = working_dic['urbanParkSoilVol'] + _soil_volume if working_dic['urbanParkSoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("commercialLandUseCl")):
-                    working_dic['commercialLandUseSoilVolume'] = working_dic['commercialLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['commercialLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['commercialSoilVol'] = working_dic['commercialSoilVol'] + _soil_volume if working_dic['commercialSoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("industrialLandUseIl")):
-                    working_dic['industrialLandUseSoilVolume'] = working_dic['industrialLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['industrialLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['industrialSoilVol'] = working_dic['industrialSoilVol'] + _soil_volume if working_dic['industrialSoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("agriculturalLandUseAl")):
-                    working_dic['agriculturalLandUseSoilVolume'] = working_dic['agriculturalLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['agriculturalLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['agriculturalSoilVol'] = working_dic['agriculturalSoilVol'] + _soil_volume if working_dic['agriculturalSoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("wildlandsNaturalLandUseWln")):
-                    working_dic['wildlandsNaturalLandUseSoilVolume'] = working_dic['wildlandsNaturalLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['wildlandsNaturalLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['wildlandsNaturalSoilVol'] = working_dic['wildlandsNaturalSoilVol'] + _soil_volume if working_dic['wildlandsNaturalSoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("wildlandsRevertedLandUseWlr")):
-                    working_dic['wildlandsRevertedLandUseSoilVolume'] = working_dic['wildlandsRevertedLandUseSoilVolume'] + _soil_volume \
-                        if working_dic['wildlandsRevertedLandUseSoilVolume'] is not None else _soil_volume
+                    working_dic['wildlandsRevertedSoilVol'] = working_dic['wildlandsRevertedSoilVol'] + _soil_volume if working_dic['wildlandsRevertedSoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("residentialLandUseLowDensityRlld")):
-                    working_dic['residentialLandUseLowDensitySoilVolume'] = working_dic['residentialLandUseLowDensitySoilVolume'] + _soil_volume \
-                        if working_dic['residentialLandUseLowDensitySoilVolume'] is not None else _soil_volume
+                    working_dic['residentLowDensitySoilVol'] = working_dic['residentLowDensitySoilVol'] + _soil_volume if working_dic['residentLowDensitySoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
                 elif is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
-                    working_dic['residentialLandUseHighDensitySoilVolume'] = working_dic['residentialLandUseHighDensitySoilVolume'] + _soil_volume \
-                        if working_dic['residentialLandUseHighDensitySoilVolume'] is not None else _soil_volume
+                    working_dic['residentHighDensitySoilVol'] = working_dic['residentHighDensitySoilVol'] + _soil_volume if working_dic['residentHighDensitySoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
+
         if _total_soil_volume != 0:
-            working_dic['totalSoilVolme'] = _total_soil_volume
+            working_dic['totalSoilVolume'] = _total_soil_volume
 
 def add_regional_district_dic(site_dic, reg_dist_dic):
     """
@@ -556,17 +552,7 @@ def map_source_site(_submission):
     """Mapping source site"""
     _src_dic = {}
     _confirmation_id = get_confirm_id(_submission, chefs_src_param('form'), chefs_src_param('confirmationId'))
-    if (validate_lat_lon(
-            _submission.get(chefs_src_param('latitudeDegrees')),
-            _submission.get(chefs_src_param('latitudeMinutes')),
-            _submission.get(chefs_src_param('latitudeSeconds')),
-            _submission.get(chefs_src_param('longitudeDegrees')),
-            _submission.get(chefs_src_param('longitudeMinutes')),
-            _submission.get(chefs_src_param('longitudeSeconds')),
-            _confirmation_id,
-            'Soil Relocation Notification Form-Source Site')
-        and _submission.get('Submit')
-    ):
+    if _submission.get('Submit'):
         logging.debug("Mapping sourece site ...")
         for src_header in constant.SOURCE_SITE_HEADERS:
             _src_dic[src_header] = None
@@ -634,6 +620,7 @@ def map_source_site(_submission):
         _src_dic['legallyTitledSiteCity'] = _submission.get(chefs_src_param('legallyTitledSiteCity'))
         _src_dic['legallyTitledSitePostalCode'] = _submission.get(chefs_src_param('legallyTitledSitePostalCode'))
         _src_dic['crownLandFileNumbers'] = create_land_file_numbers(_submission,chefs_src_param('crownLandFileNumbers'))
+        _src_dic['reserveNameAndNumber'] = _submission.get(chefs_src_param('reserveNameAndNumber'))
 
         _src_dic['PID'], _src_dic['legalLandDescription'] = create_pid_pin_and_desc(
                                                             _submission,
@@ -700,16 +687,7 @@ def map_rcv_site(_submission, rcv_clz):
     """Mapping receiving site"""
     _rcv_dic = {}
     _confirmation_id = get_confirm_id(_submission,chefs_rcv_param('form', rcv_clz),chefs_rcv_param('confirmationId', rcv_clz))
-    if (validate_additional_rcv_site(_submission, rcv_clz) and
-        validate_lat_lon(
-            _submission.get(chefs_rcv_param('latitudeDegrees', rcv_clz)),
-            _submission.get(chefs_rcv_param('latitudeMinutes', rcv_clz)),
-            _submission.get(chefs_rcv_param('latitudeSeconds', rcv_clz)),
-            _submission.get(chefs_rcv_param('longitudeDegrees', rcv_clz)),
-            _submission.get(chefs_rcv_param('longitudeMinutes', rcv_clz)),
-            _submission.get(chefs_rcv_param('longitudeSeconds', rcv_clz)),
-            _confirmation_id,
-            'Soil Relocation Notification Form-Receiving Site')
+    if (validate_additional_rcv_site(_submission, rcv_clz)
         and _submission.get('Submit')
     ):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
@@ -789,12 +767,9 @@ def map_rcv_site(_submission, rcv_clz):
                                                 chefs_rcv_param('untitledMunicipalLand', rcv_clz),
                                                 chefs_rcv_param('untitledMunicipalLandDesc', rcv_clz))
 
-        _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(
-                                            _submission,
-                                            chefs_rcv_param('crownLandFileNumbers', rcv_clz))
-        _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(
-                                            _submission,
-                                            chefs_rcv_param('receivingSiteLandUse', rcv_clz))
+        _rcv_dic['crownLandFileNumbers'] = create_land_file_numbers(_submission,chefs_rcv_param('crownLandFileNumbers', rcv_clz))
+        _rcv_dic['reserveNameAndNumber'] = _submission.get(chefs_rcv_param('reserveNameAndNumber', rcv_clz))
+        _rcv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(_submission,chefs_rcv_param('receivingSiteLandUse', rcv_clz))
 
         create_soil_volumes(
             _submission,
@@ -823,17 +798,7 @@ def map_hv_site(_hvs):
     """Mapping HV Site"""
     _hv_dic = {}
     _confirmation_id = get_confirm_id(_hvs,chefs_hv_param('form'),chefs_hv_param('confirmationId'))
-    if (validate_lat_lon(
-            _hvs.get(chefs_hv_param('latitudeDegrees')),
-            _hvs.get(chefs_hv_param('latitudeMinutes')),
-            _hvs.get(chefs_hv_param('latitudeSeconds')),
-            _hvs.get(chefs_hv_param('longitudeDegrees')),
-            _hvs.get(chefs_hv_param('longitudeMinutes')),
-            _hvs.get(chefs_hv_param('longitudeSeconds')),
-            _confirmation_id,
-            'High Volume Receiving Site Form')
-        and _hvs.get('Submit')
-    ):
+    if _hvs.get('Submit'):
         logging.debug("Mapping high volume site ...")
         for hv_header in constant.HV_SITE_HEADERS:
             _hv_dic[hv_header] = None
@@ -912,6 +877,7 @@ def map_hv_site(_hvs):
                                                 chefs_hv_param('untitledMunicipalLandDesc'))
 
         _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(_hvs, chefs_hv_param('crownLandFileNumbers'))
+        _hv_dic['reserveNameAndNumber'] = _hvs.get(chefs_hv_param('reserveNameAndNumber'))
         _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(_hvs, chefs_hv_param('receivingSiteLandUse'))
         _hv_dic['hvsConfirmation'] = _hvs.get(chefs_hv_param('hvsConfirmation'))
         _hv_dic['dateSiteBecameHighVolume'] = convert_simple_datetime_format_in_str(_hvs.get(chefs_hv_param('dateSiteBecameHighVolume')))
