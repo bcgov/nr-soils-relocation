@@ -611,10 +611,10 @@ def map_source_site(_submission):
         _src_dic['landOwnership'] = create_land_ownership(_submission, chefs_src_param('landOwnership'))
 
         _src_dic['regionalDistrict'] = create_regional_district(_submission, chefs_src_param('regionalDistrict'))
-        logging.debug('regionalDistrict:%s', _src_dic.get('regionalDistrict'))
-        if (_src_dic.get('regionalDistrict') is None and _src_dic.get('latitude') and _src_dic.get('longitude')):
-            _src_dic['regionalDistrict'] = get_regional_district(_src_dic.get('latitude'), _src_dic.get('longitude'))
-            logging.debug('filled in regional district using arcgis feature service:%s', _src_dic['regionalDistrict'])
+        #logging.debug('regionalDistrict:%s', _src_dic.get('regionalDistrict'))
+        #if (_src_dic.get('regionalDistrict') is None and _src_dic.get('latitude') and _src_dic.get('longitude')):
+        #    _src_dic['regionalDistrict'] = get_regional_district(_src_dic.get('latitude'), _src_dic.get('longitude'))
+        #    logging.debug('filled in regional district using arcgis feature service:%s', _src_dic['regionalDistrict'])
 
         _src_dic['legallyTitledSiteAddress'] = _submission.get(chefs_src_param('legallyTitledSiteAddress'))
         _src_dic['legallyTitledSiteCity'] = _submission.get(chefs_src_param('legallyTitledSiteCity'))
@@ -926,18 +926,18 @@ def map_source_receiving_site(_source_sites, _receiving_sites):
                 _rcv_site['sourceSiteRegionalDistrict'] = _src_site.get('regionalDistrict')
     return _source_sites, _receiving_sites
 
-def get_regional_district(_lat, _long):
-    """Returns regional district for latitude and longutide"""
-    _arcgis_regional_districts_query_url = FEATURE_SERVICE_URL + '&geometry=' + str(_long) + ',' + str(_lat)
-    try:
-        _service_response = requests.request("GET", FEATURE_SERVICE_URL, timeout=5) # timeout in seconds
-        _service_response_json = json.loads(_service_response.content)
-        if _service_response_json.get('features')[0].get('attributes').get('ADMIN_AREA_NAME'):
-            return _service_response_json['features'][0]['attributes']['ADMIN_AREA_NAME']
-        else:
-            raise KeyError("status code:" + str(_service_response.status_code))
-    except KeyError as err:
-        logging.error(err)
-    except Timeout:
-        logging.error('The request timed out! %s', _arcgis_regional_districts_query_url)
+#def get_regional_district(_lat, _long):
+#    """Returns regional district for latitude and longutide"""
+#    _arcgis_regional_districts_query_url = FEATURE_SERVICE_URL + '&geometry=' + str(_long) + ',' + str(_lat)
+#    try:
+#        _service_response = requests.request("GET", FEATURE_SERVICE_URL, timeout=5) # timeout in seconds
+#        _service_response_json = json.loads(_service_response.content)
+#        if _service_response_json.get('features')[0].get('attributes').get('ADMIN_AREA_NAME'):
+#            return _service_response_json['features'][0]['attributes']['ADMIN_AREA_NAME']
+#        else:
+#            raise KeyError("status code:" + str(_service_response.status_code))
+#    except KeyError as err:
+#        logging.error(err)
+#    except Timeout:
+#        logging.error('The request timed out! %s', _arcgis_regional_districts_query_url)
     
