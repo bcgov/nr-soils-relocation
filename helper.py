@@ -166,7 +166,7 @@ def send_single_email(to_email, subject, message):
 def site_list(form_id, form_key, form_version):
     """Retrieve CHEFS form data via CHEFS API"""
     content = None
-    chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions' + form_version
+    chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions&version=' + form_version
     try:
         request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
         content = json.loads(request.content)
