@@ -163,10 +163,10 @@ def send_single_email(to_email, subject, message):
             logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
     return _ches_response
 
-def site_list(form_id, form_key):
+def site_list(form_id, form_key, form_version):
     """Retrieve CHEFS form data via CHEFS API"""
     content = None
-    chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions'
+    chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions' + form_version
     try:
         request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
         content = json.loads(request.content)
