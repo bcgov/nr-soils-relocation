@@ -19,6 +19,9 @@ parameters:
   - name: CHEFS_MAIL_FORM_ID
     description: Mail Form ID
     required: true
+  - name: CHEFS_MAIL_FORM_VERSION
+    description: Mail Form version number
+    required: true    
   - name: RCV_LAYER_ID
     description:
     required: true
@@ -52,6 +55,9 @@ parameters:
   - name: CHEFS_HV_FORM_ID
     description: High Volume  Form ID.
     required: true
+  - name: CHEFS_HV_FORM_VERSION
+    description: High Volume  Form version number.
+    required: true
   - name: MAPHUB_PASS
     description: map hub password.
     required: true
@@ -64,6 +70,9 @@ parameters:
   - name: CHEFS_SOILS_FORM_ID
     description: Soil Form ID.
     required: true
+  - name: CHEFS_SOILS_FORM_VERSION
+    description: Soil Form version number.
+    required: true    
   - name: HV_LAYER_ID
     description: High Volume Layer ID.
     required: true
@@ -88,6 +97,7 @@ objects:
         app: ${APP_NAME}
     data:
       CHEFS_MAIL_FORM_ID: ${CHEFS_MAIL_FORM_ID}
+      CHEFS_MAIL_FORM_VERSION: ${CHEFS_MAIL_FORM_VERSION}
       RCV_LAYER_ID: ${RCV_LAYER_ID}
       CHES_URL: ${CHES_URL}
       CHEFS_MAIL_API_KEY: ${CHEFS_MAIL_API_KEY}
@@ -99,10 +109,12 @@ objects:
       SRC_CSV_ID: ${SRC_CSV_ID}
       MAPHUB_USER: ${MAPHUB_USER}
       CHEFS_HV_FORM_ID: ${CHEFS_HV_FORM_ID}
+      CHEFS_HV_FORM_VERSION: ${CHEFS_HV_FORM_VERSION}
       MAPHUB_PASS: ${MAPHUB_PASS}
       CHEFS_API_URL: ${CHEFS_API_URL}
       AUTH_URL: ${AUTH_URL}
       CHEFS_SOILS_FORM_ID: ${CHEFS_SOILS_FORM_ID}
+      CHEFS_SOILS_FORM_VERSION: ${CHEFS_SOILS_FORM_VERSION}
       HV_LAYER_ID: ${HV_LAYER_ID}
       CHEFS_HV_API_KEY: ${CHEFS_HV_API_KEY}
       CHEFS_SOILS_API_KEY: ${CHEFS_SOILS_API_KEY}
