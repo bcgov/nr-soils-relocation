@@ -35,8 +35,6 @@ def load_submissions():
     if submission_loaded:
         logging.info("%s Submissions are retrived.", len(submissions_json))
     logging.debug(submissions_json)
-    # logging.info('Loading Submission attributes and headers...')
-    # soilsAttributes = helper.fetch_columns(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY)
 
     logging.info('Loading High Volume Sites list...')
     hvs_loaded = True
@@ -51,8 +49,6 @@ def load_submissions():
     if hvs_loaded:
         logging.info("%s High Volume Sites are retrived.", len(hvs_json))
     logging.debug(hvs_json)
-    # logging.info('Loading High Volume Sites attributes and headers...')
-    # hvsAttributes = helper.fetch_columns(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY)
 
     logging.info('Loading submission subscribers list...')
     subscribers_loaded = True
@@ -67,8 +63,6 @@ def load_submissions():
     if subscribers_loaded:
         logging.info("%s Submission Subscribers are retrived.", len(subscribers_json))
     logging.debug(subscribers_json)
-    # logging.info('Loading submission subscribers attributes and headers...')
-    # subscribeAttributes = helper.fetch_columns(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY)
 
     chefs_loaded = True if submission_loaded and hvs_loaded and subscribers_loaded else False
     return submissions_json, hvs_json, subscribers_json, chefs_loaded
