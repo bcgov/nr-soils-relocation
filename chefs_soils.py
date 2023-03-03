@@ -38,9 +38,3 @@ if chefsLoaded:
     email_sender.email_to_subscribers(subscribersJson, srcRegDistDic, rcvRegDistDic, hvRegDistDic, currentDate)
 
     logging.info('Completed Soils data publishing')
-
-#### to track the version of forms (Feb/21/2023)
-# CHEFS generates new vresion of forms when changes of data fields, manages data by each version
-# 1.soil relocation form version: v17
-# 2.high volume submission version v10
-# 3.subscriber form version: v9
