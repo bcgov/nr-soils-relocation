@@ -1,0 +1,56 @@
+---
+data_management_roles:
+  data_custodian: Alan McCammon
+  data_steward: Patricia Fortin
+  product_owner: Ana deCastro
+product_external_dependencies:
+  common_components:
+    - Common-Hosted-Form-Service
+  notification_standard:
+    - Common-Hosted-Email-Service
+product_information:
+  api_specifications: []
+  ministry:
+    - Environment and Climate Change Strategy
+  product_acronym: SRIS
+  product_description: >-
+    The soil relocation provisions in the Environmental Management Act (EMA)
+    were amended in March 2020 (Bill 3) to streamline requirements, establish a
+    robust and transparent notification system, and introduce additional
+    requirements for sites receiving high soil volumes across the province.
+    These changes will ensure soil is being relocated appropriately and will
+    improve ENV oversight. Subsequently, changes to the Contaminated Sites
+    Regulation (CSR) are required to align with the amendments to EMA. The
+    online form is needed to support this initiative. The Soil Relocation
+    Information System (SRIS) was established to display soil relocation
+    notifications and high volume receiving site registrations and to allow
+    Indigenous Nations, local governments and other interested people to access
+    information on soil relocation activity in B.C.
+  product_name: Soil Relocation Info System
+  product_status: stable
+  product_urls:
+    - >-
+      https://submit.digital.gov.bc.ca/app/form/submit?f=e6083928-4bff-45b5-a447-2b9b59d61757
+    - >-
+      https://submit.digital.gov.bc.ca/app/form/submit?f=83181b39-521b-4b9f-b089-f5c794bdcc80
+    - https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/
+    - >-
+      https://submit.digital.gov.bc.ca/app/form/submit?f=75a33b78-f20a-4d05-8eb6-96986604760b
+    - >-
+      https://www2.gov.bc.ca/gov/content/environment/air-land-water/site-remediation/remediation-implementation/soil-relocation
+  program_area: Environmental Protection Division
+product_technology_information:
+  backend_frameworks: []
+  backend_languages_version:
+    - name: Python
+      version: '3.9'
+  ci_cd_tools:
+    - GitHub-Actions
+  frontend_languages: []
+  hosting_platforms:
+    - Private-Cloud-Openshift
+    - Other
+  hosting_platforms_custom: AGOL(ArcGIS Online)
+  spatial_mapping_technologies:
+    - ArcGIS
+version: 1
