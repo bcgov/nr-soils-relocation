@@ -250,6 +250,18 @@ def extract_floating_from_string(value):
         logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
 
     return _result
+def str_to_float(value):
+    """Convert string to Float, if possible"""
+    _result = None
+    try:
+        if (value is not None and value != ''):
+            _exp_result = re.sub('[^\d\.]', '', value)
+            _result = (float(_exp_result))
+
+    except ValueError as _ve:
+        logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
+
+    return _result
 def str_to_double(obj):
     """Convert string to double type value"""
     return float(obj) if isinstance(obj, str) else obj
@@ -446,7 +458,9 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
                 and _dg9.get(claz_field) is not None and len(_dg9.get(claz_field)) > 0):
                 _soil_volume = _dg9[volume_field]
                 if not isfloat(_soil_volume):
-                    _soil_volume = extract_floating_from_string(_soil_volume)
+                    _soil_volume = str_to_float(_soil_volume)
+                    if _soil_volume is None:
+                        continue
 
                 _soil_volume = str_to_double(_soil_volume)
                 _soil_claz = _dg9.get("B1-soilClassificationSource")
