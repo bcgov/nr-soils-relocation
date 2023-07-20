@@ -252,7 +252,7 @@ def extract_floating_from_string(value):
     return _result
 def str_to_float(value):
     """Convert string to Float, if possible"""
-    _result = 0
+    _result = None
     try:
         if (value is not None and value != ''):
             _exp_result = re.sub('[^\d\.]', '', value)
@@ -459,12 +459,10 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
                 _soil_volume = _dg9[volume_field]
                 if not isfloat(_soil_volume):
                     _soil_volume = str_to_float(_soil_volume)
+                    if _soil_volume is None:
+                        continue
 
                 _soil_volume = str_to_double(_soil_volume)
-                
-                # Write the soil volume back to the dictionary, in case it's been converted from a string
-                _dg9[volume_field] = _soil_volume
-
                 _soil_claz = _dg9.get("B1-soilClassificationSource")
 
                 if is_not_none_true(_soil_claz.get("urbanParkLandUsePl")):
