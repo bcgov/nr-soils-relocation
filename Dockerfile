@@ -13,7 +13,8 @@ RUN       pip install requests && \
           pip install ujson && \
           pip install pytz && \
           pip install geomet && \
-          pip install Jinja2
+          pip install Jinja2 && \
+          pip install urllib3==1.26.5
 RUN addgroup docker &&  useradd -ms /bin/bash -G docker $user
 RUN chmod -R 777 $home
 WORKDIR $home
