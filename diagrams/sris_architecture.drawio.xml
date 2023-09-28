@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" modified="2023-09-28T18:58:12.102Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.0 Chrome/114.0.5735.289 Electron/25.8.3 Safari/537.36" etag="YabcPye5fcGtzAqY5SJo" version="22.0.0" type="device">
+  <diagram name="Page-1" id="gvz6dgsNylzjIy1afCQ0">
+    <mxGraphModel dx="2600" dy="2308" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-78" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="-530" y="-886" width="490" height="336" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-61" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f9f7ed;strokeColor=#36393d;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry y="-1080" width="540" height="536" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-60" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="-280" y="-520" width="970" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-1" target="RQ_5_HvRftcG3SqZH9Sa-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-14" value="GitHub Actions&lt;br&gt;ci-openshift-prod.yaml" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RQ_5_HvRftcG3SqZH9Sa-13">
+          <mxGeometry x="-0.2889" y="3" relative="1" as="geometry">
+            <mxPoint x="-62" y="-17" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-1" value="SRIS GitHub Repository&lt;br&gt;https://github.com/bcgov/nr-soils-relocation" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00080A;shape=mxgraph.azure.github_code;pointerEvents=1;" vertex="1" parent="1">
+          <mxGeometry x="-230" y="-1050" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-2" value="ArcGIS Online" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=1;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloud_map;" vertex="1" parent="1">
+          <mxGeometry x="-270" y="-509" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-4" value="Map Application&lt;br&gt;https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=8a6afeae8fdd4960a0ea0df1fa34aa74" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shadow=0;dashed=0;strokeWidth=1;shape=mxgraph.ios.iBgMap;strokeColor=#18211b;strokeColor2=#008cff;fillColor2=#96D1FF;" vertex="1" parent="1">
+          <mxGeometry y="-200" width="60" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-5" value="Dashboard&lt;br&gt;https://governmentofbc.maps.arcgis.com/apps/dashboards/3bc201bc3b754f0fb4eb5d487ef0cfae" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#505050;shape=mxgraph.mscae.oms.dashboard" vertex="1" parent="1">
+          <mxGeometry x="300" y="-200.29999999999995" width="80" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-6" value="Map Hub&lt;br&gt;https://soil-relocation-information-system-governmentofbc.hub.arcgis.com/" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.resilience_hub;" vertex="1" parent="1">
+          <mxGeometry x="440" y="-335.20000000000005" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-7" value="Layer Catalog&lt;br&gt;https://governmentofbc.maps.arcgis.com/home/item.html?id=e0eb17c5c33d499a8971bea71991979f&lt;br&gt;Source Site&lt;br&gt;Destination Site&lt;br&gt;High Volume Site" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=none;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.map;" vertex="1" parent="1">
+          <mxGeometry x="253.78999999999996" y="-475" width="54" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-10" target="RQ_5_HvRftcG3SqZH9Sa-52">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-10" value="CHES API&lt;br&gt;https://bcgov.github.io/common-service-showcase/services/ches.html" style="sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=api" vertex="1" parent="1">
+          <mxGeometry x="-320" y="-840" width="90" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-11" value="CHEFS API&lt;br&gt;https://submit.digital.gov.bc.ca/app/" style="sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=api" vertex="1" parent="1">
+          <mxGeometry x="-315" y="-688.2" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-12" target="RQ_5_HvRftcG3SqZH9Sa-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="-1020" />
+              <mxPoint x="520" y="-856" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-12" value="SRIS Openshift Environment&lt;br&gt;https://console.apps.silver.devops.gov.bc.ca/project-details/ns/f0431b-prod" style="image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/OpenShift.svg;labelBackgroundColor=none;" vertex="1" parent="1">
+          <mxGeometry x="220" y="-1065" width="119.57" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-15" value="cron Schedule&lt;br&gt;./openshift/sris-schedule-job.yml&lt;br&gt;https://console.apps.silver.devops.gov.bc.ca/k8s/ns/f0431b-prod/cronjobs/sris-cron-job/yaml" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/general/Scheduler.svg;labelBackgroundColor=none;" vertex="1" parent="1">
+          <mxGeometry x="245.78999999999996" y="-890" width="68" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-17" target="RQ_5_HvRftcG3SqZH9Sa-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="510" y="-710" />
+              <mxPoint x="510" y="-572" />
+              <mxPoint x="281" y="-572" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-75" value="Publish Layer Data to AGO&lt;br&gt;Via user&amp;nbsp;PX.SRIS.CHEFSTOAGOL" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" vertex="1" connectable="0" parent="RQ_5_HvRftcG3SqZH9Sa-66">
+          <mxGeometry x="-0.0259" y="-4" relative="1" as="geometry">
+            <mxPoint x="-96" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-17" value="&lt;span style=&quot;&quot;&gt;Soils Python Processor&lt;br&gt;chefs_soils.py&lt;br&gt;Python 3.9&lt;/span&gt;" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.android;fillColor=#FFD44F;gradientColor=none;labelBackgroundColor=none;" vertex="1" parent="1">
+          <mxGeometry x="243.78999999999996" y="-752.2" width="73.5" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-37" value="BCeID Authentication" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.authenticated_user;" vertex="1" parent="1">
+          <mxGeometry x="-830" y="-840" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-37" target="RQ_5_HvRftcG3SqZH9Sa-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-791" y="-630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-54" value="CHEFS form Submission" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RQ_5_HvRftcG3SqZH9Sa-41">
+          <mxGeometry x="-0.2071" y="-1" relative="1" as="geometry">
+            <mxPoint x="-38" y="-19" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-45" target="RQ_5_HvRftcG3SqZH9Sa-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-45" value="Public User" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.user;" vertex="1" parent="1">
+          <mxGeometry x="720" y="-334.30000000000007" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-52" value="Subscribed Notifications Users" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.authenticated_user;labelBackgroundColor=none;" vertex="1" parent="1">
+          <mxGeometry x="-670" y="-839" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-63" value="SRIS Deployment Environment&lt;br&gt;BC Gov OpenShift" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="10" y="-1070" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-6" target="RQ_5_HvRftcG3SqZH9Sa-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.52;entryY=-0.036;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-6" target="RQ_5_HvRftcG3SqZH9Sa-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-73" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.018;entryY=0.484;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-4" target="RQ_5_HvRftcG3SqZH9Sa-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-80" y="-145" />
+              <mxPoint x="-80" y="-451" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-74" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-4" target="RQ_5_HvRftcG3SqZH9Sa-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-76" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-15" target="RQ_5_HvRftcG3SqZH9Sa-17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="-856" />
+              <mxPoint x="20" y="-720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-79" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-17">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-240" y="-790" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-20" y="-700" />
+              <mxPoint x="-20" y="-790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-80" value="Send Notifications to subscribers" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" vertex="1" connectable="0" parent="RQ_5_HvRftcG3SqZH9Sa-79">
+          <mxGeometry x="-0.4626" y="2" relative="1" as="geometry">
+            <mxPoint x="-223" y="-102" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-81" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-11" target="RQ_5_HvRftcG3SqZH9Sa-17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="-640" />
+              <mxPoint x="80" y="-689" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-82" value="Retrieve Data from CHEFS forms" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RQ_5_HvRftcG3SqZH9Sa-81">
+          <mxGeometry x="-0.1947" y="1" relative="1" as="geometry">
+            <mxPoint x="-118" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-83" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.005;entryY=0.63;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="RQ_5_HvRftcG3SqZH9Sa-52" target="RQ_5_HvRftcG3SqZH9Sa-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-631" y="-638" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-84" value="Submit notification request form" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RQ_5_HvRftcG3SqZH9Sa-83">
+          <mxGeometry x="-0.3285" relative="1" as="geometry">
+            <mxPoint x="56" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RQ_5_HvRftcG3SqZH9Sa-85" value="&lt;b&gt;BC Gov Common Hosted Services&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-520" y="-886" width="200" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
