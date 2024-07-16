@@ -38,29 +38,37 @@ NOTE: This application is the middle layer between CHEFS forms and AGOL, neither
 
 2. Once the code is reviewed and approved, merge it to main branch.
 
-3. Go to the Actions tab, click on [Build And Add Job to Openshift Prod](https://github.com/bcgov/nr-soils-relocation/actions//workflows/ci-openshift-prod.yaml) and trigger a build
+3. Now the code can be deployed to TEST/PROD environments.
+    1. PROD Deployment 
+       1. Go to the Actions tab, click on [Build And Add Job to Openshift Prod](https://github.com/bcgov/nr-soils-relocation/actions//workflows/ci-openshift-prod.yaml) and trigger a build
 
-   1. Provide a unique tag number.  Check the [releases/tags](https://github.com/bcgov/nr-soils-relocation/tags) and increment accordingly
-   2. Please make sure you are only entering the number without the `release` prefix, if the latest release shows `release/1.0.0`, your input should be `1.0.1`
-   3. Click on Run workflow button
+          1. Provide a unique tag number.  Check the [releases/tags](https://github.com/bcgov/nr-soils-relocation/tags) and increment accordingly
+          2. Please make sure you are only entering the number without the `release` prefix, if the latest release shows `release/1.0.0`, your input should be `1.0.1`
+          3. Click on Run workflow button
 
-4. The workflow will:
+       2. The workflow will:
 
-   1. Build and push a container image to the [GitHub Container Registry (GHCR.io)](https://github.com/bcgov/nr-soils-relocation/pkgs/container/nr-soils-relocation%2Fsris), tagged with the release you provided
+          1. Build and push a container image to the [GitHub Container Registry (GHCR.io)](https://github.com/bcgov/nr-soils-relocation/pkgs/container/nr-soils-relocation%2Fsris), tagged with the release you provided
 
-   2. Create the matching GitHub [release/tag](https://github.com/bcgov/nr-soils-relocation/tags)
+          2. Create the matching GitHub [release/tag](https://github.com/bcgov/nr-soils-relocation/tags)
 
-   3. Deploy code and configmap changes to OpenShift
+          3. Deploy code and configmap changes to OpenShift
 
-5. A cronjob will be deployed in the PROD environment using the new image
+       3. A cronjob will be deployed in the PROD environment using the new image
+    2. TEST Deployment
+       1. Go to the Actions tab, click on [Build And Add Job to Openshift Test](https://github.com/bcgov/nr-soils-relocation/actions//workflows/ci-openshift-test.yaml) and trigger the job. The workflow will, do the following:
 
-6. Environment variables are supplied to the container through the configmap using GitHub Secrets
+           1. Build and push a container image to the [GitHub Container Registry (GHCR.io)](https://github.com/bcgov/nr-soils-relocation/pkgs/container/nr-soils-relocation%2Fsris), tagged with `latest`
+           2. Deploy code and configmap changes to OpenShift, reading from github test environment
+           3. A cronjob will be deployed in the PROD environment using the new image
 
-7. Environment varialbes must be updated only through GitHub Secrets, our _source of truth_
+4. Environment variables are supplied to the container through the configmap using GitHub Secrets
 
-8. The cronjob is scheduled to run daily at 8 AM UTC (1AM PDT)
+5. Environment varialbes must be updated only through GitHub Secrets, our _source of truth_
 
-9. Cronjobs can be triggered manually, usually for testing, with the One-Time Job steps below
+6. The cronjob is scheduled to run daily at 8 AM UTC (1AM PDT)
+
+7. Cronjobs can be triggered manually, usually for testing, with the One-Time Job steps below
 
 #### One-Time Job
 
