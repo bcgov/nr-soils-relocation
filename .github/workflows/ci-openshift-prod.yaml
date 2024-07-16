@@ -63,6 +63,8 @@ jobs:
             CHES_URL=${{ secrets.CHES_URL }}
             LOGLEVEL=${{ secrets.LOGLEVEL }}
             NOTICE_STANDARD_TIME=${{ secrets.NOTICE_STANDARD_TIME }}
+            AGOL_UPDATE_FLAG=${{ secrets.AGOL_UPDATE_FLAG }}
+            EMAIL_NOTIFY_FLAG=${{ secrets.EMAIL_NOTIFY_FLAG }}
   release:
     name: Release
     runs-on: ubuntu-22.04
