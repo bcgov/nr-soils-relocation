@@ -323,7 +323,7 @@ def chefs_src_param(key):
         return key
 
 def convert_regional_district_to_name(key):
-    """"Returns regional district name matching with the given key in regional district dictionay"""
+    """"Returns regional district name matching with the given key in regional district dictionary"""
     name = constant.REGIONAL_DISTRICT_NAME_DIC.get(key)
     if name is not None:
         return name
@@ -331,7 +331,7 @@ def convert_regional_district_to_name(key):
         return key
 
 def convert_source_site_use_to_name(key):
-    """Returns source site use name matching with the given key in source site use dictionay"""
+    """Returns source site use name matching with the given key in source site use dictionary"""
     name = constant.SOURCE_SITE_USE_NAME_DIC.get(key)
     if name is not None:
         return name
@@ -341,7 +341,7 @@ def convert_source_site_use_to_name(key):
 def convert_receiving_site_use_to_name(key):
     """
     Returns receiving site use name matching with the given key in
-    receiving site use dictionay
+    receiving site use dictionary
     """
     name = constant.RECEIVING_SITE_USE_NAME_DIC.get(key)
     if name is not None:
@@ -352,7 +352,7 @@ def convert_receiving_site_use_to_name(key):
 def convert_soil_quality_to_name(key):
     """
     Returns soil quality name matching with the given key in
-    soil quality dictionay
+    soil quality dictionary
     """
     name = constant.SOIL_QUALITY_NAME_DIC.get(key)
     if name is not None:
@@ -385,13 +385,37 @@ def create_regional_district(chefs_dic, field):
 def convert_land_ownership_to_name(key):
     """
     Returns land ownership name matching with the given key in
-    land ownership dictionay
+    land ownership dictionary
     """
     name = constant.LAND_OWNERSHIP_NAME_DIC.get(key)
     if name is not None:
         return name
     else:
         return key
+
+def convert_soil_exemption_to_name(key):
+    """
+    Returns source site protocol 19 excemptions name matching with the given key in
+    soil exemption dictionary
+    """
+    name = constant.SOIL_EXEMPTION_NAME_DIC.get(key)
+    if name is not None:
+        return name
+    else:
+        return key
+
+def create_source_site_protocol_19_exemptions(chefs_dic, field):
+    """
+    Extract "source site protocol 19 exemptions" value from form
+    (in case of multiple data, they are joined with comma)
+    """
+    _exemptions = []
+    for _key, _value in chefs_dic[field].items():
+        if is_not_none_true(_value):
+            _exemptions.append(convert_soil_exemption_to_name(_key))
+    if len(_exemptions) > 0:
+        _exemptions = "\"" + ",".join(_exemptions) + "\""
+    return _exemptions
 
 def create_land_ownership(chefs_dic, field):
     """
@@ -619,6 +643,9 @@ def map_source_site(_submission):
         _src_dic['highVolumeSite'] = _submission.get(chefs_src_param('highVolumeSite'))
         _src_dic['soilRelocationPurpose'] = _submission.get(chefs_src_param('soilRelocationPurpose'))
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
+
+        if _submission.get(chefs_src_param('protocol19AppliedExemptions')) is not None:
+            _src_dic['protocol19AppliedExemptions'] = create_source_site_protocol_19_exemptions(_submission, chefs_src_param('protocol19AppliedExemptions'))
 
         create_soil_volumes(
             _submission,

@@ -151,6 +151,10 @@ LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land'
                             , reserveLand='Reserve land')
+SOIL_EXEMPTION_NAME_DIC = dict(eligibleForExemption1='Exemption 1- site with a Final Determination the site is not contaminated or a numerical-based Certificate of Compliance'
+                            , eligibleForExemption2='Exemption 2- soil treatment facilities with an Environmental Management Act waste discharge authorization'
+                            , eligibleForExemption3='Exemption 3- quarries with a Mines Act Permit'
+                            , eligibleForExemption4='Exemption 4- transitory sites')
 CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , latitudeMinutes='A3-SourceSiteLatitude-Minutes'
                             , latitudeSeconds='A3-SourceSiteLatitude-Seconds'
@@ -182,10 +186,11 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , highVolumeSite='isTheSourceSiteHighRisk'
                             , soilRelocationPurpose='A5-PurposeOfSoilExcavationSource'
                             , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'
+                            , protocol19AppliedExemptions='ifAnExemptionFromProtocol19AppliesPleaseSelectBelow' # Exemption check boxes - If yes, please choose below. - Under Source Site Protocol 19 Exemptions                            
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
                             , soilClassificationSource='B1-soilClassificationSource'
-                            , soilUnderProtocol19Exemptions='A6_DoesexemptionfromProtocol19apply' # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box                            
+                            , soilUnderProtocol19Exemptions='A6_DoesexemptionfromProtocol19apply' # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box
                             , vapourExemption='B3-yesOrNoVapourexemptionsource'
                             , vapourExemptionDesc='B3-ifExemptionsApplyPleaseDescribe'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -380,6 +385,7 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "highVolumeSite",
                        "soilRelocationPurpose",
                        "soilStorageType",
+                       "protocol19AppliedExemptions", # Exemption check boxes - If yes, please choose below. - Under Source Site Protocol 19 Exemptions
                        "industrialSoilVol",
                        "commercialSoilVol",
                        "residentHighDensitySoilVol",
