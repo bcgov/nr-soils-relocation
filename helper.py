@@ -627,6 +627,7 @@ def map_source_site(_submission):
             chefs_src_param('soilClassificationSource'),
             _src_dic)
 
+        _src_dic['soilUnderProtocol19Exemptions'] = _submission.get(chefs_src_param('soilUnderProtocol19Exemptions'), 'yes') # default to 'yes' if None (that is, non-existent source field)
         _src_dic['vapourExemption'] = _submission.get(chefs_src_param('vapourExemption'))
         _src_dic['vapourExemptionDesc'] = _submission.get(chefs_src_param('vapourExemptionDesc'))
         _src_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_src_param('soilRelocationStartDate')))
