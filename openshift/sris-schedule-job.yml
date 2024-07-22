@@ -88,6 +88,12 @@ parameters:
   - name: NOTICE_STANDARD_TIME
     description: Notification processing interval time
     required: true
+  - name: AGOL_UPDATE_FLAG
+    description: FLAG to control, whether AGOL should be updated or not.
+    required: true
+  - name: EMAIL_NOTIFY_FLAG
+    description: FLAG to control, retrieval of subscribers from CHEFs and notifying them via CHES.
+    required: true
 objects:
   - kind: ConfigMap
     apiVersion: v1
@@ -120,6 +126,8 @@ objects:
       CHEFS_SOILS_API_KEY: ${CHEFS_SOILS_API_KEY}
       LOGLEVEL: ${LOGLEVEL}
       NOTICE_STANDARD_TIME: ${NOTICE_STANDARD_TIME}
+      AGOL_UPDATE_FLAG: ${AGOL_UPDATE_FLAG}
+      EMAIL_NOTIFY_FLAG: ${EMAIL_NOTIFY_FLAG}
 
   - apiVersion: batch/v1
     kind: CronJob
