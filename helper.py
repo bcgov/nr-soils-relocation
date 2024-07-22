@@ -795,4 +795,8 @@ def map_source_receiving_site(_source_sites, _receiving_sites):
                 _rcv_site['sourceSiteCity'] = _src_site.get('legallyTitledSiteCity')
                 _rcv_site['sourceSiteRegionalDistrict'] = _src_site.get('regionalDistrict')
     return _source_sites, _receiving_sites
-    
+def get_boolean_env_var(env_var):
+    """Returns boolean value of the given environment variable, handles None and case-insensitive values"""
+    if env_var is not None:
+        return os.getenv(env_var, 'false').lower() in ['true', '1']
+    return False

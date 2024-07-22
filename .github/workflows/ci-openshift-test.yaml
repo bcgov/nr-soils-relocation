@@ -1,10 +1,7 @@
-name: Build And Add Job to Openshift Prod
+name: Build And Add Job to Openshift Test
 on:
   workflow_dispatch:
-    inputs:
-      RELEASE_VERSION:
-        required: true
-        description: The Tag release to PROD.
+
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -19,14 +16,13 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         with:
           package: sris
-          tag: ${{ github.event.inputs.RELEASE_VERSION }}
-          tag_fallback: latest
+          tag: latest
           build_file: ./Dockerfile
   deploy:
     name: Deploy
     runs-on: ubuntu-22.04
     needs: [builds]
-    environment: prod # read secrets from prod environment in github.
+    environment: test # read secrets from test environment in github.
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
@@ -38,7 +34,7 @@ jobs:
           file: ./openshift/sris-schedule-job.yml
           parameters: |
             APP_NAME=sris
-            TAG=${{ github.event.inputs.RELEASE_VERSION }}
+            TAG=latest
             CHEFS_SOILS_FORM_ID=${{ secrets.CHEFS_SOILS_FORM_ID }}
             CHEFS_SOILS_API_KEY=${{ secrets.CHEFS_SOILS_API_KEY }}
             CHEFS_SOILS_FORM_VERSION=${{ secrets.CHEFS_SOILS_FORM_VERSION }}
@@ -65,15 +61,3 @@ jobs:
             NOTICE_STANDARD_TIME=${{ secrets.NOTICE_STANDARD_TIME }}
             AGOL_UPDATE_FLAG=${{ secrets.AGOL_UPDATE_FLAG }}
             EMAIL_NOTIFY_FLAG=${{ secrets.EMAIL_NOTIFY_FLAG }}
-  release:
-    name: Release
-    runs-on: ubuntu-22.04
-    needs: [ builds, deploy ]
-    steps:
-      - uses: rickstaa/action-create-tag@v1
-        name: Create Release Tag in Git
-        with:
-          tag: "release/${{ github.event.inputs.RELEASE_VERSION }}"
-          message: "Release version ${{ github.event.inputs.RELEASE_VERSION }}"
-
-

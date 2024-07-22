@@ -1,0 +1,7 @@
+README.md
+LICENSE
+COMPLIANCE.yaml
+bcgovpubcode.yml
+openshift/**
+diagrams/**
+.github/**
