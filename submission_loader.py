@@ -50,6 +50,7 @@ def load_submissions():
 
     if CHEFS_SOILS_FORM_VERSION:
         soils_form_versions = get_versions(CHEFS_SOILS_FORM_VERSION)
+
     logging.debug("soils_form_versions:%s", soils_form_versions)
 
     if soils_form_versions:
@@ -88,6 +89,7 @@ def load_submissions():
 
     if CHEFS_HV_FORM_VERSION:
         hv_form_versions = get_versions(CHEFS_HV_FORM_VERSION)
+
     logging.debug("hv_form_versions:%s", hv_form_versions)
 
     if hv_form_versions:
@@ -126,6 +128,7 @@ def load_submissions():
 
     if CHEFS_MAIL_FORM_VERSION:
         mail_form_versions = get_versions(CHEFS_MAIL_FORM_VERSION)
+
     logging.debug("mail_form_versions:%s", mail_form_versions)
 
     if mail_form_versions:
