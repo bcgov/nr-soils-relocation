@@ -146,7 +146,8 @@ SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , urbanParkLandUsePl='Urban park (PL)'
                             , agriculturalLandUseAl='Agricultural (AL)'
                             , wildlandsNaturalLandUseWln='Wildlands natural (WLN)'
-                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)')
+                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)'
+                            , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
 LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land'
@@ -394,6 +395,7 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "agriculturalSoilVol",
                        "wildlandsNaturalSoilVol",
                        "wildlandsRevertedSoilVol",
+                       "mdardSoilVol",
                        "totalSoilVolume",
                        "soilUnderProtocol19Exemptions", # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box
                        "vapourExemption",

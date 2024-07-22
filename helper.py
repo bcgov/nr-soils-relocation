@@ -511,6 +511,9 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
                 elif is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
                     working_dic['residentHighDensitySoilVol'] = working_dic['residentHighDensitySoilVol'] + _soil_volume if working_dic['residentHighDensitySoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
+                elif is_not_none_true(_soil_claz.get("potentialToCauseMetalsLeachingAcidRockDrainageMlArd")):
+                    working_dic['mdardSoilVol'] = working_dic['mdardSoilVol'] + _soil_volume if working_dic['mdardSoilVol'] is not None else _soil_volume
+                    _total_soil_volume += _soil_volume
 
         if _total_soil_volume != 0:
             working_dic['totalSoilVolume'] = _total_soil_volume

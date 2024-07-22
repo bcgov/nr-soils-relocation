@@ -55,7 +55,7 @@ def map_sites(submissions_json, hvs_json, current_date):
     logging.debug('Mapping additional work between source site and receiving sites...')
     source_sites, receiving_sites = helper.map_source_receiving_site(source_sites, receiving_sites)
 
-    logging.info('Creating high volume site records records...')
+    logging.info('Creating high volume site records...')
     for hvs in hvs_json:
         logging.debug('Mapping hv data to the hv site...')
         _hv_dic = helper.map_hv_site(hvs)
