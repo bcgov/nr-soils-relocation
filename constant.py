@@ -192,7 +192,7 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
                             , soilClassificationSource='B1-soilClassificationSource'
-                            , soilUnderProtocol19Exemptions='A6_DoesexemptionfromProtocol19apply' # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box
+                            , soilUnderProtocol19Exemptions='doAllOfTheSoilsListedAboveFallUnderProtocol19Exemptions' # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box
                             , vapourExemption='B3-yesOrNoVapourexemptionsource'
                             , vapourExemptionDesc='B3-ifExemptionsApplyPleaseDescribe'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
