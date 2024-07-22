@@ -130,7 +130,7 @@ SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing or bulk storage'
                                 , i4='I4. treated wood storage at the site of treatment'
                                 , i5='I5. veneer or plywood manufacturing'
                                 , i6='I6. wood treatment (antisapstain or preservation)'
-                                , i7='I7. wood treatment chemical manufacturing, bulk storage')
+                                , i7='I7. wood treatment chemical manufacturing or bulk storage')
 RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                                   , commercialLandUseCl='Commercial Land Use (CL)'
                                   , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
