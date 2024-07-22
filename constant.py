@@ -41,38 +41,38 @@ REGIONAL_DISTRICT_NAME_DIC = dict(regionalDistrictOfBulkleyNechako='Regional Dis
                                 , sunshineCoastRegionalDistrict='Sunshine Coast Regional District'
                                 , strathconaRegionalDistrict='Strathcona Regional District'
                                 , stikineRegionUnincorporated='Stikine Region (Unincorporated)')
-SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing, bulk storage, shipping or handling'
-                                , a2='A2. chemical manufacturing, bulk storage, shipping or handling'
-                                , a3='A3. explosives or ammunition manufacturing, bulk storage, shipping or handling'
-                                , a4='A4. fire retardant manufacturing, bulk storage, shipping or handling'
-                                , a5='A5. fertilizer manufacturing, bulk storage, shipping or handling'
-                                , a6='A6. ink or dye manufacturing, bulk storage, shipping or handling'
+SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing or bulk storage'
+                                , a2='A2. chemical manufacturing or bulk storage'
+                                , a3='A3. explosives or ammunition manufacturing or bulk storage'
+                                , a4='A4. fire retardant manufacturing, bulk storage or shipping'
+                                , a5='A5. fertilizer manufacturing, bulk storage or shipping'
+                                , a6='A6. ink or dye manufacturing or bulk storage'
                                 , a7='A7. leather or hides tanning'
-                                , a8='A8. paint, lacquer or varnish manufacturing, formulation, recycling, bulk storage, shipping or handling, not including retail stores'
+                                , a8='A8. paint, lacquer or varnish manufacturing, formulation, recycling or bulk storage'
                                 , a9='A9. pharmaceutical products, or controlled substances as defined in the Controlled Drugs and Substances Act (Canada), manufacturing or operations'
                                 , a10='A10. plastic products (foam or expanded plastic) manufacturing or repurposing'
                                 , none='None'
                                 , a11='A11. textile dyeing'
-                                , a12='A12. pesticide manufacturing, formulation, bulk storage, shipping or handling'
-                                , a13='A13. resin or plastic monomer manufacturing, formulation, bulk storage, shipping or handling'
-                                , b1='B1. battery manufacturing, recycling, bulk storage, shipping or handling'
+                                , a12='A12. pesticide manufacturing, formulation, bulk storage or shipping'
+                                , a13='A13. resin or plastic monomer manufacturing, formulation or bulk storage'
+                                , b1='B1. battery manufacturing, recycling or bulk storage'
                                 , b2='B2. facilities using equipment that contains PCBs greater than or equal to 50 ppm'
-                                , b3='B3. electrical equipment manufacturing, refurbishing, bulk storage, shipping or handling'
+                                , b3='B3. electrical equipment manufacturing, refurbishing or bulk storage'
                                 , b4='B4. electrical transmission or distribution substations'
                                 , b5='B5. electronic equipment manufacturing'
-                                , b6='B6. transformer oil manufacturing, processing, bulk storage, shipping or handling'
-                                , b7='B7. electrical power generating operations fuelled by coal or petroleum hydrocarbons that supply electricity to a community or commercial or industrial operation, excluding emergency generators'
+                                , b6='B6. transformer oil manufacturing, processing or bulk storage'
+                                , b7='B7. electrical power generating operations fueled by coal or petroleum hydrocarbons that supply electricity to a community or commercial or industrial operation, excluding emergency generators'
                                 , c1='C1. foundries'
                                 , c2='C2. galvanizing'
                                 , c3='C3. metal plating or finishing'
                                 , c4='C4. metal salvage operations'
                                 , c5='C5. metal smelting or refining'
                                 , c6='C6. welding or machine shops (repair or fabrication)'
-                                , d1='D1. asbestos mining, milling, bulk storage, shipping or handling'
-                                , d2='D2. coal coke manufacture, bulk storage, shipping or handling'
-                                , d3='D3. coal or lignite mining, milling, bulk storage, shipping or handling'
-                                , d4='D4. milling reagent manufacture, bulk storage, shipping or handling'
-                                , d5='D5. metal concentrate bulk storage, shipping or handling'
+                                , d1='D1. asbestos mining, milling, bulk storage or shipping'
+                                , d2='D2. coal coke manufacture, bulk storage or shipping'
+                                , d3='D3. coal or lignite mining, milling, bulk storage or shipping'
+                                , d4='D4. milling reagent manufacture, bulk storage or shipping'
+                                , d5='D5. metal concentrate bulk storage or shipping'
                                 , d6='D6. metal ore mining or milling'
                                 , e1='E1. appliance, equipment or engine maintenance, repair, reconditioning, cleaning or salvage'
                                 , e2='E2. ash deposit from boilers, incinerators or other thermal facilities'
@@ -83,26 +83,24 @@ SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing, bulk storage, s
                                 , e7='E7. road salt or brine storage'
                                 , e8='E8. measuring instruments (containing mercury) manufacture, repair or bulk storage'
                                 , e9='E9. dry cleaning facilities or operations and dry cleaning chemical storage, excluding locations at which clothing is deposited but no dry cleaning process occurs'
-                                , e10='E10. contamination or likely contamination of land by substances migrating from an industrial or commercial site'
                                 , e11='E11. fire training facilities at which fire retardants are used'
-                                , e12='E12. single or cumulative spills to the environment greater than the reportable quantities of substances listed in the Spill Reporting Regulation'
                                 , f1='F1. petroleum or natural gas drilling'
                                 , f2='F2. petroleum or natural gas production facilities'
                                 , f3='F3. natural gas processing'
-                                , f4='F4. petroleum coke manufacture, bulk storage, shipping or handling'
+                                , f4='F4. petroleum coke manufacture, bulk storage or shipping'
                                 , f5='F5. petroleum product, other than compressed gas, dispensing facilities, including service stations and card locks'
                                 , f6='F6. petroleum, natural gas or sulfur pipeline rights of way excluding rights of way for pipelines used to distribute natural gas to consumers in a community'
                                 , f7='F7. petroleum product (other than compressed gas), or produced water storage in non-mobile above ground or underground tanks, except tanks associated with emergency generators or with secondary containment'
                                 , f8='F8. petroleum product, other than compressed gas, bulk storage or distribution'
                                 , f9='F9. petroleum refining'
-                                , f10='F10. solvent manufacturing, bulk storage, shipping or handling'
+                                , f10='F10. solvent manufacturing or bulk storage'
                                 , f11='F11. sulfur handling, processing or bulk storage and distribution'
                                 , g1='G1. aircraft maintenance, cleaning or salvage'
                                 , g2='G2. automotive, truck, bus, subway or other motor vehicle maintenance, repair, salvage or wrecking'
                                 , g3='G3. dry docks, marinas, ship building or boat repair and maintenance, including paint removal from hulls'
                                 , g4='G4. marine equipment salvage'
                                 , g5='G5. rail car or locomotive maintenance, cleaning, salvage or related uses, including railyards'
-                                , h1='H1. antifreeze bulk storage, recycling, shipping or handling'
+                                , h1='H1. antifreeze bulk storage, recycling or shipping'
                                 , h2='H2. barrel, drum or tank reconditioning or salvage'
                                 , h3='H3. biomedical waste disposal'
                                 , h4='H4. bulk manure stockpiling and high rate land application or disposal (nonfarm applications only)'
@@ -121,7 +119,7 @@ SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing, bulk storage, s
                                 , h7='H17. sewage lagoons or impoundments'
                                 , h18='H18. hazardous waste storage, treatment or disposal'
                                 , h19='H19. sludge drying or composting'
-                                , h20='H20. municipal or provincial road snow removal dumping or yard snow removal dumping'
+                                , h20='H20. municipal or provincial road or yard snow removal dumping'
                                 , h21='H21. waste oil reprocessing, recycling or bulk storage'
                                 , h22='H22. wire reclaiming operations'
                                 , i1='I1. particle or wafer board manufacturing'
@@ -130,7 +128,7 @@ SOURCE_SITE_USE_NAME_DIC = dict(a1='A1. adhesives manufacturing, bulk storage, s
                                 , i4='I4. treated wood storage at the site of treatment'
                                 , i5='I5. veneer or plywood manufacturing'
                                 , i6='I6. wood treatment (antisapstain or preservation)'
-                                , i7='I7. wood treatment chemical manufacturing, bulk storage')
+                                , i7='I7. wood treatment chemical manufacturing or bulk storage')
 RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)'
                                   , commercialLandUseCl='Commercial Land Use (CL)'
                                   , residentialLandUseHighDensityRlhd='Residential Land Use High Density (RLHD)'
@@ -138,7 +136,8 @@ RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)
                                   , urbanParkLandUsePl='Urban Park Land Use (PL)'
                                   , agriculturalLandUseAl='Agricultural Land Use (AL)'
                                   , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
+                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)'
+                                  , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
 SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , commercialLandUseCl='Commercial (CL)'
                             , residentialLandUseHighDensityRlhd='Residential high density (RLHD)'
@@ -146,11 +145,16 @@ SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , urbanParkLandUsePl='Urban park (PL)'
                             , agriculturalLandUseAl='Agricultural (AL)'
                             , wildlandsNaturalLandUseWln='Wildlands natural (WLN)'
-                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)')
+                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)'
+                            , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
 LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land'
                             , reserveLand='Reserve land')
+SOIL_EXEMPTION_NAME_DIC = dict(eligibleForExemption1='Exemption 1- site with a Final Determination the site is not contaminated or a numerical-based Certificate of Compliance'
+                            , eligibleForExemption2='Exemption 2- soil treatment facilities with an Environmental Management Act waste discharge authorization'
+                            , eligibleForExemption3='Exemption 3- quarries with a Mines Act Permit'
+                            , eligibleForExemption4='Exemption 4- transitory sites')
 CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , latitudeMinutes='A3-SourceSiteLatitude-Minutes'
                             , latitudeSeconds='A3-SourceSiteLatitude-Seconds'
@@ -182,9 +186,12 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , highVolumeSite='isTheSourceSiteHighRisk'
                             , soilRelocationPurpose='A5-PurposeOfSoilExcavationSource'
                             , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'
+                            , exemptionFromProtocol19Apply='A6_DoesexemptionfromProtocol19apply' # Do exemptions from Protocol 19 apply?
+                            , protocol19AppliedExemptions='ifAnExemptionFromProtocol19AppliesPleaseSelectBelow' # Exemption check boxes - If yes, please choose below. - Under Source Site Protocol 19 Exemptions                            
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
                             , soilClassificationSource='B1-soilClassificationSource'
+                            , soilUnderProtocol19Exemptions='doAllOfTheSoilsListedAboveFallUnderProtocol19Exemptions' # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box
                             , vapourExemption='B3-yesOrNoVapourexemptionsource'
                             , vapourExemptionDesc='B3-ifExemptionsApplyPleaseDescribe'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -379,6 +386,8 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "highVolumeSite",
                        "soilRelocationPurpose",
                        "soilStorageType",
+                       "exemptionFromProtocol19Apply", # Do exemptions from Protocol 19 apply?
+                       "protocol19AppliedExemptions", # Exemption check boxes - If yes, please choose below. - Under Source Site Protocol 19 Exemptions
                        "industrialSoilVol",
                        "commercialSoilVol",
                        "residentHighDensitySoilVol",
@@ -387,7 +396,9 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "agriculturalSoilVol",
                        "wildlandsNaturalSoilVol",
                        "wildlandsRevertedSoilVol",
+                       "mdardSoilVol",
                        "totalSoilVolume",
+                       "soilUnderProtocol19Exemptions", # "Do all of the soils listed above fall under Protocol 19 exemptions?" yes or no radio box
                        "vapourExemption",
                        "vapourExemptionDesc",
                        "soilRelocationStartDate",
@@ -430,6 +441,7 @@ RECEIVING_SITE_HEADERS = ["confirmationId",
                           "agriculturalSoilVol",
                           "wildlandsNaturalSoilVol",
                           "wildlandsRevertedSoilVol",
+                          "mdardSoilVol",
                           "totalSoilVolume",
                           "receivingSiteLandUse",
                           "CSRFactors",

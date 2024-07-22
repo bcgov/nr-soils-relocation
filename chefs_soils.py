@@ -21,7 +21,6 @@ AGOL_UPDATE_FLAG= helper.get_boolean_env_var('AGOL_UPDATE_FLAG') # the flag to c
 EMAIL_NOTIFY_FLAG = helper.get_boolean_env_var('EMAIL_NOTIFY_FLAG',) # the flag to control whether to send email notification or not
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
-logging.info('Loading Submissions List...')
 submissionsJson, hvsJson, subscribersJson, chefsLoaded = submission_loader.load_submissions()
 
 if chefsLoaded:
