@@ -647,6 +647,10 @@ def map_source_site(_submission):
         _src_dic['soilRelocationPurpose'] = _submission.get(chefs_src_param('soilRelocationPurpose'))
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
 
+        if _submission.get(chefs_src_param('exemptionFromProtocol19Apply')) is not None:
+            _src_dic['exemptionFromProtocol19Apply'] = _submission.get(chefs_src_param('exemptionFromProtocol19Apply'), 'no') # default to 'no' if None
+        else:
+            _src_dic['exemptionFromProtocol19Apply'] = 'no'
         if _submission.get(chefs_src_param('protocol19AppliedExemptions')) is not None:
             _src_dic['protocol19AppliedExemptions'] = create_source_site_protocol_19_exemptions(_submission, chefs_src_param('protocol19AppliedExemptions'))
 
@@ -657,7 +661,7 @@ def map_source_site(_submission):
             chefs_src_param('soilClassificationSource'),
             _src_dic)
 
-        _src_dic['soilUnderProtocol19Exemptions'] = _submission.get(chefs_src_param('soilUnderProtocol19Exemptions'), 'yes') # default to 'yes' if None (that is, non-existent source field)
+        _src_dic['soilUnderProtocol19Exemptions'] = _submission.get(chefs_src_param('soilUnderProtocol19Exemptions'), 'no') # default to 'no' if None
         _src_dic['vapourExemption'] = _submission.get(chefs_src_param('vapourExemption'))
         _src_dic['vapourExemptionDesc'] = _submission.get(chefs_src_param('vapourExemptionDesc'))
         _src_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_src_param('soilRelocationStartDate')))

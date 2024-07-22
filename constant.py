@@ -188,6 +188,7 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , highVolumeSite='isTheSourceSiteHighRisk'
                             , soilRelocationPurpose='A5-PurposeOfSoilExcavationSource'
                             , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'
+                            , exemptionFromProtocol19Apply='A6_DoesexemptionfromProtocol19apply' # Do exemptions from Protocol 19 apply?
                             , protocol19AppliedExemptions='ifAnExemptionFromProtocol19AppliesPleaseSelectBelow' # Exemption check boxes - If yes, please choose below. - Under Source Site Protocol 19 Exemptions                            
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
@@ -387,6 +388,7 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "highVolumeSite",
                        "soilRelocationPurpose",
                        "soilStorageType",
+                       "exemptionFromProtocol19Apply", # Do exemptions from Protocol 19 apply?
                        "protocol19AppliedExemptions", # Exemption check boxes - If yes, please choose below. - Under Source Site Protocol 19 Exemptions
                        "industrialSoilVol",
                        "commercialSoilVol",
