@@ -73,7 +73,7 @@ jobs:
       - uses: rickstaa/action-create-tag@v1
         name: Create Release Tag in Git
         with:
-          tag: "release/${{ secrets.TAG }}"
-          message: "Release version ${{ secrets.TAG }}"
+          tag: "release/${{ github.event.inputs.RELEASE_VERSION }}"
+          message: "Release version ${{ github.event.inputs.RELEASE_VERSION }}"
 
 
