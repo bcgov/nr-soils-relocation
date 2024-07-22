@@ -138,7 +138,8 @@ RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)
                                   , urbanParkLandUsePl='Urban Park Land Use (PL)'
                                   , agriculturalLandUseAl='Agricultural Land Use (AL)'
                                   , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
+                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)'
+                                  , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
 SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , commercialLandUseCl='Commercial (CL)'
                             , residentialLandUseHighDensityRlhd='Residential high density (RLHD)'
@@ -440,6 +441,7 @@ RECEIVING_SITE_HEADERS = ["confirmationId",
                           "agriculturalSoilVol",
                           "wildlandsNaturalSoilVol",
                           "wildlandsRevertedSoilVol",
+                          "mdardSoilVol",
                           "totalSoilVolume",
                           "receivingSiteLandUse",
                           "CSRFactors",
