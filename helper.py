@@ -445,15 +445,25 @@ def create_land_file_numbers(chefs_dic, field):
 
 def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_field):
     """
-    Extract only first "PID and description" or "PIN and description" value from form
+     Extract all "PID and description" or "PIN and description" values from form and join them with a comma
     """
-    _pid = None
-    _desc = None
+    _pid_list = []
+    _desc_list = []
+
     if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0:
-        if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
-            _pid = chefs_dic.get(data_grid_field)[0].get(pid_pin_field)
-            if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
-                _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
+        for item in chefs_dic[data_grid_field]:
+            pid_value = item.get(pid_pin_field)
+            desc_value = item.get(desc_field)
+
+            if pid_value is not None and pid_value.strip() != '':
+                _pid_list.append(pid_value.strip())
+
+            if desc_value is not None and desc_value.strip() != '':
+                _desc_list.append(desc_value.strip())
+
+    _pid = ','.join(_pid_list) if _pid_list else None
+    _desc = ','.join(_desc_list) if _desc_list else None
+
     return _pid, _desc
 
 def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
