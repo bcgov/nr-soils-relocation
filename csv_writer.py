@@ -6,8 +6,11 @@ import csv
 import os
 import logging
 import constant
+import helper
 
 LOGLEVEL = os.getenv('LOGLEVEL')
+
+helper.load_env()
 
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 

@@ -2,3 +2,6 @@
 *.csv
 __pycache__
 .vscode
+.env
+prod.env
+test.env

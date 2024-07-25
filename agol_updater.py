@@ -25,6 +25,8 @@ LOGLEVEL = os.getenv('LOGLEVEL')
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 
+helper.load_env()
+
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def agol_items_overwrite():

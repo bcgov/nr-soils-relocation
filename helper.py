@@ -34,6 +34,18 @@ AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
+def load_env():
+    """Loading environment variables from .env files - for local testing"""
+    env_file = '.env'
+    if os.path.exists(env_file):
+        with open(env_file, encoding='utf-8') as f:
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key] = value
+
+# calling the load environment variables function
+load_env()
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
