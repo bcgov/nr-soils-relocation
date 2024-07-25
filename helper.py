@@ -658,11 +658,11 @@ def map_source_site(_submission):
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
 
         if _submission.get(chefs_src_param('exemptionFromProtocol19Apply')) is not None:
-            _src_dic['exemptionFromProtocol19Apply'] = _submission.get(chefs_src_param('exemptionFromProtocol19Apply'), 'no') # default to 'no' if None
-        else:
-            _src_dic['exemptionFromProtocol19Apply'] = 'no'
-        if _submission.get(chefs_src_param('protocol19AppliedExemptions')) is not None:
-            _src_dic['protocol19AppliedExemptions'] = create_source_site_protocol_19_exemptions(_submission, chefs_src_param('protocol19AppliedExemptions'))
+            if _submission.get(chefs_src_param('exemptionFromProtocol19Apply')):
+                if _submission.get(chefs_src_param('protocol19AppliedExemptions')) is not None:
+                    _src_dic['protocol19Exemptions'] = create_source_site_protocol_19_exemptions(_submission, chefs_src_param('protocol19AppliedExemptions'))
+            else:
+                _src_dic['protocol19Exemptions'] = 'no'
 
         create_soil_volumes(
             _submission,
