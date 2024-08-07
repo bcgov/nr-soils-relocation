@@ -13,8 +13,6 @@ LOGLEVEL = os.getenv('LOGLEVEL')
 
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
-helper.load_env()
-
 def map_sites(submissions_json, hvs_json, current_date):
     """Map submission data from CHEFS the pre-defined submision dictionaries by sites"""
     source_sites = []

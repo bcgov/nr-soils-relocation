@@ -18,8 +18,6 @@ CHEFS_MAIL_API_KEY = os.getenv('CHEFS_MAIL_API_KEY')
 CHEFS_MAIL_FORM_VERSION = os.getenv('CHEFS_MAIL_FORM_VERSION')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
-helper.load_env()
-
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def get_versions(chefs_soils_form_version):

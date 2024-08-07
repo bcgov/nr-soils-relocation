@@ -10,8 +10,6 @@ import helper
 
 LOGLEVEL = os.getenv('LOGLEVEL')
 
-helper.load_env()
-
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 def site_csv_writer(source_sites, receiving_sites, hv_sites):

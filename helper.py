@@ -44,9 +44,6 @@ def load_env():
                     key, value = line.strip().split('=', 1)
                     os.environ[key] = value
 
-# calling the load environment variables function
-load_env()
-
 def read_config():
     """Read configuration information to access AGOL and CHES"""
     _config = configparser.ConfigParser()
