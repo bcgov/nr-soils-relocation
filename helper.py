@@ -34,6 +34,15 @@ AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
 
+def load_env():
+    """Loading environment variables from .env files - for local testing"""
+    env_file = '.env'
+    if os.path.exists(env_file):
+        with open(env_file, encoding='utf-8') as f:
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key] = value
 
 def read_config():
     """Read configuration information to access AGOL and CHES"""
@@ -378,8 +387,12 @@ def create_regional_district(chefs_dic, field):
     Extract only first "regional district" value from form
     """
     _regional_district = None
-    if chefs_dic.get(field) is not None and len(chefs_dic[field]) > 0:
-        _regional_district = convert_regional_district_to_name(chefs_dic[field][0])
+    _value = chefs_dic.get(field)
+    if _value:
+        if isinstance(_value, list) and len(_value) > 0:
+            _regional_district = convert_regional_district_to_name(_value[0])
+        elif isinstance(_value, str): # changed to only allow one region selection on newer form
+            _regional_district = convert_regional_district_to_name(_value)
     return _regional_district
 
 def convert_land_ownership_to_name(key):
@@ -445,15 +458,25 @@ def create_land_file_numbers(chefs_dic, field):
 
 def create_pid_pin_and_desc(chefs_dic, data_grid_field, pid_pin_field, desc_field):
     """
-    Extract only first "PID and description" or "PIN and description" value from form
+     Extract all "PID and description" or "PIN and description" values from form and join them with a comma
     """
-    _pid = None
-    _desc = None
+    _pid_list = []
+    _desc_list = []
+
     if chefs_dic.get(data_grid_field) is not None and len(chefs_dic[data_grid_field]) > 0:
-        if chefs_dic.get(data_grid_field)[0].get(pid_pin_field) is not None and chefs_dic.get(data_grid_field)[0].get(pid_pin_field).strip() != '':
-            _pid = chefs_dic.get(data_grid_field)[0].get(pid_pin_field)
-            if _pid is not None and chefs_dic.get(data_grid_field)[0].get(desc_field) and chefs_dic.get(data_grid_field)[0].get(desc_field).strip() != '':
-                _desc = chefs_dic.get(data_grid_field)[0].get(desc_field).strip()
+        for item in chefs_dic[data_grid_field]:
+            pid_value = item.get(pid_pin_field)
+            desc_value = item.get(desc_field)
+
+            if pid_value is not None and pid_value.strip() != '':
+                _pid_list.append(pid_value.strip())
+
+            if desc_value is not None and desc_value.strip() != '':
+                _desc_list.append(desc_value.strip())
+
+    _pid = ','.join(_pid_list) if _pid_list else None
+    _desc = ','.join(_desc_list) if _desc_list else None
+
     return _pid, _desc
 
 def create_untitled_municipal_land_desc(chefs_dic, parent_field, desc_field):
@@ -648,11 +671,11 @@ def map_source_site(_submission):
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
 
         if _submission.get(chefs_src_param('exemptionFromProtocol19Apply')) is not None:
-            _src_dic['exemptionFromProtocol19Apply'] = _submission.get(chefs_src_param('exemptionFromProtocol19Apply'), 'no') # default to 'no' if None
-        else:
-            _src_dic['exemptionFromProtocol19Apply'] = 'no'
-        if _submission.get(chefs_src_param('protocol19AppliedExemptions')) is not None:
-            _src_dic['protocol19AppliedExemptions'] = create_source_site_protocol_19_exemptions(_submission, chefs_src_param('protocol19AppliedExemptions'))
+            if _submission.get(chefs_src_param('exemptionFromProtocol19Apply')):
+                if _submission.get(chefs_src_param('protocol19AppliedExemptions')) is not None:
+                    _src_dic['protocol19Exemptions'] = create_source_site_protocol_19_exemptions(_submission, chefs_src_param('protocol19AppliedExemptions'))
+            else:
+                _src_dic['protocol19Exemptions'] = 'no'
 
         create_soil_volumes(
             _submission,
@@ -661,7 +684,6 @@ def map_source_site(_submission):
             chefs_src_param('soilClassificationSource'),
             _src_dic)
 
-        _src_dic['soilUnderProtocol19Exemptions'] = _submission.get(chefs_src_param('soilUnderProtocol19Exemptions'), 'no') # default to 'no' if None
         _src_dic['vapourExemption'] = _submission.get(chefs_src_param('vapourExemption'))
         _src_dic['vapourExemptionDesc'] = _submission.get(chefs_src_param('vapourExemptionDesc'))
         _src_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_src_param('soilRelocationStartDate')))

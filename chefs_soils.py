@@ -16,9 +16,13 @@ import csv_writer
 import agol_updater
 import email_sender
 import helper
+
 LOGLEVEL = os.getenv('LOGLEVEL')
 AGOL_UPDATE_FLAG= helper.get_boolean_env_var('AGOL_UPDATE_FLAG') # the flag to control whether to update AGOL or not
 EMAIL_NOTIFY_FLAG = helper.get_boolean_env_var('EMAIL_NOTIFY_FLAG',) # the flag to control whether to send email notification or not
+
+helper.load_env()
+
 logging.basicConfig(level=LOGLEVEL, format='%(asctime)s [%(levelname)s] %(message)s')
 
 submissionsJson, hvsJson, subscribersJson, chefsLoaded = submission_loader.load_submissions()
@@ -31,6 +35,7 @@ if chefsLoaded:
 
     logging.info('Creating soil source / receiving / high volume site CSV...')
     csv_writer.site_csv_writer(sourceSites, receivingSites, hvSites)
+
     if AGOL_UPDATE_FLAG:
         logging.info('Updating source / receiving / high volume site CSV and Layer in AGOL...')
         agol_updater.agol_items_overwrite()
