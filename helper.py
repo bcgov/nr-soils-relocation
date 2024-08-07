@@ -390,8 +390,12 @@ def create_regional_district(chefs_dic, field):
     Extract only first "regional district" value from form
     """
     _regional_district = None
-    if chefs_dic.get(field) is not None and len(chefs_dic[field]) > 0:
-        _regional_district = convert_regional_district_to_name(chefs_dic[field][0])
+    _value = chefs_dic.get(field)
+    if _value:
+        if isinstance(_value, list) and len(_value) > 0:
+            _regional_district = convert_regional_district_to_name(_value[0])
+        elif isinstance(_value, str): # changed to only allow one region selection on newer form
+            _regional_district = convert_regional_district_to_name(_value)
     return _regional_district
 
 def convert_land_ownership_to_name(key):
