@@ -28,8 +28,8 @@ jobs:
       - uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           oc_server: ${{ secrets.OPENSHIFT_SERVER }}
-          oc_namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
-          oc_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: true
           penetration_test: false
           file: ./openshift/sris-schedule-job.yml
