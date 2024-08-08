@@ -630,7 +630,7 @@ def map_source_site(_submission):
         for src_header in constant.SOURCE_SITE_HEADERS:
             _src_dic[src_header] = None
 
-        _src_dic['updateToPreviousForm'] = _submission.get(chefs_src_param('updateToPreviousForm'))
+        _src_dic['updateToPreviousForm'] = convert_to_yes_no(_submission.get(chefs_src_param('updateToPreviousForm')))
         _src_dic['previousConfirmCode'] = _submission.get(chefs_src_param('previousConfirmCode'))
         _src_dic['ownerCompany'] = _submission.get(chefs_src_param('ownerCompany'))
         _src_dic['owner2Company'] = _submission.get(chefs_src_param('owner2Company'))
@@ -677,7 +677,7 @@ def map_source_site(_submission):
                 _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
             _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-        _src_dic['highVolumeSite'] = _submission.get(chefs_src_param('highVolumeSite'))
+        _src_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_src_param('highVolumeSite')))
         _src_dic['soilRelocationPurpose'] = _submission.get(chefs_src_param('soilRelocationPurpose'))
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
 
@@ -695,7 +695,7 @@ def map_source_site(_submission):
             chefs_src_param('soilClassificationSource'),
             _src_dic)
 
-        _src_dic['vapourExemption'] = _submission.get(chefs_src_param('vapourExemption'))
+        _src_dic['vapourExemption'] = convert_to_yes_no(_submission.get(chefs_src_param('vapourExemption')))
         _src_dic['vapourExemptionDesc'] = _submission.get(chefs_src_param('vapourExemptionDesc'))
         _src_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_src_param('soilRelocationStartDate')))
         _src_dic['soilRelocationCompletionDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_src_param('soilRelocationCompletionDate')))
@@ -767,9 +767,9 @@ def map_rcv_site(_submission, rcv_clz):
 
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
         _rcv_dic['relocatedSoilUse'] = _submission.get(chefs_rcv_param('relocatedSoilUse', rcv_clz))
-        _rcv_dic['highVolumeSite'] = _submission.get(chefs_rcv_param('highVolumeSite', rcv_clz))
-        _rcv_dic['soilDepositIsALR'] = _submission.get(chefs_rcv_param('soilDepositIsALR', rcv_clz))
-        _rcv_dic['soilDepositIsReserveLands'] = _submission.get(chefs_rcv_param('soilDepositIsReserveLands', rcv_clz))
+        _rcv_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_rcv_param('highVolumeSite', rcv_clz)))
+        _rcv_dic['soilDepositIsALR'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsALR', rcv_clz)))
+        _rcv_dic['soilDepositIsReserveLands'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsReserveLands', rcv_clz)))
         _rcv_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_rcv_param('soilRelocationStartDate', rcv_clz)))
         _rcv_dic['soilRelocationCompletionDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_rcv_param('soilRelocationCompletionDate', rcv_clz)))
         _rcv_dic['createAt'] = get_create_date(
@@ -830,11 +830,11 @@ def map_hv_site(_hvs):
         _hv_dic['crownLandFileNumbers'] = create_land_file_numbers(_hvs, chefs_hv_param('crownLandFileNumbers'))
         _hv_dic['reserveNameAndNumber'] = _hvs.get(chefs_hv_param('reserveNameAndNumber'))
         _hv_dic['receivingSiteLandUse'] = create_receiving_site_lan_uses(_hvs, chefs_hv_param('receivingSiteLandUse'))
-        _hv_dic['hvsConfirmation'] = _hvs.get(chefs_hv_param('hvsConfirmation'))
+        _hv_dic['hvsConfirmation'] = convert_to_yes_no(_hvs.get(chefs_hv_param('hvsConfirmation')))
         _hv_dic['dateSiteBecameHighVolume'] = convert_simple_datetime_format_in_str(_hvs.get(chefs_hv_param('dateSiteBecameHighVolume')))
         _hv_dic['howRelocatedSoilWillBeUsed'] = _hvs.get(chefs_hv_param('howRelocatedSoilWillBeUsed'))
-        _hv_dic['soilDepositIsALR'] = _hvs.get(chefs_hv_param('soilDepositIsALR'))
-        _hv_dic['soilDepositIsReserveLands'] = _hvs.get(chefs_hv_param('soilDepositIsReserveLands'))
+        _hv_dic['soilDepositIsALR'] = convert_to_yes_no(_hvs.get(chefs_hv_param('soilDepositIsALR')))
+        _hv_dic['soilDepositIsReserveLands'] = convert_to_yes_no(_hvs.get(chefs_hv_param('soilDepositIsReserveLands')))
         _hv_dic['qualifiedProfessionalOrganization'] = _hvs.get(chefs_hv_param('qualifiedProfessionalOrganization'))
         _hv_dic['createAt'] = get_create_date(_hvs, chefs_hv_param('form'), chefs_hv_param('createdAt'))
         _hv_dic['confirmationId'] = _confirmation_id
@@ -868,3 +868,26 @@ def get_boolean_env_var(env_var):
     if env_var is not None:
         return os.getenv(env_var, 'false').lower() in ['true', '1']
     return False
+
+def convert_to_yes_no(argument):
+    """
+    Convert the argument to 'Yes' or 'No'.
+    If the argument is 'yes', 'true', True (case-insensitive), return 'Yes'.
+    If the argument is 'no', 'false', False (case-insensitive), return 'No'.
+    Otherwise, return the original argument.
+    """
+    # Convert boolean to string
+    if isinstance(argument, bool):
+        argument = str(argument)
+    
+    # Convert argument to lowercase if it is a string
+    if isinstance(argument, str):
+        argument_lower = argument.lower()
+
+        if argument_lower in ['yes', 'true']:
+            return 'Yes'
+        elif argument_lower in ['no', 'false']:
+            return 'No'
+
+    # Return the original argument if it doesn't match any criteria
+    return argument
