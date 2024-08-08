@@ -224,18 +224,29 @@ def get_confirm_id(cefs_dic, form_field, confirm_id_field):
 
 def convert_simple_datetime_format_in_str(str_date):
     """
-    Convert and returns simple datetime format
-    str_date: '2022-09-22T00:00:00-07:00' or '09/02/2022' format
-    return: 'MM/DD/YYYY' string format
+    Convert and returns simple datetime format.
+    str_date: '2022-09-22T00:00:00-07:00', '09/02/2022' or '2022-09-02' format
+    return: 'MM/DD/YYYY 00:00:00' string format
     """
     _result = None
     try:
         if str_date is not None and str_date != '':
-            _datetime_in_str = str_date.split('T')
-            if len(_datetime_in_str) > 1:
-                _result = datetime.datetime.strptime(_datetime_in_str[0], '%Y-%m-%d').strftime('%m/%d/%Y')
+            # Handling the 'YYYY-MM-DDTHH:MM:SS-07:00' format
+            if 'T' in str_date:
+                _datetime_in_str = str_date.split('T')[0]
+                _result = datetime.datetime.strptime(_datetime_in_str, '%Y-%m-%d').strftime('%m/%d/%Y')
+            # Handling the 'MM/DD/YYYY' format directly
+            elif '/' in str_date:
+                _result = datetime.datetime.strptime(str_date, '%m/%d/%Y').strftime('%m/%d/%Y')
+            # Handling the 'YYYY-MM-DD' format
+            else:
+                _result = datetime.datetime.strptime(str_date, '%Y-%m-%d').strftime('%m/%d/%Y')
     except ValueError as _ve:
         logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
+
+    if _result is not None:
+        _result += ' 00:00:00'
+
     return _result if _result is not None else str_date
 
 def isfloat(value):
