@@ -772,6 +772,7 @@ def map_rcv_site(_submission, rcv_clz):
         _rcv_dic['soilDepositIsReserveLands'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsReserveLands', rcv_clz)))
         _rcv_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_rcv_param('soilRelocationStartDate', rcv_clz)))
         _rcv_dic['soilRelocationCompletionDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_rcv_param('soilRelocationCompletionDate', rcv_clz)))
+        _rcv_dic['qualifiedProfessionalOrganization'] = _submission.get(chefs_rcv_param('qualifiedProfessionalOrganization', rcv_clz))
         _rcv_dic['createAt'] = get_create_date(
                                 _submission,
                                 chefs_rcv_param('form', rcv_clz),
