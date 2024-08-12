@@ -237,6 +237,7 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
 							, soilDepositIsReserveLands='D2-receivingsitesoilDepositIsInTheReserveLands1'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
                             , soilRelocationCompletionDate='B4-soilRelocationEstimatedCompletionDateMonthDayYear'
+                            , qualifiedProfessionalOrganization='D1-organization1QualifiedProfessional'                            
                             , form='form'
                             , createdAt='createdAt'
                             , confirmationId='confirmationId'
@@ -280,6 +281,7 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
 							, soilDepositIsReserveLands='D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
                             , soilRelocationCompletionDate='B4-soilRelocationEstimatedCompletionDateMonthDayYear'
+                            , qualifiedProfessionalOrganization='D1-organization1QualifiedProfessional'                            
                             , form='form'
                             , createdAt='createdAt'
                             , confirmationId='confirmationId'
@@ -323,6 +325,7 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
 							, soilDepositIsReserveLands='D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
                             , soilRelocationCompletionDate='B4-soilRelocationEstimatedCompletionDateMonthDayYear'
+                            , qualifiedProfessionalOrganization='D1-organization1QualifiedProfessional'                            
                             , form='form'
                             , createdAt='createdAt'
                             , confirmationId='confirmationId'
@@ -450,7 +453,8 @@ RECEIVING_SITE_HEADERS = ["confirmationId",
                           "soilRelocationCompletionDate",
                           "sourceSiteAddress",
                           "sourceSiteCity",
-                          "sourceSiteRegionalDistrict"
+                          "sourceSiteRegionalDistrict",
+                          "qualifiedProfessionalOrganization",
                           ]
 HV_SITE_HEADERS = ["confirmationId",
                    "ownerCompany",
