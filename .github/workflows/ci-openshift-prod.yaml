@@ -72,6 +72,10 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ builds, deploy ]
     steps:
+      
+      - uses: actions/checkout@v4
+        name: checkout
+      
       - uses: rickstaa/action-create-tag@v1
         name: Create Release Tag in Git
         with:
