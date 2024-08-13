@@ -22,6 +22,7 @@ jobs:
           tag: ${{ github.event.inputs.RELEASE_VERSION }}
           tag_fallback: latest
           build_file: ./Dockerfile
+          build_context: .
   deploy:
     name: Deploy
     runs-on: ubuntu-22.04
@@ -37,34 +38,34 @@ jobs:
           penetration_test: false
           file: ./openshift/sris-schedule-job.yml
           parameters: |
-            APP_NAME=sris
-            TAG=${{ github.event.inputs.RELEASE_VERSION }}
-            CHEFS_SOILS_FORM_ID=${{ secrets.CHEFS_SOILS_FORM_ID }}
-            CHEFS_SOILS_API_KEY=${{ secrets.CHEFS_SOILS_API_KEY }}
-            CHEFS_SOILS_FORM_VERSION=${{ secrets.CHEFS_SOILS_FORM_VERSION }}
-            CHEFS_HV_FORM_ID=${{ secrets.CHEFS_HV_FORM_ID }}
-            CHEFS_HV_API_KEY=${{ secrets.CHEFS_HV_API_KEY }}
-            CHEFS_HV_FORM_VERSION=${{ secrets.CHEFS_HV_FORM_VERSION }}
-            CHEFS_MAIL_FORM_ID=${{ secrets.CHEFS_MAIL_FORM_ID }}
-            CHEFS_MAIL_API_KEY=${{ secrets.CHEFS_MAIL_API_KEY }}
-            CHEFS_MAIL_FORM_VERSION=${{ secrets.CHEFS_MAIL_FORM_VERSION }}
-            CHES_API_OAUTH_SECRET=${{ secrets.CHES_API_OAUTH_SECRET }}
-            MAPHUB_USER=${{ secrets.MAPHUB_USER }}
-            MAPHUB_PASS=${{ secrets.MAPHUB_PASS }}
-            SRC_CSV_ID=${{ secrets.SRC_CSV_ID }}
-            SRC_LAYER_ID=${{ secrets.SRC_LAYER_ID }}
-            RCV_CSV_ID=${{ secrets.RCV_CSV_ID }}
-            RCV_LAYER_ID=${{ secrets.RCV_LAYER_ID }}
-            HV_CSV_ID=${{ secrets.HV_CSV_ID }}
-            HV_LAYER_ID=${{ secrets.HV_LAYER_ID }}
-            WEB_MAP_APP_ID=${{ secrets.WEB_MAP_APP_ID }}
-            CHEFS_API_URL=${{ secrets.CHEFS_API_URL }}
-            AUTH_URL=${{ secrets.AUTH_URL }}
-            CHES_URL=${{ secrets.CHES_URL }}
-            LOGLEVEL=${{ secrets.LOGLEVEL }}
-            NOTICE_STANDARD_TIME=${{ secrets.NOTICE_STANDARD_TIME }}
-            AGOL_UPDATE_FLAG=${{ secrets.AGOL_UPDATE_FLAG }}
-            EMAIL_NOTIFY_FLAG=${{ secrets.EMAIL_NOTIFY_FLAG }}
+            APP_NAME=sris \
+            TAG=${{ github.event.inputs.RELEASE_VERSION }} \
+            CHEFS_SOILS_FORM_ID=${{ secrets.CHEFS_SOILS_FORM_ID }} \
+            CHEFS_SOILS_API_KEY=${{ secrets.CHEFS_SOILS_API_KEY }} \
+            CHEFS_SOILS_FORM_VERSION=${{ secrets.CHEFS_SOILS_FORM_VERSION }} \
+            CHEFS_HV_FORM_ID=${{ secrets.CHEFS_HV_FORM_ID }} \
+            CHEFS_HV_API_KEY=${{ secrets.CHEFS_HV_API_KEY }} \
+            CHEFS_HV_FORM_VERSION=${{ secrets.CHEFS_HV_FORM_VERSION }} \
+            CHEFS_MAIL_FORM_ID=${{ secrets.CHEFS_MAIL_FORM_ID }} \
+            CHEFS_MAIL_API_KEY=${{ secrets.CHEFS_MAIL_API_KEY }} \
+            CHEFS_MAIL_FORM_VERSION=${{ secrets.CHEFS_MAIL_FORM_VERSION }} \
+            CHES_API_OAUTH_SECRET=${{ secrets.CHES_API_OAUTH_SECRET }} \
+            MAPHUB_USER=${{ secrets.MAPHUB_USER }} \
+            MAPHUB_PASS=${{ secrets.MAPHUB_PASS }} \
+            SRC_CSV_ID=${{ secrets.SRC_CSV_ID }} \
+            SRC_LAYER_ID=${{ secrets.SRC_LAYER_ID }} \
+            RCV_CSV_ID=${{ secrets.RCV_CSV_ID }} \
+            RCV_LAYER_ID=${{ secrets.RCV_LAYER_ID }} \
+            HV_CSV_ID=${{ secrets.HV_CSV_ID }} \
+            HV_LAYER_ID=${{ secrets.HV_LAYER_ID }} \
+            WEB_MAP_APP_ID=${{ secrets.WEB_MAP_APP_ID }} \
+            CHEFS_API_URL=${{ secrets.CHEFS_API_URL }} \
+            AUTH_URL=${{ secrets.AUTH_URL }} \
+            CHES_URL=${{ secrets.CHES_URL }} \
+            LOGLEVEL=${{ secrets.LOGLEVEL }} \
+            NOTICE_STANDARD_TIME=${{ secrets.NOTICE_STANDARD_TIME }} \
+            AGOL_UPDATE_FLAG=${{ secrets.AGOL_UPDATE_FLAG }} \
+            EMAIL_NOTIFY_FLAG=${{ secrets.EMAIL_NOTIFY_FLAG }} \
   release:
     name: Release
     runs-on: ubuntu-22.04
