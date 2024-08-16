@@ -95,9 +95,9 @@ def agol_items_overwrite():
             _hv_lyr_overwrite_result = _hv_flc.manager.overwrite(constant.HIGH_VOLUME_CSV_FILE)
             logging.info("Updated High Volume Receiving Site Feature Layer successfully:%s", json.dumps(_hv_lyr_overwrite_result))
 
-            logging.info('Adding Soil Relocation Receiving Site Feature Layer Fields Description...')
-            fields_desc_list = get_fields_desc_list(constant.RECEIVE_FIELDS_DESC_FILE)
-            search = _gis.content.search("id:" + RCV_LAYER_ID, item_type="Feature Layer")
+            logging.info('Adding High Volume Receiving Site Feature Layer Fields Description...')
+            fields_desc_list = get_fields_desc_list(constant.HIGH_VOLUME_FIELDS_CSV_FILE)
+            search = _gis.content.search("id:" + HV_LAYER_ID, item_type="Feature Layer")
             add_layer_fields_desc(search, fields_desc_list)
 
 def add_layer_fields_desc(search, fields_desc_list):
