@@ -15,6 +15,7 @@ RUN       pip install requests && \
           pip install geomet && \
           pip install Jinja2 && \
           pip install puremagic && \
+          pip install openpyxl && \
           pip install urllib3==1.26.5
 RUN addgroup docker &&  useradd -ms /bin/bash -G docker $user
 RUN chmod -R 777 $home
