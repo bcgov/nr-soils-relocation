@@ -26,6 +26,10 @@ HV_LAYER_ID = os.getenv('HV_LAYER_ID')
 LOGLEVEL = os.getenv('LOGLEVEL')
 TIMEOUT_SECONDS = os.getenv('TIMEOUT_SECONDS')
 
+# If there is no TIMEOUT_SECONDS, set it to 300 seconds (5 minutes)
+if not TIMEOUT_SECONDS:
+    TIMEOUT_SECONDS = '300'
+
 config = helper.read_config()
 MAPHUB_URL = config['AGOL']['MAPHUB_URL']
 
