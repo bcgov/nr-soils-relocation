@@ -94,6 +94,9 @@ parameters:
   - name: EMAIL_NOTIFY_FLAG
     description: FLAG to control, retrieval of subscribers from CHEFs and notifying them via CHES.
     required: true
+  - name: TIMEOUT_SECONDS
+    description: Timeout to AGOL API call
+    required: true
 objects:
   - kind: ConfigMap
     apiVersion: v1
@@ -128,6 +131,7 @@ objects:
       NOTICE_STANDARD_TIME: ${NOTICE_STANDARD_TIME}
       AGOL_UPDATE_FLAG: ${AGOL_UPDATE_FLAG}
       EMAIL_NOTIFY_FLAG: ${EMAIL_NOTIFY_FLAG}
+      TIMEOUT_SECONDS: ${TIMEOUT_SECONDS}
 
   - apiVersion: batch/v1
     kind: CronJob

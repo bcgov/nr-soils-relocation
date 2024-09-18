@@ -63,3 +63,4 @@ jobs:
             NOTICE_STANDARD_TIME=${{ secrets.NOTICE_STANDARD_TIME }} \
             AGOL_UPDATE_FLAG=${{ secrets.AGOL_UPDATE_FLAG }} \
             EMAIL_NOTIFY_FLAG=${{ secrets.EMAIL_NOTIFY_FLAG }} \
+            TIMEOUT_SECONDS=${{ secrets.TIMEOUT_SECONDS }} \
