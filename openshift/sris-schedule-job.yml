@@ -146,6 +146,7 @@ objects:
       failedJobsHistoryLimit: 30
       jobTemplate:
         spec:
+          activeDeadlineSeconds: 1800
           template:
             metadata:
               labels:
@@ -159,8 +160,8 @@ objects:
                       cpu: "100m"
                       memory: "2Gi"
                     limits:
-                      cpu: "1.5"
-                      memory: "4Gi"
+                      cpu: "1.45"
+                      memory: "3.9Gi"
                   envFrom:
                     - configMapRef:
                         name: "${APP_NAME}-configmap"
