@@ -53,7 +53,7 @@ def run_with_timeout(func, *args, timeout=TIMEOUT_SECONDS, **kwargs):
         except FuturesTimeoutError:
             # Log an error with the specific function name if the operation times out
             logging.error("Operation '%s' timed out after %s seconds.", func.__name__, timeout)
-            return None
+            os._exit(1)
 
 def connect_to_agol():
     """Connect to AGOL GIS with timeout handling."""
