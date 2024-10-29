@@ -33,6 +33,28 @@ CHEFS_API_URL = os.getenv('CHEFS_API_URL')
 AUTH_URL = os.getenv('AUTH_URL')
 CHES_URL = os.getenv('CHES_URL')
 LOGLEVEL = os.getenv('LOGLEVEL')
+CHEFS_FORM_TIMEOUT_SECONDS = os.getenv('CHEFS_FORM_TIMEOUT_SECONDS')
+CHES_EMAIL_TIMEOUT_SECONDS = os.getenv('CHES_EMAIL_TIMEOUT_SECONDS')
+CHES_TOKEN_TIMEOUT_SECONDS = os.getenv('CHES_TOKEN_TIMEOUT_SECONDS')
+CHES_HEALTH_TIMEOUT_SECONDS = os.getenv('CHES_HEALTH_TIMEOUT_SECONDS')
+
+# If there is no CHEFS_FORM_TIMEOUT_SECONDS, set it to 60 seconds (1 minutes)
+if not CHEFS_FORM_TIMEOUT_SECONDS:
+    CHEFS_FORM_TIMEOUT_SECONDS = '60'
+
+# If there is no CHES_EMAIL_TIMEOUT_SECONDS, set it to 60 seconds (1 minutes)
+if not CHES_EMAIL_TIMEOUT_SECONDS:
+    CHES_EMAIL_TIMEOUT_SECONDS = '60'
+
+# If there is no CHES_TOKEN_TIMEOUT_SECONDS, set it to 60 seconds (1 minutes)
+if not CHES_TOKEN_TIMEOUT_SECONDS:
+    CHES_TOKEN_TIMEOUT_SECONDS = '60'
+
+# If there is no CHES_HEALTH_TIMEOUT_SECONDS, set it to 60 seconds (1 minutes)
+if not CHES_HEALTH_TIMEOUT_SECONDS:
+    CHES_HEALTH_TIMEOUT_SECONDS = '60'
+
+
 
 def load_env():
     """Loading environment variables from .env files - for local testing"""
@@ -119,7 +141,8 @@ def get_ches_token():
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load, timeout=5) # timeout in seconds
+        ches_token_timeout_seconds = int(CHES_TOKEN_TIMEOUT_SECONDS)
+        _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load, timeout=ches_token_timeout_seconds) # timeout in seconds
         _auth_response_json = json.loads(_auth_response.content)
         if _auth_response_json.get('access_token'):
             return _auth_response_json['access_token']
@@ -131,6 +154,8 @@ def get_ches_token():
         logging.exception("Email could not be sent due to an authorization issue:%s", _ke)
     except Timeout:
         logging.error('The request timed out to get CHES token! - %s', AUTH_URL)
+    except ValueError:
+        logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_TOKEN_TIMEOUT_SECONDS)
     return _auth_response
 
 def check_ches_health():
@@ -142,7 +167,8 @@ def check_ches_health():
     }
     _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
     try:
-        _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers, timeout=5) # timeout in seconds
+        ches_health_timeout_seconds = int(CHES_HEALTH_TIMEOUT_SECONDS)
+        _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers, timeout=ches_health_timeout_seconds) # timeout in seconds
         if _ches_response.status_code == 200:
             logging.info(constant.CHES_HEALTH_200_STATUS)
         elif _ches_response.status_code == 401:
@@ -153,6 +179,8 @@ def check_ches_health():
             logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
     except Timeout:
         logging.error('The request timed out to check CHES Health! - %s', _ches_api_health_endpoint)
+    except ValueError:
+        logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_HEALTH_TIMEOUT_SECONDS)
 
 def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
@@ -167,9 +195,12 @@ def send_single_email(to_email, subject, message):
         }
         _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
         try:
-            _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=5) # timeout in seconds
+            ches_email_timeout_seconds = int(CHES_EMAIL_TIMEOUT_SECONDS)
+            _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=ches_email_timeout_seconds) # timeout in seconds
         except Timeout:
             logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
+        except ValueError:
+            logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_EMAIL_TIMEOUT_SECONDS)
     return _ches_response
 
 def get_chefs_form_data(form_id, form_key, form_version):
@@ -177,25 +208,29 @@ def get_chefs_form_data(form_id, form_key, form_version):
     content = None
     chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions&version=' + form_version
     try:
-        request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
+        chefs_form_timeout_seconds = int(CHEFS_FORM_TIMEOUT_SECONDS)
+        request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=chefs_form_timeout_seconds) # timeout in seconds
         content = json.loads(request.content)
     except Timeout:
         logging.error('The request timed out! %s', chefs_api_request_url)
         os._exit(1)
+    except ValueError:
+        logging.error('Invalid timeout value: %s. Must be an int or float.', CHEFS_FORM_TIMEOUT_SECONDS)
+        os._exit(1)
     return content
 
-def fetch_columns(form_id, form_key):
-    """Retrieve CHEFS form columns"""
-    attributes = None
-    try:
-        request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
-        request_json = json.loads(request.content)
-        version = request_json[0]['id']
-        attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
-        attributes = json.loads(attribute_request.content)
-    except Timeout:
-        logging.error('The request timed out to retrieve CHEFS form columns!')
-    return attributes
+# def fetch_columns(form_id, form_key):
+#     """Retrieve CHEFS form columns"""
+#     attributes = None
+#     try:
+#         request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
+#         request_json = json.loads(request.content)
+#         version = request_json[0]['id']
+#         attribute_request = requests.get(CHEFS_API_URL + '/forms/' + form_id + '/versions/' + version + '/fields', auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=5) # timeout in seconds
+#         attributes = json.loads(attribute_request.content)
+#     except Timeout:
+#         logging.error('The request timed out to retrieve CHEFS form columns!')
+#     return attributes
 
 def get_difference_datetimes_in_hour(datetime1, datetime2):
     """Calculates and returns the difference between two given dates/times in hours"""
