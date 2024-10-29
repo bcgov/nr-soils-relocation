@@ -299,6 +299,8 @@ def chefs_rcv_param(key, rcv_clz):
     Returns receiver parameter name that matching in receiver dictionary
     according to receiver classfication(1st, 2nd, 3rd receiver)
     """
+    name = None
+
     if rcv_clz == 1: # 1st receiver
         name = constant.CHEFS_RCV1_PARAM_DIC.get(key)
     elif rcv_clz == 2: # 2nd receiver
