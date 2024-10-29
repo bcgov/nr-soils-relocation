@@ -56,7 +56,7 @@ def load_submissions():
     if soils_form_versions:
         for version in soils_form_versions:
             submission_loaded = False
-            response = helper.site_list(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY, version)
+            response = helper.get_chefs_form_data(CHEFS_SOILS_FORM_ID, CHEFS_SOILS_API_KEY, version)
             if isinstance(response, dict) and int(response.get('status')) > 201:
                 logging.error("Loading Submissions List failed: %s %s, %s", response['status'], response['title'], response['detail'])
             elif response is None:
@@ -95,7 +95,7 @@ def load_submissions():
     if hv_form_versions:
         for version in hv_form_versions:
             hvs_loaded = False
-            response = helper.site_list(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY, version)
+            response = helper.get_chefs_form_data(CHEFS_HV_FORM_ID, CHEFS_HV_API_KEY, version)
             if isinstance(response, dict) and int(response.get('status')) > 201:
                 logging.error("Loading High Volume Sites list failed: %s %s, %s", response['status'], response['title'], response['detail'])
             elif response is None:
@@ -134,7 +134,7 @@ def load_submissions():
     if mail_form_versions:
         for version in mail_form_versions:
             subscribers_loaded = False
-            response = helper.site_list(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY, version)
+            response = helper.get_chefs_form_data(CHEFS_MAIL_FORM_ID, CHEFS_MAIL_API_KEY, version)
             if isinstance(response, dict) and int(response.get('status')) > 201:
                 logging.error("Loading submission subscribers list failed: %s %s, %s", response['status'], response['title'], response['detail'])
             elif response is None:

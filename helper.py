@@ -172,7 +172,7 @@ def send_single_email(to_email, subject, message):
             logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
     return _ches_response
 
-def site_list(form_id, form_key, form_version):
+def get_chefs_form_data(form_id, form_key, form_version):
     """Retrieve CHEFS form data via CHEFS API"""
     content = None
     chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions&version=' + form_version
@@ -181,6 +181,7 @@ def site_list(form_id, form_key, form_version):
         content = json.loads(request.content)
     except Timeout:
         logging.error('The request timed out! %s', chefs_api_request_url)
+        os._exit(1)
     return content
 
 def fetch_columns(form_id, form_key):
