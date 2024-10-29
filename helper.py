@@ -129,7 +129,7 @@ def get_ches_token():
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        ches_api_timeout = int(CHES_API_TIMEOUT)
+        ches_api_timeout = float(CHES_API_TIMEOUT)
         _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load, timeout=ches_api_timeout) # timeout in seconds
         _auth_response_json = json.loads(_auth_response.content)
         if _auth_response_json.get('access_token'):
@@ -155,7 +155,7 @@ def check_ches_health():
     }
     _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
     try:
-        ches_api_timeout = int(CHES_API_TIMEOUT)
+        ches_api_timeout = float(CHES_API_TIMEOUT)
         _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers, timeout=ches_api_timeout) # timeout in seconds
         if _ches_response.status_code == 200:
             logging.info(constant.CHES_HEALTH_200_STATUS)
@@ -183,7 +183,7 @@ def send_single_email(to_email, subject, message):
         }
         _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
         try:
-            ches_api_timeout = int(CHES_API_TIMEOUT)
+            ches_api_timeout = float(CHES_API_TIMEOUT)
             _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=ches_api_timeout) # timeout in seconds
         except Timeout:
             logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
@@ -196,7 +196,7 @@ def get_chefs_form_data(form_id, form_key, form_version):
     content = None
     chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions&version=' + form_version
     try:
-        chefs_api_timeout = int(CHEFS_API_TIMEOUT)
+        chefs_api_timeout = float(CHEFS_API_TIMEOUT)
         request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=chefs_api_timeout) # timeout in seconds
         content = json.loads(request.content)
     except Timeout:
