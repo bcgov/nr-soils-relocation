@@ -149,6 +149,10 @@ def get_ches_token():
 def check_ches_health():
     """Returns health checks of external service dependencies"""
     _access_token = get_ches_token()
+
+    if _access_token is None:
+        return False
+
     ches_headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + _access_token
@@ -165,6 +169,8 @@ def check_ches_health():
             logging.error(constant.CHES_HEALTH_403_STATUS)
         else:
             logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
+
+        return True
     except Timeout:
         logging.error('The request timed out to check CHES Health! - %s', _ches_api_health_endpoint)
     except ValueError:
