@@ -218,7 +218,8 @@ def send_email_subscribers(subscribers_json, src_reg_dist_dic, rcv_reg_dist_dic,
 def email_to_subscribers(subscribers_json, src_reg_dist_dic, rcv_reg_dist_dic, hv_reg_dist_dic, current_date):
     """Send notification emails to subscribers"""
     logging.info('Checking CHES Health...')
-    helper.check_ches_health()
+    ches_health = helper.check_ches_health()
 
-    logging.info('Sending subscriber emails...')
-    send_email_subscribers(subscribers_json, src_reg_dist_dic, rcv_reg_dist_dic, hv_reg_dist_dic, current_date)
+    if ches_health:
+        logging.info('Sending subscriber emails...')
+        send_email_subscribers(subscribers_json, src_reg_dist_dic, rcv_reg_dist_dic, hv_reg_dist_dic, current_date)
