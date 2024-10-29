@@ -97,6 +97,18 @@ parameters:
   - name: TIMEOUT_SECONDS
     description: Timeout to AGOL API call
     required: true
+  - name: CHEFS_FORM_TIMEOUT_SECONDS
+    description: Timeout to CHEFS API call to get form data
+    required: true
+  - name: CHES_EMAIL_TIMEOUT_SECONDS
+    description: Timeout to CHES API call to send email
+    required: true
+  - name: CHES_TOKEN_TIMEOUT_SECONDS
+    description: Timeout to CHES API call to get token
+    required: true
+  - name: CHES_HEALTH_TIMEOUT_SECONDS
+    description: Timeout to CHES API call to check the health of API
+    required: true
 objects:
   - kind: ConfigMap
     apiVersion: v1
@@ -132,6 +144,10 @@ objects:
       AGOL_UPDATE_FLAG: ${AGOL_UPDATE_FLAG}
       EMAIL_NOTIFY_FLAG: ${EMAIL_NOTIFY_FLAG}
       TIMEOUT_SECONDS: ${TIMEOUT_SECONDS}
+      CHEFS_FORM_TIMEOUT_SECONDS: ${CHEFS_FORM_TIMEOUT_SECONDS}
+      CHES_EMAIL_TIMEOUT_SECONDS: ${CHES_EMAIL_TIMEOUT_SECONDS}
+      CHES_TOKEN_TIMEOUT_SECONDS: ${CHES_TOKEN_TIMEOUT_SECONDS}
+      CHES_HEALTH_TIMEOUT_SECONDS: ${CHES_HEALTH_TIMEOUT_SECONDS}
 
   - apiVersion: batch/v1
     kind: CronJob
