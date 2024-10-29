@@ -68,6 +68,8 @@ jobs:
             AGOL_UPDATE_FLAG=${{ secrets.AGOL_UPDATE_FLAG }} \
             EMAIL_NOTIFY_FLAG=${{ secrets.EMAIL_NOTIFY_FLAG }} \
             TIMEOUT_SECONDS=${{ secrets.TIMEOUT_SECONDS }} \
+            CHEFS_API_TIMEOUT=${{ secrets.CHEFS_API_TIMEOUT }} \
+            CHES_API_TIMEOUT=${{ secrets.CHES_API_TIMEOUT }} \
   release:
     name: Release
     runs-on: ubuntu-22.04
