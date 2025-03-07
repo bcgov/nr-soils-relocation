@@ -43,7 +43,7 @@ product_technology_information:
   backend_frameworks: []
   backend_languages_version:
     - name: Python
-      version: '3.9'
+      version: '3.12.9'
   ci_cd_tools:
     - GitHub-Actions
   frontend_languages: []

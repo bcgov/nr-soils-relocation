@@ -1,22 +1,9 @@
-FROM python:3.9-bullseye
+FROM python:3.12.9-bullseye
 ARG user=1001
 ARG home=/home/$user
-RUN       pip install requests && \
-          pip install arcgis --no-deps && \
-          pip install cryptography && \
-          pip install requests_ntlm && \
-          pip install cachetools && \
-          pip install lxml && \
-          pip install requests_oauthlib  && \
-          pip install requests_toolbelt  && \
-          pip install six && \
-          pip install ujson && \
-          pip install pytz && \
-          pip install geomet && \
-          pip install Jinja2 && \
-          pip install puremagic && \
-          pip install openpyxl && \
-          pip install urllib3==1.26.5
+RUN       pip install arcgis==2.4.0 && \
+          pip install Jinja2==3.1.6 && \
+          pip install openpyxl==3.1.5
 RUN addgroup docker &&  useradd -ms /bin/bash -G docker $user
 RUN chmod -R 777 $home
 WORKDIR $home
