@@ -305,8 +305,8 @@ def str_to_float(value):
     _result = 0
     try:
         if (value is not None and value != ''):
-            _exp_result = re.sub('[^\d\.]', '', value)
-            _result = (float(_exp_result))
+            _exp_result = re.sub('[^\\d\\.]', '', value)
+            _result = float(_exp_result)
 
     except ValueError as _ve:
         logging.exception(constant.VALUE_ERROR_EXCEPTION_RAISED, _ve)
@@ -912,7 +912,7 @@ def convert_to_yes_no(argument):
     # Convert boolean to string
     if isinstance(argument, bool):
         argument = str(argument)
-    
+
     # Convert argument to lowercase if it is a string
     if isinstance(argument, str):
         argument_lower = argument.lower()
