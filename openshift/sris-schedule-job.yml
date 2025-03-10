@@ -165,8 +165,8 @@ objects:
                   image: ghcr.io/bcgov/nr-soils-relocation/${APP_NAME}:${TAG}
                   resources:
                     requests:
-                      cpu: "500m"
-                      memory: "2Gi"
+                      cpu: "450m"
+                      memory: "1.8Gi"
                   envFrom:
                     - configMapRef:
                         name: "${APP_NAME}-configmap"
