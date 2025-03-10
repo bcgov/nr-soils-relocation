@@ -305,7 +305,7 @@ def str_to_float(value):
     _result = 0
     try:
         if (value is not None and value != ''):
-            _exp_result = re.sub('[^\d\.]', '', value)
+            _exp_result = re.sub('[^\\d\\.]', '', value)
             _result = (float(_exp_result))
 
     except ValueError as _ve:
