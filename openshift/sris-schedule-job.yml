@@ -166,7 +166,7 @@ objects:
                   resources:
                     requests:
                       cpu: "450m"
-                      memory: "1.8Gi"
+                      memory: "1850Mi"
                   envFrom:
                     - configMapRef:
                         name: "${APP_NAME}-configmap"
