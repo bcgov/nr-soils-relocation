@@ -1,4 +1,4 @@
-FROM python:3.12.9-bullseye
+FROM python:3.12.9-bookworm
 ARG user=1001
 ARG home=/home/$user
 RUN       pip install arcgis==2.4.0 && \
