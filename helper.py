@@ -40,9 +40,14 @@ CHES_API_TIMEOUT = os.getenv('CHES_API_TIMEOUT')
 if not CHEFS_API_TIMEOUT:
     CHEFS_API_TIMEOUT = '60'
 
+CHEFS_API_TIMEOUT = CHEFS_API_TIMEOUT.strip()
+
 # If there is no CHES_API_TIMEOUT, set it to 60 seconds (1 minutes)
 if not CHES_API_TIMEOUT:
     CHES_API_TIMEOUT = '60'
+
+CHES_API_TIMEOUT = CHES_API_TIMEOUT.strip()
+
 
 def load_env():
     """Loading environment variables from .env files - for local testing"""
@@ -124,27 +129,66 @@ def get_ches_token():
     """"Get CHES Token"""
     _auth_response = None
     try:
+        # Prepare request payload and headers
         _auth_pay_load = 'grant_type=client_credentials'
         _auth_headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + CHES_API_OAUTH_SECRET
         }
-        ches_api_timeout = float(CHES_API_TIMEOUT)
+
+        # Convert timeout value
+        try:
+            ches_api_timeout = float(CHES_API_TIMEOUT)
+        except ValueError as e:
+            logging.exception("get_ches_token():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+            return None
+
+        # Make the request
         _auth_response = requests.request("POST", AUTH_URL, headers=_auth_headers, data=_auth_pay_load, timeout=ches_api_timeout) # timeout in seconds
-        _auth_response_json = json.loads(_auth_response.content)
-        if _auth_response_json.get('access_token'):
-            return _auth_response_json['access_token']
+
+        # Check response status
+        if _auth_response.status_code != 200:
+            logging.error(
+                "get_ches_token():Request failed with status code: %s, response: %r",
+                _auth_response.status_code,
+                _auth_response.content
+            )
+            return None
+
+        # Parse JSON response
+        try:
+            _auth_response_json = json.loads(_auth_response.content)
+        except ValueError as e:
+            logging.exception(
+                'get_ches_token():Failed to parse JSON response: %s | Status Code: %s | Response Content: %r',
+                str(e),
+                _auth_response.status_code,
+                _auth_response.content
+            )
+            return None
+
+        # Verify response type
+        if not isinstance(_auth_response_json, dict):
+            logging.error("get_ches_token():Response is not a dictionary: %r", _auth_response_json)
+            return None
+
+        # Extract access token
+        access_token = _auth_response_json.get('access_token')
+        if access_token:
+            return access_token
         else:
-            raise KeyError(_auth_response_json.get('error_description') + ", "
-                + _auth_response_json.get('error') + ", status code:"
-                + str(_auth_response.status_code) + ", reason:"+ _auth_response.reason)
-    except KeyError as _ke:
-        logging.exception("Email could not be sent due to an authorization issue:%s", _ke)
-    except Timeout:
-        logging.error('The request timed out to get CHES token! - %s', AUTH_URL)
-    except ValueError:
-        logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_API_TIMEOUT)
-    return _auth_response
+            logging.error(
+                "get_ches_token():No access token found | Error Description: %s | Error: %s",
+                _auth_response_json.get('error_description'),
+                _auth_response_json.get('error')
+            )
+            return None
+    except Timeout as e:
+        logging.exception("get_ches_token():Request timed out: %s", str(e))
+        return None
+    except requests.RequestException as e:
+        logging.exception('get_ches_token():Network error occurred: %s', str(e))
+        return None
 
 def check_ches_health():
     """Returns health checks of external service dependencies"""
@@ -158,60 +202,118 @@ def check_ches_health():
     'Authorization': 'Bearer ' + _access_token
     }
     _ches_api_health_endpoint = CHES_URL + '/api/v1/health'
+
     try:
+        # Convert timeout value
         ches_api_timeout = float(CHES_API_TIMEOUT)
+
+        # Make the request
         _ches_response = requests.request("GET", _ches_api_health_endpoint, headers=ches_headers, timeout=ches_api_timeout) # timeout in seconds
+
+        # Handle response status
         if _ches_response.status_code == 200:
             logging.info(constant.CHES_HEALTH_200_STATUS)
-        elif _ches_response.status_code == 401:
-            logging.error(constant.CHES_HEALTH_401_STATUS)
-        elif _ches_response.status_code == 403:
-            logging.error(constant.CHES_HEALTH_403_STATUS)
+            return True
         else:
-            logging.error("CHES Health returned staus code:%s, text:%s", str(_ches_response.status_code), _ches_response.text)
-
-        return True
-    except Timeout:
-        logging.error('The request timed out to check CHES Health! - %s', _ches_api_health_endpoint)
-    except ValueError:
-        logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_API_TIMEOUT)
+            logging.error(
+                "check_ches_health():Health check failed with status code: %s, response text: %r",
+                _ches_response.status_code,
+                _ches_response.text
+            )
+            return False
+    except ValueError as e:
+        logging.exception("check_ches_health():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+        return False
+    except Timeout as e:
+        logging.exception("check_ches_health():Request timed out: %s", str(e))
+        return False
+    except requests.RequestException as e:
+        logging.exception('check_ches_health():Network error occurred: %s', str(e))
+        return False
 
 def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
-    _ches_response = None
     _access_token = get_ches_token()
-    if _access_token is not None:
-        from_email = constant.EMAIL_SENDER_ADDRESS
-        ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
-        ches_headers = {
+    if _access_token is None:
+        logging.warning("send_single_email():No access token available")
+        return None
+
+    from_email = constant.EMAIL_SENDER_ADDRESS
+    ches_pay_load = "{\n \"bodyType\": \"html\",\n \"body\": \""+message+"\",\n \"delayTS\": 0,\n \"encoding\": \"utf-8\",\n \"from\": \""+from_email+"\",\n \"priority\": \"normal\",\n  \"subject\": \""+subject+"\",\n  \"to\": [\""+to_email+"\"]\n }\n"
+    ches_headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + _access_token
-        }
-        _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
-        try:
-            ches_api_timeout = float(CHES_API_TIMEOUT)
-            _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=ches_api_timeout) # timeout in seconds
-        except Timeout:
-            logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
-        except ValueError:
-            logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_API_TIMEOUT)
-    return _ches_response
+    }
+    _ches_api_single_email_endpoint = CHES_URL + '/api/v1/email'
+
+    try:
+        # Convert timeout value
+        ches_api_timeout = float(CHES_API_TIMEOUT)
+
+        # Make the request
+        _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=ches_api_timeout) # timeout in seconds
+
+        # Check response status
+        if _ches_response.status_code == 200 or _ches_response.status_code == 201:
+            return _ches_response
+        else:
+            logging.error(
+                "send_single_email():Request failed with status code: %s, response text: %r",
+                _ches_response.status_code,
+                _ches_response.text
+            )
+            return None
+    except ValueError as e:
+        logging.exception("send_single_email():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+        return None
+    except Timeout as e:
+        logging.exception("send_single_email():Request timed out: %s", str(e))
+        return None
+    except requests.RequestException as e:
+        logging.exception("send_single_email():Network error: %s", str(e))
+        return None
 
 def get_chefs_form_data(form_id, form_key, form_version):
     """Retrieve CHEFS form data via CHEFS API"""
-    content = None
     chefs_api_request_url = CHEFS_API_URL + '/forms/' + form_id + '/export?format=json&type=submissions&version=' + form_version
+
     try:
+        # Convert timeout value
         chefs_api_timeout = float(CHEFS_API_TIMEOUT)
-        request = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=chefs_api_timeout) # timeout in seconds
-        content = json.loads(request.content)
-    except Timeout:
-        logging.error('The request timed out! %s', chefs_api_request_url)
+
+        # Make the request
+        _response = requests.get(chefs_api_request_url, auth=HTTPBasicAuth(form_id, form_key), headers={'Content-type': 'application/json'}, timeout=chefs_api_timeout) # timeout in seconds
+
+        # Check response status
+        if _response.status_code != 200:
+            logging.error(
+                "get_chefs_form_data():Request failed with status code: %s, response text: %r",
+                _response.status_code,
+                _response.text
+            )
+            return None
+
+        # Parse JSON response
+        try:
+            content = json.loads(_response.content)
+            return content
+        except ValueError as e:
+            logging.exception(
+                "get_chefs_form_data():Failed to parse JSON response: %s | Status Code: %s | Response Content: %r",
+                str(e),
+                _response.status_code,
+                _response.content
+            )
+            return None
+    except ValueError as e:
+        logging.exception("get_chefs_form_data():Failed to convert CHEFS_API_TIMEOUT: %r to float. Error: %s", CHEFS_API_TIMEOUT, str(e))
         os._exit(1)
-    except ValueError:
-        logging.error('Invalid timeout value: %s. Must be an int or float.', CHEFS_API_TIMEOUT)
+    except Timeout as e:
+        logging.exception("get_chefs_form_data():Request timed out: %s", str(e))
         os._exit(1)
-    return content
+    except requests.RequestException as e:
+        logging.exception("get_chefs_form_data():Network error: %s", str(e))
+        os._exit(1)
 
 # def fetch_columns(form_id, form_key):
 #     """Retrieve CHEFS form columns"""
