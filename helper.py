@@ -140,7 +140,7 @@ def get_ches_token():
         try:
             ches_api_timeout = float(CHES_API_TIMEOUT)
         except ValueError as e:
-            logging.error("get_ches_token():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+            logging.exception("get_ches_token():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
             return None
 
         # Make the request
@@ -159,7 +159,7 @@ def get_ches_token():
         try:
             _auth_response_json = json.loads(_auth_response.content)
         except ValueError as e:
-            logging.error(
+            logging.exception(
                 'get_ches_token():Failed to parse JSON response: %s | Status Code: %s | Response Content: %r',
                 str(e),
                 _auth_response.status_code,
@@ -184,10 +184,10 @@ def get_ches_token():
             )
             return None
     except Timeout as e:
-        logging.error("get_ches_token():Request timed out: %s", str(e))
+        logging.exception("get_ches_token():Request timed out: %s", str(e))
         return None
     except requests.RequestException as e:
-        logging.error('get_ches_token():Network error occurred: %s', str(e))
+        logging.exception('get_ches_token():Network error occurred: %s', str(e))
         return None
 
 def check_ches_health():
@@ -222,13 +222,13 @@ def check_ches_health():
             )
             return False
     except ValueError as e:
-        logging.error("check_ches_health():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+        logging.exception("check_ches_health():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
         return False
     except Timeout as e:
-        logging.error("check_ches_health():Request timed out: %s", str(e))
+        logging.exception("check_ches_health():Request timed out: %s", str(e))
         return False
     except requests.RequestException as e:
-        logging.error('check_ches_health():Network error occurred: %s', str(e))
+        logging.exception('check_ches_health():Network error occurred: %s', str(e))
         return False
 
 def send_single_email(to_email, subject, message):
@@ -264,13 +264,13 @@ def send_single_email(to_email, subject, message):
             )
             return None
     except ValueError as e:
-        logging.error("send_single_email():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+        logging.exception("send_single_email():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
         return None
     except Timeout as e:
-        logging.error("send_single_email():Request timed out: %s", str(e))
+        logging.exception("send_single_email():Request timed out: %s", str(e))
         return None
     except requests.RequestException as e:
-        logging.error("send_single_email():Network error: %s", str(e))
+        logging.exception("send_single_email():Network error: %s", str(e))
         return None
 
 def get_chefs_form_data(form_id, form_key, form_version):
@@ -298,7 +298,7 @@ def get_chefs_form_data(form_id, form_key, form_version):
             content = json.loads(_response.content)
             return content
         except ValueError as e:
-            logging.error(
+            logging.exception(
                 "get_chefs_form_data():Failed to parse JSON response: %s | Status Code: %s | Response Content: %r",
                 str(e),
                 _response.status_code,
@@ -306,13 +306,13 @@ def get_chefs_form_data(form_id, form_key, form_version):
             )
             return None
     except ValueError as e:
-        logging.error("get_chefs_form_data():Failed to convert CHEFS_API_TIMEOUT: %r to float. Error: %s", CHEFS_API_TIMEOUT, str(e))
+        logging.exception("get_chefs_form_data():Failed to convert CHEFS_API_TIMEOUT: %r to float. Error: %s", CHEFS_API_TIMEOUT, str(e))
         os._exit(1)
     except Timeout as e:
-        logging.error("get_chefs_form_data():Request timed out: %s", str(e))
+        logging.exception("get_chefs_form_data():Request timed out: %s", str(e))
         os._exit(1)
     except requests.RequestException as e:
-        logging.error("get_chefs_form_data():Network error: %s", str(e))
+        logging.exception("get_chefs_form_data():Network error: %s", str(e))
         os._exit(1)
 
 # def fetch_columns(form_id, form_key):

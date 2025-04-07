@@ -42,7 +42,7 @@ def run_with_timeout(func, *args, timeout=TIMEOUT_SECONDS, **kwargs):
         try:
             timeout = int(timeout)  # Convert to integer if it's a string
         except ValueError:
-            logging.error("Invalid timeout value: %s. Must be a number.", timeout)
+            logging.exception("Invalid timeout value: %s. Must be a number.", timeout)
             return None
 
     with ThreadPoolExecutor() as executor:
@@ -52,7 +52,7 @@ def run_with_timeout(func, *args, timeout=TIMEOUT_SECONDS, **kwargs):
             return future.result(timeout=timeout)
         except FuturesTimeoutError:
             # Log an error with the specific function name if the operation times out
-            logging.error("Operation '%s' timed out after %s seconds.", func.__name__, timeout)
+            logging.exception("Operation '%s' timed out after %s seconds.", func.__name__, timeout)
             os._exit(1)
 
 def connect_to_agol():
