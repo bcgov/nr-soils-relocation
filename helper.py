@@ -40,9 +40,14 @@ CHES_API_TIMEOUT = os.getenv('CHES_API_TIMEOUT')
 if not CHEFS_API_TIMEOUT:
     CHEFS_API_TIMEOUT = '60'
 
+CHEFS_API_TIMEOUT = CHEFS_API_TIMEOUT.strip()
+
 # If there is no CHES_API_TIMEOUT, set it to 60 seconds (1 minutes)
 if not CHES_API_TIMEOUT:
     CHES_API_TIMEOUT = '60'
+
+CHES_API_TIMEOUT = CHES_API_TIMEOUT.strip()
+
 
 def load_env():
     """Loading environment variables from .env files - for local testing"""
