@@ -147,8 +147,8 @@ def get_ches_token():
         logging.exception("Email could not be sent due to an authorization issue:%s", _ke)
     except Timeout:
         logging.error('The request timed out to get CHES token! - %s', AUTH_URL)
-    except ValueError:
-        logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_API_TIMEOUT)
+    except ValueError as e:
+        logging.error("get_ches_token():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
     return _auth_response
 
 def check_ches_health():
@@ -178,8 +178,8 @@ def check_ches_health():
         return True
     except Timeout:
         logging.error('The request timed out to check CHES Health! - %s', _ches_api_health_endpoint)
-    except ValueError:
-        logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_API_TIMEOUT)
+    except ValueError as e:
+        logging.error("check_ches_health():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
 
 def send_single_email(to_email, subject, message):
     """Send email via CHES API"""
@@ -198,8 +198,9 @@ def send_single_email(to_email, subject, message):
             _ches_response = requests.request("POST", _ches_api_single_email_endpoint, headers=ches_headers, data=ches_pay_load, timeout=ches_api_timeout) # timeout in seconds
         except Timeout:
             logging.error('The request timed out to send email! - %s', _ches_api_single_email_endpoint)
-        except ValueError:
-            logging.error('Invalid timeout value: %s. Must be an int or float.', CHES_API_TIMEOUT)
+        except ValueError as e:
+            logging.error("send_single_email():Failed to convert CHES_API_TIMEOUT: %r to float. Error: %s", CHES_API_TIMEOUT, str(e))
+
     return _ches_response
 
 def get_chefs_form_data(form_id, form_key, form_version):
@@ -213,8 +214,8 @@ def get_chefs_form_data(form_id, form_key, form_version):
     except Timeout:
         logging.error('The request timed out! %s', chefs_api_request_url)
         os._exit(1)
-    except ValueError:
-        logging.error('Invalid timeout value: %s. Must be an int or float.', CHEFS_API_TIMEOUT)
+    except ValueError as e:
+        logging.error("get_chefs_form_data():Failed to convert CHEFS_API_TIMEOUT: %r to float. Error: %s", CHEFS_API_TIMEOUT, str(e))
         os._exit(1)
     return content
 
