@@ -764,8 +764,6 @@ def map_source_site(_submission):
         for src_header in constant.SOURCE_SITE_HEADERS:
             _src_dic[src_header] = None
 
-        _src_dic['updateToPreviousForm'] = convert_to_yes_no(_submission.get(chefs_src_param('updateToPreviousForm')))
-        _src_dic['previousConfirmCode'] = _submission.get(chefs_src_param('previousConfirmCode'))
         _src_dic['ownerCompany'] = _submission.get(chefs_src_param('ownerCompany'))
         _src_dic['owner2Company'] = _submission.get(chefs_src_param('owner2Company'))
         _src_dic['contactCompany'] = _submission.get(chefs_src_param('contactCompany'))
@@ -849,7 +847,6 @@ def map_rcv_site(_submission, rcv_clz):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
             _rcv_dic[rcv_header] = None
 
-        _rcv_dic['previousConfirmCode'] = _submission.get(chefs_rcv_param('previousConfirmCode', rcv_clz))
         _rcv_dic['ownerCompany'] = _submission.get(chefs_rcv_param('ownerCompany', rcv_clz))
         _rcv_dic['owner2Company'] = _submission.get(chefs_rcv_param('owner2Company', rcv_clz))
         _rcv_dic['contactCompany'] = _submission.get(chefs_rcv_param('contactCompany', rcv_clz))

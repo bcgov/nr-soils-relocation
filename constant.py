@@ -167,8 +167,6 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , longitudeSeconds='A3-SourceSiteLongitude-Seconds'
                             , landOwnership='SourcelandOwnership-checkbox'
                             , regionalDistrict='SourceSiteregionalDistrict'
-                            , updateToPreviousForm='Intro-New_form_or_update'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='A1-Company'
                             , owner2Company='A1-additionalownerCompany1'
                             , contactCompany='A2-SourceSiteContactCompany'
@@ -212,7 +210,6 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , longitudeSeconds='C2-Longitude-SecondsReceivingSite'
                             , landOwnership='C2-receivinglandOwnership-checkbox'
                             , regionalDistrict='ReceivingSiteregionalDistrict'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='C1-CompanyReceivingSiteOwner'
                             , owner2Company='C1-Company1ReceivingSiteAdditionalOwners'
                             , contactCompany='C2-RSC-Company'
@@ -256,7 +253,6 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
 							, additionalRcvInformation='firstAdditionalReceivingSiteInformation'
                             , landOwnership='Firstadditionalreceiving-landOwnership-checkbox1'
                             , regionalDistrict='FirstAdditionalReceivingSiteregionalDistrict1'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='C1-Company2FirstAdditionalReceivingSite'
                             , owner2Company='C1-Company3AdditionalReceivingSiteOwner'
                             , contactCompany='C2-RSC-Company1AdditionalReceivingSite'
@@ -300,7 +296,6 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
 							, additionalRcvInformation='secondAdditionalReceivingSiteInformation'
                             , landOwnership='Secondadditionalreceiving-landOwnership-checkbox3'
                             , regionalDistrict='SecondAdditionalReceivingSiteregionalDistrict'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='C1-Company6SecondAdditionalreceivingSite'
                             , owner2Company='C1-Company7SecondAdditionalreceivingSite'
                             , contactCompany='C2-RSC-Company3SecondAdditionalreceivingSite'
@@ -370,8 +365,6 @@ CHEFS_HV_PARAM_DIC = dict(latitudeDegrees='Section3-Latitude-Degrees'
                             , createdAt='createdAt'
                             , confirmationId='confirmationId')
 SOURCE_SITE_HEADERS = ["confirmationId",
-                       "updateToPreviousForm",
-                       "previousConfirmCode",
                        "ownerCompany",
                        "owner2Company",
                        "contactCompany",
@@ -420,7 +413,6 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "receivingSite3RegionalDistrict"
                        ]
 RECEIVING_SITE_HEADERS = ["confirmationId",
-                          "previousConfirmCode",
                           "ownerCompany",
                           "owner2Company",
                           "contactCompany",
