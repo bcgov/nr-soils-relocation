@@ -809,7 +809,7 @@ def map_source_site(_submission):
                 _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
             _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-        _src_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_src_param('highVolumeSite')))
+        _src_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_src_param('highVolumeSite'))) # The param name should have actually been 'high risk site'.
         _src_dic['soilRelocationPurpose'] = _submission.get(chefs_src_param('soilRelocationPurpose'))
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
 
@@ -898,7 +898,6 @@ def map_rcv_site(_submission, rcv_clz):
 
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
         _rcv_dic['relocatedSoilUse'] = _submission.get(chefs_rcv_param('relocatedSoilUse', rcv_clz))
-        _rcv_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_rcv_param('highVolumeSite', rcv_clz)))
         _rcv_dic['soilDepositIsALR'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsALR', rcv_clz)))
         _rcv_dic['soilDepositIsReserveLands'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsReserveLands', rcv_clz)))
         _rcv_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_rcv_param('soilRelocationStartDate', rcv_clz)))

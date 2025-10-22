@@ -185,7 +185,7 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumnSource'
                             , untitledMunicipalLandDesc='legalLandDescriptionUntitledMunicipalSource'
                             , sourceSiteLandUse='A4-schedule2ReferenceSourceSite'
-                            , highVolumeSite='isTheSourceSiteHighRisk'
+                            , highVolumeSite='isTheSourceSiteHighRisk' # This should have actually been 'high risk site'.
                             , soilRelocationPurpose='A5-PurposeOfSoilExcavationSource'
                             , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'
                             , exemptionFromProtocol19Apply='A6_DoesexemptionfromProtocol19apply' # Do exemptions from Protocol 19 apply?
@@ -233,7 +233,6 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , pinDesc='legalLandDescriptionUntitledCrownLandReceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn1'
                             , untitledMunicipalLandDesc='legalLandDescription'
-                            , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime'
 							, soilDepositIsALR='D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1'
 							, soilDepositIsReserveLands='D2-receivingsitesoilDepositIsInTheReserveLands1'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -276,7 +275,6 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , pinDesc='legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn2'
                             , untitledMunicipalLandDesc='legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite'
-                            , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1'
 							, soilDepositIsALR='D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2'
 							, soilDepositIsReserveLands='D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -319,7 +317,6 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
                             , pinDesc='UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn3'
                             , untitledMunicipalLandDesc='legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite'
-                            , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3'
 							, soilDepositIsALR='D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3'
 							, soilDepositIsReserveLands='D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -442,7 +439,6 @@ RECEIVING_SITE_HEADERS = ["confirmationId",
                           "receivingSiteLandUse",
                           "CSRFactors",
                           "relocatedSoilUse",
-                          "highVolumeSite",
                           "soilDepositIsALR",
                           "soilDepositIsReserveLands",
                           "soilRelocationStartDate",
