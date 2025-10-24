@@ -191,6 +191,8 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
                             , soilClassificationSource='B1-soilClassificationSource'
+                            , mlardYesNoContainer='container'
+                            , mlardYesNo='MLARD_YesNo_Source'
                             , vapourExemption='B3-yesOrNoVapourexemptionsource'
                             , vapourExemptionDesc='B3-ifExemptionsApplyPleaseDescribe'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -390,6 +392,7 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "wildlandsNaturalSoilVol",
                        "wildlandsRevertedSoilVol",
                        "totalSoilVolume",
+                       "mlardYesNo",
                        "vapourExemption",
                        "vapourExemptionDesc",
                        "soilRelocationStartDate",

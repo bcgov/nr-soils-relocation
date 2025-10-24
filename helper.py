@@ -824,6 +824,12 @@ def map_source_site(_submission):
             chefs_src_param('soilClassificationSource'),
             _src_dic)
 
+        # We only need to see the Yes answers (not No)
+        if _submission.get(chefs_src_param('mlardYesNoContainer')) is not None and _submission.get(chefs_src_param('mlardYesNoContainer')).get(chefs_src_param('mlardYesNo')) is not None:
+            _mlard_yes_no = _submission.get(chefs_src_param('mlardYesNoContainer')).get(chefs_src_param('mlardYesNo'))
+            if convert_to_yes_no(_mlard_yes_no) == 'Yes':
+                _src_dic['mlardYesNo'] = 'Yes'
+
         _src_dic['vapourExemption'] = convert_to_yes_no(_submission.get(chefs_src_param('vapourExemption')))
         _src_dic['vapourExemptionDesc'] = _submission.get(chefs_src_param('vapourExemptionDesc'))
         _src_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_src_param('soilRelocationStartDate')))
