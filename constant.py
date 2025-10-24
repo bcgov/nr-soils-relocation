@@ -140,8 +140,7 @@ RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)
                                   , urbanParkLandUsePl='Urban Park Land Use (PL)'
                                   , agriculturalLandUseAl='Agricultural Land Use (AL)'
                                   , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)'
-                                  , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
+                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
 SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , commercialLandUseCl='Commercial (CL)'
                             , residentialLandUseHighDensityRlhd='Residential high density (RLHD)'
@@ -149,8 +148,7 @@ SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , urbanParkLandUsePl='Urban park (PL)'
                             , agriculturalLandUseAl='Agricultural (AL)'
                             , wildlandsNaturalLandUseWln='Wildlands natural (WLN)'
-                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)'
-                            , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
+                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)')
 LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land'
@@ -391,7 +389,6 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "agriculturalSoilVol",
                        "wildlandsNaturalSoilVol",
                        "wildlandsRevertedSoilVol",
-                       "mdardSoilVol",
                        "totalSoilVolume",
                        "vapourExemption",
                        "vapourExemptionDesc",
@@ -434,7 +431,6 @@ RECEIVING_SITE_HEADERS = ["confirmationId",
                           "agriculturalSoilVol",
                           "wildlandsNaturalSoilVol",
                           "wildlandsRevertedSoilVol",
-                          "mdardSoilVol",
                           "totalSoilVolume",
                           "receivingSiteLandUse",
                           "CSRFactors",
