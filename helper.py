@@ -679,9 +679,6 @@ def create_soil_volumes(chefs_dic, data_grid, volume_field, claz_field, working_
                 elif is_not_none_true(_soil_claz.get("residentialLandUseHighDensityRlhd")):
                     working_dic['residentHighDensitySoilVol'] = working_dic['residentHighDensitySoilVol'] + _soil_volume if working_dic['residentHighDensitySoilVol'] is not None else _soil_volume
                     _total_soil_volume += _soil_volume
-                elif is_not_none_true(_soil_claz.get("potentialToCauseMetalsLeachingAcidRockDrainageMlArd")):
-                    working_dic['mdardSoilVol'] = working_dic['mdardSoilVol'] + _soil_volume if working_dic['mdardSoilVol'] is not None else _soil_volume
-                    _total_soil_volume += _soil_volume
 
         if _total_soil_volume != 0:
             working_dic['totalSoilVolume'] = _total_soil_volume
@@ -764,8 +761,6 @@ def map_source_site(_submission):
         for src_header in constant.SOURCE_SITE_HEADERS:
             _src_dic[src_header] = None
 
-        _src_dic['updateToPreviousForm'] = convert_to_yes_no(_submission.get(chefs_src_param('updateToPreviousForm')))
-        _src_dic['previousConfirmCode'] = _submission.get(chefs_src_param('previousConfirmCode'))
         _src_dic['ownerCompany'] = _submission.get(chefs_src_param('ownerCompany'))
         _src_dic['owner2Company'] = _submission.get(chefs_src_param('owner2Company'))
         _src_dic['contactCompany'] = _submission.get(chefs_src_param('contactCompany'))
@@ -811,7 +806,7 @@ def map_source_site(_submission):
                 _source_site_land_uses.append(convert_source_site_use_to_name(_ref_source_site))
             _src_dic['sourceSiteLandUse'] = "\"" + ",".join(_source_site_land_uses) + "\""
 
-        _src_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_src_param('highVolumeSite')))
+        _src_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_src_param('highVolumeSite'))) # The param name should have actually been 'high risk site'.
         _src_dic['soilRelocationPurpose'] = _submission.get(chefs_src_param('soilRelocationPurpose'))
         _src_dic['soilStorageType'] = _submission.get(chefs_src_param('soilStorageType'))
 
@@ -828,6 +823,12 @@ def map_source_site(_submission):
             chefs_src_param('soilVolume'),
             chefs_src_param('soilClassificationSource'),
             _src_dic)
+
+        # We only need to see the Yes answers (not No)
+        if _submission.get(chefs_src_param('mlardYesNoContainer')) is not None and _submission.get(chefs_src_param('mlardYesNoContainer')).get(chefs_src_param('mlardYesNo')) is not None:
+            _mlard_yes_no = _submission.get(chefs_src_param('mlardYesNoContainer')).get(chefs_src_param('mlardYesNo'))
+            if convert_to_yes_no(_mlard_yes_no) == 'Yes':
+                _src_dic['mlardYesNo'] = 'Yes'
 
         _src_dic['vapourExemption'] = convert_to_yes_no(_submission.get(chefs_src_param('vapourExemption')))
         _src_dic['vapourExemptionDesc'] = _submission.get(chefs_src_param('vapourExemptionDesc'))
@@ -849,7 +850,6 @@ def map_rcv_site(_submission, rcv_clz):
         for rcv_header in constant.RECEIVING_SITE_HEADERS:
             _rcv_dic[rcv_header] = None
 
-        _rcv_dic['previousConfirmCode'] = _submission.get(chefs_rcv_param('previousConfirmCode', rcv_clz))
         _rcv_dic['ownerCompany'] = _submission.get(chefs_rcv_param('ownerCompany', rcv_clz))
         _rcv_dic['owner2Company'] = _submission.get(chefs_rcv_param('owner2Company', rcv_clz))
         _rcv_dic['contactCompany'] = _submission.get(chefs_rcv_param('contactCompany', rcv_clz))
@@ -901,7 +901,6 @@ def map_rcv_site(_submission, rcv_clz):
 
         _rcv_dic['CSRFactors'] = _submission.get(chefs_rcv_param('CSRFactors', rcv_clz))
         _rcv_dic['relocatedSoilUse'] = _submission.get(chefs_rcv_param('relocatedSoilUse', rcv_clz))
-        _rcv_dic['highVolumeSite'] = convert_to_yes_no(_submission.get(chefs_rcv_param('highVolumeSite', rcv_clz)))
         _rcv_dic['soilDepositIsALR'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsALR', rcv_clz)))
         _rcv_dic['soilDepositIsReserveLands'] = convert_to_yes_no(_submission.get(chefs_rcv_param('soilDepositIsReserveLands', rcv_clz)))
         _rcv_dic['soilRelocationStartDate'] = convert_simple_datetime_format_in_str(_submission.get(chefs_rcv_param('soilRelocationStartDate', rcv_clz)))

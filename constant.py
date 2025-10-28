@@ -140,8 +140,7 @@ RECEIVING_SITE_USE_NAME_DIC = dict(industrialLandUseIl='Industrial Land Use (IL)
                                   , urbanParkLandUsePl='Urban Park Land Use (PL)'
                                   , agriculturalLandUseAl='Agricultural Land Use (AL)'
                                   , wildlandsNaturalLandUseWln='Wildlands Natural Land Use (WLN)'
-                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)'
-                                  , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
+                                  , wildlandsRevertedLandUseWlr='Wildlands Reverted Land Use (WLR)')
 SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , commercialLandUseCl='Commercial (CL)'
                             , residentialLandUseHighDensityRlhd='Residential high density (RLHD)'
@@ -149,8 +148,7 @@ SOIL_QUALITY_NAME_DIC = dict(industrialLandUseIl='Industrial (IL)'
                             , urbanParkLandUsePl='Urban park (PL)'
                             , agriculturalLandUseAl='Agricultural (AL)'
                             , wildlandsNaturalLandUseWln='Wildlands natural (WLN)'
-                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)'
-                            , potentialToCauseMetalsLeachingAcidRockDrainageMlArd='Without potential for Metals Leaching/Acid Rock Drainage (ML/ARD) as evaluated under Protocol 19')
+                            , wildlandsRevertedLandUseWlr='Wildlands reverted (WLR)')
 LAND_OWNERSHIP_NAME_DIC = dict(titled='Legally Titled, registered property'
                             , untitled='Untitled Crown Land'
                             , untitledMunicipalLand='Untitled Municipal Land'
@@ -167,8 +165,6 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , longitudeSeconds='A3-SourceSiteLongitude-Seconds'
                             , landOwnership='SourcelandOwnership-checkbox'
                             , regionalDistrict='SourceSiteregionalDistrict'
-                            , updateToPreviousForm='Intro-New_form_or_update'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='A1-Company'
                             , owner2Company='A1-additionalownerCompany1'
                             , contactCompany='A2-SourceSiteContactCompany'
@@ -187,7 +183,7 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumnSource'
                             , untitledMunicipalLandDesc='legalLandDescriptionUntitledMunicipalSource'
                             , sourceSiteLandUse='A4-schedule2ReferenceSourceSite'
-                            , highVolumeSite='isTheSourceSiteHighRisk'
+                            , highVolumeSite='isTheSourceSiteHighRisk' # This should have actually been 'high risk site'.
                             , soilRelocationPurpose='A5-PurposeOfSoilExcavationSource'
                             , soilStorageType='B4-currentTypeOfSoilStorageEGStockpiledInSitu1Source'
                             , exemptionFromProtocol19Apply='A6_DoesexemptionfromProtocol19apply' # Do exemptions from Protocol 19 apply?
@@ -195,6 +191,8 @@ CHEFS_SOURCE_PARAM_DIC = dict(latitudeDegrees='A3-SourceSiteLatitude-Degrees'
                             , soilVolumeDataGrid='dataGrid9'
                             , soilVolume='B1-soilVolumeToBeRelocationedInCubicMetresM3Source'
                             , soilClassificationSource='B1-soilClassificationSource'
+                            , mlardYesNoContainer='container'
+                            , mlardYesNo='MLARD_YesNo_Source'
                             , vapourExemption='B3-yesOrNoVapourexemptionsource'
                             , vapourExemptionDesc='B3-ifExemptionsApplyPleaseDescribe'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -212,7 +210,6 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , longitudeSeconds='C2-Longitude-SecondsReceivingSite'
                             , landOwnership='C2-receivinglandOwnership-checkbox'
                             , regionalDistrict='ReceivingSiteregionalDistrict'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='C1-CompanyReceivingSiteOwner'
                             , owner2Company='C1-Company1ReceivingSiteAdditionalOwners'
                             , contactCompany='C2-RSC-Company'
@@ -236,7 +233,6 @@ CHEFS_RCV1_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-DegreesReceivingSite'
                             , pinDesc='legalLandDescriptionUntitledCrownLandReceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn1'
                             , untitledMunicipalLandDesc='legalLandDescription'
-                            , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime'
 							, soilDepositIsALR='D2-receivingsitesoilDepositIsInTheAgriculturalLandReserveAlr1'
 							, soilDepositIsReserveLands='D2-receivingsitesoilDepositIsInTheReserveLands1'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -256,7 +252,6 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
 							, additionalRcvInformation='firstAdditionalReceivingSiteInformation'
                             , landOwnership='Firstadditionalreceiving-landOwnership-checkbox1'
                             , regionalDistrict='FirstAdditionalReceivingSiteregionalDistrict1'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='C1-Company2FirstAdditionalReceivingSite'
                             , owner2Company='C1-Company3AdditionalReceivingSiteOwner'
                             , contactCompany='C2-RSC-Company1AdditionalReceivingSite'
@@ -280,7 +275,6 @@ CHEFS_RCV2_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees1FirstAdditional
                             , pinDesc='legalLandDescriptionUntitledCrownFirstAdditionalReceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn2'
                             , untitledMunicipalLandDesc='legalLandDescriptionUntitledMunicipalFirstAdditionalReceivingSite'
-                            , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime1'
 							, soilDepositIsALR='D2-firstaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr2'
 							, soilDepositIsReserveLands='D2-firstaddtlreceivingsitesoilDepositIsInTheReserveLands2'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -300,7 +294,6 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
 							, additionalRcvInformation='secondAdditionalReceivingSiteInformation'
                             , landOwnership='Secondadditionalreceiving-landOwnership-checkbox3'
                             , regionalDistrict='SecondAdditionalReceivingSiteregionalDistrict'
-                            , previousConfirmCode='ifThisIsAnUpdatePleaseEnterTheConfirmationCodeOfThePreviousSubmission'
                             , ownerCompany='C1-Company6SecondAdditionalreceivingSite'
                             , owner2Company='C1-Company7SecondAdditionalreceivingSite'
                             , contactCompany='C2-RSC-Company3SecondAdditionalreceivingSite'
@@ -324,7 +317,6 @@ CHEFS_RCV3_PARAM_DIC = dict(latitudeDegrees='C2-Latitude-Degrees3SecondAdditiona
                             , pinDesc='UntitledCrownLandLegalLandDescriptionSecondAdditionalreceivingSite'
                             , untitledMunicipalLand='A-UntitledMunicipalLand-PIDColumn3'
                             , untitledMunicipalLandDesc='legalLandDescriptionUntitledMunicipalSecondAdditionalreceivingSite'
-                            , highVolumeSite='C3-receivingSiteIsAHighVolumeSite20000CubicMetresOrMoreDepositedOnTheSiteInALifetime3'
 							, soilDepositIsALR='D2-secondaddtlreceivingsitesoilDepositIsInTheAgriculturalLandReserveAlr3'
 							, soilDepositIsReserveLands='D2-secondaddtlreceivingsitesoilDepositIsInTheReserveLands3'
                             , soilRelocationStartDate='B4-soilRelocationEstimatedStartDateMonthDayYear'
@@ -370,8 +362,6 @@ CHEFS_HV_PARAM_DIC = dict(latitudeDegrees='Section3-Latitude-Degrees'
                             , createdAt='createdAt'
                             , confirmationId='confirmationId')
 SOURCE_SITE_HEADERS = ["confirmationId",
-                       "updateToPreviousForm",
-                       "previousConfirmCode",
                        "ownerCompany",
                        "owner2Company",
                        "contactCompany",
@@ -401,8 +391,8 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "agriculturalSoilVol",
                        "wildlandsNaturalSoilVol",
                        "wildlandsRevertedSoilVol",
-                       "mdardSoilVol",
                        "totalSoilVolume",
+                       "mlardYesNo",
                        "vapourExemption",
                        "vapourExemptionDesc",
                        "soilRelocationStartDate",
@@ -420,7 +410,6 @@ SOURCE_SITE_HEADERS = ["confirmationId",
                        "receivingSite3RegionalDistrict"
                        ]
 RECEIVING_SITE_HEADERS = ["confirmationId",
-                          "previousConfirmCode",
                           "ownerCompany",
                           "owner2Company",
                           "contactCompany",
@@ -445,12 +434,10 @@ RECEIVING_SITE_HEADERS = ["confirmationId",
                           "agriculturalSoilVol",
                           "wildlandsNaturalSoilVol",
                           "wildlandsRevertedSoilVol",
-                          "mdardSoilVol",
                           "totalSoilVolume",
                           "receivingSiteLandUse",
                           "CSRFactors",
                           "relocatedSoilUse",
-                          "highVolumeSite",
                           "soilDepositIsALR",
                           "soilDepositIsReserveLands",
                           "soilRelocationStartDate",
